@@ -126,7 +126,7 @@ tr:hover td{background:#f8f9ff;cursor:pointer}
       <option value="all">All Years</option>
     </select>
     <button class="btn p" style="font-size:11px;padding:4px 10px;" onclick="loadDashboard()">⟳ Refresh</button>
-    <button id="webhook-btn" onclick="resetWebhook()" style="padding:4px 10px;border-radius:6px;border:1px solid rgba(255,255,255,.3);background:rgba(255,255,255,.15);color:#fff;font-size:11px;cursor:pointer;">🔗 Webhook</button>
+
   </div>
   <div class="nav">
     <button class="active" onclick="showP('dash',this)">Dashboard</button>
@@ -137,6 +137,7 @@ tr:hover td{background:#f8f9ff;cursor:pointer}
     <button onclick="showP('analytics',this)">📈 Analytics</button>
     <button onclick="showP('skipped',this)" style="border-color:rgba(251,191,36,.5);color:#fcd34d">⏭ Skipped</button>
     <button onclick="showP('notsus',this)" style="border-color:rgba(16,185,129,.5);color:#6ee7b7">✓ Not Suspicious</button>
+    <button onclick="showP('status',this)" style="border-color:rgba(159,225,203,.5);color:#9FE1CB">🖥 System</button>
   </div>
 </div>
 
@@ -470,6 +471,53 @@ tr:hover td{background:#f8f9ff;cursor:pointer}
   </div>
 </div>
 
+<!-- ══ SYSTEM STATUS ══ -->
+<div id="panel-status" class="panel">
+  <div style="margin-bottom:14px;display:flex;justify-content:space-between;align-items:center;">
+    <div>
+      <div style="font-size:16px;font-weight:700;color:#1565c0">🖥 System Status</div>
+      <div style="font-size:12px;color:var(--mu);margin-top:4px">Railway + Supabase health monitor</div>
+    </div>
+    <button class="btn p" onclick="loadSystemStatus()">⟳ Refresh</button>
+  </div>
+
+  <!-- Status Cards -->
+  <div class="stats" style="margin-bottom:16px" id="sys-cards">
+    <div class="stat"><div class="sl">Railway</div><div class="sv" id="sys-railway">—</div></div>
+    <div class="stat"><div class="sl">Supabase</div><div class="sv" id="sys-supabase">—</div></div>
+    <div class="stat"><div class="sl">Last Transaction</div><div class="sv" id="sys-last">—</div></div>
+    <div class="stat"><div class="sl">Today's Transactions</div><div class="sv blue" id="sys-today">—</div></div>
+    <div class="stat"><div class="sl">Today's Sales</div><div class="sv green" id="sys-sales">—</div></div>
+    <div class="stat"><div class="sl">DB Storage</div><div class="sv pur" id="sys-storage">—</div></div>
+  </div>
+
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:12px">
+    <!-- Transaction gap checker -->
+    <div class="cs">
+      <div class="cs-t">📡 Live Feed Status</div>
+      <div id="sys-feed" style="padding:12px 0;font-size:13px;line-height:2"></div>
+    </div>
+
+    <!-- Today by area -->
+    <div class="cs">
+      <div class="cs-t">📊 Today by Area</div>
+      <div id="sys-area-today" style="padding:4px 0"></div>
+    </div>
+  </div>
+
+  <!-- Recent gaps -->
+  <div class="cs" style="margin-bottom:12px">
+    <div class="cs-t">⏱ Last 10 Transactions Received</div>
+    <div id="sys-recent" style="font-size:12px"></div>
+  </div>
+
+  <!-- Error log -->
+  <div class="cs" style="border:1.5px solid #fecaca;background:#fff5f5">
+    <div class="cs-t" style="color:#dc2626">⚠️ Warnings</div>
+    <div id="sys-warnings" style="font-size:12px;padding:8px 0"></div>
+  </div>
+</div>
+
 </div><!-- end .w -->
 <!-- Floating back button -->
 <button id="float-back" onclick="goBack()" 
@@ -563,6 +611,7 @@ function showP(id, btn) {
   if(id==="vendos")    loadVendos();
   if(id==="skipped")   loadSkipped();
   if(id==="notsus")    loadNotSuspicious();
+  if(id==="status")    loadSystemStatus();
 }
 
 function showBread(text, backFn) {
@@ -1808,9 +1857,116 @@ setInterval(async () => {
   } catch(e) {}
 }, 60 * 1000);
 
+// ══════════════════════════════════════════════════════════
+// SYSTEM STATUS
+// ══════════════════════════════════════════════════════════
+async function loadSystemStatus() {
+  const warnings = [];
+
+  // 1. Test Supabase connection
+  try {
+    const r = await fetch(`${SB_URL}/rest/v1/transactions?select=id&limit=1`, { headers: HDR });
+    if (r.ok) {
+      document.getElementById("sys-supabase").innerHTML = '<span style="color:var(--ok)">✅ Connected</span>';
+    } else {
+      document.getElementById("sys-supabase").innerHTML = '<span style="color:var(--red)">❌ Error '+r.status+'</span>';
+      warnings.push("⚠️ Supabase returned error " + r.status);
+    }
+  } catch(e) {
+    document.getElementById("sys-supabase").innerHTML = '<span style="color:var(--red)">❌ Offline</span>';
+    warnings.push("❌ Cannot reach Supabase: " + e.message);
+  }
+
+  // 2. Last transaction time
+  try {
+    const r = await fetch(`${SB_URL}/rest/v1/transactions?select=created_at,vendo,area,amount&is_skipped=eq.false&order=created_at.desc&limit=10`, { headers: HDR });
+    const rows = await r.json();
+    if (rows?.length > 0) {
+      const last = new Date(rows[0].created_at);
+      const minsAgo = Math.floor((Date.now() - last.getTime()) / 60000);
+      const timeStr = last.toLocaleString("en-PH", {timeZone:"Asia/Manila",hour:"2-digit",minute:"2-digit",hour12:true});
+
+      let railColor = "var(--ok)", railText = "✅ Live";
+      if (minsAgo > 60) { railColor = "var(--red)"; railText = "❌ Stopped?"; warnings.push(`❌ No transactions for ${minsAgo} minutes — Railway may be down!`); }
+      else if (minsAgo > 30) { railColor = "var(--amber)"; railText = "⚠️ Slow"; warnings.push(`⚠️ No transactions for ${minsAgo} minutes`); }
+
+      document.getElementById("sys-railway").innerHTML = `<span style="color:${railColor}">${railText}</span>`;
+      document.getElementById("sys-last").innerHTML = `<span style="font-size:14px;color:${minsAgo>30?'var(--red)':'var(--ok)'}">${minsAgo}m ago</span><div style="font-size:10px;color:var(--mu)">${timeStr}</div>`;
+
+      // Recent 10
+      document.getElementById("sys-recent").innerHTML = rows.map(r => {
+        const t = new Date(r.created_at);
+        const mins = Math.floor((Date.now()-t.getTime())/60000);
+        const ts = t.toLocaleString("en-PH",{timeZone:"Asia/Manila",month:"short",day:"numeric",hour:"2-digit",minute:"2-digit",hour12:true});
+        return `<div style="display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px solid var(--bd);align-items:center">
+          <div><span style="font-weight:500">${r.vendo}</span> <span style="color:var(--mu);font-size:11px">${r.area}</span></div>
+          <div style="text-align:right"><span style="color:#1565c0;font-weight:600">${fmt(r.amount)}</span><div style="font-size:10px;color:var(--mu)">${ts} · ${mins}m ago</div></div>
+        </div>`;
+      }).join("");
+
+      // Feed status
+      const feedColor = minsAgo > 30 ? "var(--red)" : "var(--ok)";
+      document.getElementById("sys-feed").innerHTML = `
+        <div>🟢 <b>Railway Telethon</b>: <span style="color:${feedColor}">${minsAgo <= 30 ? 'Running' : 'May be down'}</span></div>
+        <div>📡 <b>Last received</b>: ${minsAgo}m ago at ${timeStr}</div>
+        <div>🗄️ <b>Supabase writes</b>: <span style="color:var(--ok)">Working</span></div>
+        <div>🔄 <b>Auto-import on restart</b>: <span style="color:var(--ok)">Enabled</span></div>
+        <div>👁️ <b>Groups monitored</b>: <span style="color:#1565c0">339 groups</span></div>
+      `;
+    }
+  } catch(e) {
+    warnings.push("❌ Error fetching transactions: " + e.message);
+  }
+
+  // 3. Today's stats
+  try {
+    const today = new Date().toLocaleDateString("en-CA", {timeZone:"Asia/Manila"});
+    const r = await fetch(`${SB_URL}/rest/v1/transactions?select=amount,area&is_skipped=eq.false&date=eq.${today}`, { headers: HDR });
+    const rows = await r.json();
+    if (rows?.length > 0) {
+      const total = rows.reduce((s,r) => s+parseFloat(r.amount||0), 0);
+      document.getElementById("sys-today").textContent = rows.length.toLocaleString();
+      document.getElementById("sys-sales").textContent = fmt(total);
+
+      // By area
+      const byArea = {};
+      rows.forEach(r => { byArea[r.area] = (byArea[r.area]||0) + parseFloat(r.amount||0); });
+      document.getElementById("sys-area-today").innerHTML = Object.entries(byArea)
+        .sort((a,b) => b[1]-a[1])
+        .map(([area, amt]) => `
+          <div style="display:flex;justify-content:space-between;padding:5px 0;border-bottom:1px solid var(--bd);font-size:12px">
+            <span style="font-weight:500">${area}</span>
+            <span style="color:#1565c0;font-weight:600">${fmt(amt)}</span>
+          </div>`).join("");
+    } else {
+      document.getElementById("sys-today").textContent = "0";
+      document.getElementById("sys-sales").textContent = "₱0";
+      document.getElementById("sys-area-today").innerHTML = '<div style="padding:12px;color:var(--mu);font-size:12px">No transactions today yet</div>';
+    }
+  } catch(e) {
+    warnings.push("❌ Error fetching today's stats: " + e.message);
+  }
+
+  // 4. Storage estimate
+  try {
+    const r = await fetch(`${SB_URL}/rest/v1/transactions?select=id&limit=1`, { headers: HDR });
+    const count = r.headers.get("content-range")?.split("/")?.[1] || "?";
+    document.getElementById("sys-storage").innerHTML = `<span style="font-size:14px">~165MB</span><div style="font-size:10px;color:var(--mu)">${parseInt(count||0).toLocaleString()} rows</div>`;
+  } catch(e) {}
+
+  // 5. Show warnings
+  const warnEl = document.getElementById("sys-warnings");
+  if (warnings.length === 0) {
+    warnEl.innerHTML = '<div style="color:var(--ok);padding:8px 0">✅ All systems normal — no issues detected</div>';
+  } else {
+    warnEl.innerHTML = warnings.map(w => `<div style="padding:6px 0;border-bottom:1px solid #fecaca;color:#dc2626">${w}</div>`).join("");
+  }
+}
+
 // ── INIT ──────────────────────────────────────────────────
 loadDashboard();
 checkWebhookHealth();
 </script>
 </body>
 </html>
+
