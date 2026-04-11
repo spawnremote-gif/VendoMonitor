@@ -8,86 +8,129 @@
 <style>
 *{box-sizing:border-box;margin:0;padding:0}
 :root{
-  --g:#1565c0;--g2:#0d47a1;--bg:#f0f4ff;--card:#fff;--bd:rgba(30,60,200,.12);
-  --t:#1a1d2e;--mu:#6b7394;--ok:#2d6e3b;--obg:#eaf3de;
+  --g:#1565c0;--g2:#0d47a1;--bg:#f0f4ff;--card:#fff;--bd:rgba(30,60,200,.1);
+  --t:#1a1d2e;--mu:#6b7394;--ok:#16a34a;--obg:#dcfce7;
   --pur:#7c3aed;--purbg:#ede9fe;--red:#dc2626;--redbg:#fee2e2;--amber:#d97706;
 }
-body{font-family:system-ui,-apple-system,sans-serif;background:var(--bg);color:var(--t);font-size:14px}
-.topbar{background:#1565c0;color:#fff;padding:10px 16px;display:flex;align-items:center;justify-content:space-between;gap:8px;flex-wrap:wrap;position:sticky;top:0;z-index:50}
-.logo{font-size:14px;font-weight:700;display:flex;align-items:center;gap:8px}
-.sdot{width:8px;height:8px;border-radius:50%;background:#9FE1CB;display:inline-block;animation:pulse 2s infinite}
-@keyframes pulse{0%,100%{box-shadow:0 0 0 0 rgba(159,225,203,.5)}70%{box-shadow:0 0 0 6px rgba(159,225,203,0)}}
-.nav{display:flex;gap:3px;flex-wrap:wrap}
-.nav button{padding:6px 13px;border:1px solid rgba(255,255,255,.3);border-radius:5px;background:transparent;color:#fff;font-size:12px;cursor:pointer;font-weight:500}
-.nav button.active{background:#7c3aed;border-color:#7c3aed}
-.nav button:hover:not(.active){background:rgba(255,255,255,.2)}
-.breadbar{background:#1250a0;padding:6px 16px;display:none;align-items:center;gap:8px;font-size:12px;color:rgba(255,255,255,.85);position:sticky;top:52px;z-index:49}
+body{font-family:system-ui,-apple-system,sans-serif;background:var(--bg);color:var(--t);font-size:13px}
+
+/* ── TOPBAR ── */
+.topbar{background:#1565c0;color:#fff;padding:8px 14px;display:flex;align-items:center;justify-content:space-between;gap:8px;flex-wrap:wrap;position:sticky;top:0;z-index:50}
+.logo{font-size:13px;font-weight:700;display:flex;align-items:center;gap:8px}
+.sdot{width:7px;height:7px;border-radius:50%;background:#4ade80;display:inline-block;animation:pulse 2s infinite}
+@keyframes pulse{0%,100%{box-shadow:0 0 0 0 rgba(74,222,128,.5)}70%{box-shadow:0 0 0 5px rgba(74,222,128,0)}}
+
+/* ── WHITE ICON NAV ── */
+.nav-bar{background:#fff;border-bottom:1.5px solid #e8eeff;padding:0 10px;display:flex;align-items:stretch;position:sticky;top:44px;z-index:49}
+.nav{display:flex;align-items:stretch;gap:0}
+.nav button{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;padding:5px 9px;border:none;border-bottom:3px solid transparent;background:transparent;cursor:pointer;min-width:58px;font-family:inherit;transition:background .12s;position:relative}
+.nav button .ni{width:24px;height:24px;display:flex;align-items:center;justify-content:center;border-radius:6px}
+.nav button .nl{font-size:8px;font-weight:600;color:#6b7394;text-transform:uppercase;letter-spacing:.04em;text-align:center;line-height:1.2}
+.nav button.active{border-bottom-color:#1565c0;background:#f0f4ff}
+.nav button.active .nl{color:#1565c0}
+.nav button:hover:not(.active){background:#f8faff;border-bottom-color:#dbeafe}
+.nbadge{position:absolute;top:3px;right:2px;font-size:7px;font-weight:700;padding:1px 3px;border-radius:5px;min-width:12px;text-align:center;line-height:1.4}
+.nbadge.r{background:#dc2626;color:#fff}
+.nbadge.am{background:#d97706;color:#fff}
+
+/* Date-time box in nav */
+.dt-box{margin-left:auto;background:#f0f4ff;border:1px solid rgba(30,60,200,.12);border-radius:7px;padding:3px 10px;display:flex;align-items:center;gap:7px;align-self:center;cursor:default}
+.dt-day{font-size:8px;font-weight:700;color:#d97706;text-transform:uppercase}
+.dt-date-s{font-size:8px;color:#6b7394}
+.dt-sep{width:1px;height:20px;background:rgba(30,60,200,.1)}
+.dt-clk{font-size:13px;font-weight:700;color:#1565c0;font-variant-numeric:tabular-nums;letter-spacing:.03em}
+
+/* ── BREADCRUMB ── */
+.breadbar{background:#0d47a1;padding:6px 14px;display:none;align-items:center;gap:10px;font-size:12px;color:rgba(255,255,255,.85);position:sticky;top:88px;z-index:48}
 .breadbar.show{display:flex}
-.back-btn{background:rgba(255,255,255,.15);border:1px solid rgba(255,255,255,.25);border-radius:5px;color:#fff;font-size:12px;padding:3px 10px;cursor:pointer}
-.w{max-width:1200px;margin:0 auto;padding:12px}
+.back-btn{background:#fff;border:none;border-radius:6px;color:#1565c0;font-size:12px;font-weight:700;padding:4px 12px;cursor:pointer}
+
+/* ── LAYOUT ── */
+.w{max-width:1400px;margin:0 auto;padding:8px 10px}
 .panel{display:none}.panel.active{display:block}
-.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:8px;margin-bottom:14px}
-.stat{background:var(--card);border-radius:8px;padding:12px 14px;border:1px solid var(--bd);cursor:pointer;transition:box-shadow .15s}
-.stat:hover{box-shadow:0 2px 8px rgba(0,0,0,.1)}
-.sl{font-size:10px;color:var(--mu);text-transform:uppercase;letter-spacing:.04em;margin-bottom:4px}
-.sv{font-size:22px;font-weight:700}
+
+/* ── STAT CARDS ── */
+.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:6px;margin-bottom:8px}
+.stat{background:#fff;border:1px solid var(--bd);border-radius:8px;padding:8px 11px;border-bottom:3px solid transparent;cursor:pointer;transition:box-shadow .12s}
+.stat:hover{box-shadow:0 2px 8px rgba(0,0,0,.08)}
+.sl{font-size:9px;color:var(--mu);text-transform:uppercase;letter-spacing:.05em;margin-bottom:2px}
+.sv{font-size:18px;font-weight:700}
 .sv.blue{color:#1565c0}.sv.green{color:var(--ok)}.sv.red{color:var(--red)}.sv.pur{color:var(--pur)}.sv.amber{color:var(--amber)}
-.cs{background:var(--card);border:1px solid var(--bd);border-radius:10px;padding:12px;box-shadow:0 1px 4px rgba(30,60,200,.06)}
+
+/* ── CARDS ── */
+.cs{background:#fff;border:1px solid var(--bd);border-radius:8px;padding:9px 11px;box-shadow:0 1px 3px rgba(30,60,200,.05)}
 .cs-scroll{max-height:320px;overflow-y:auto;scrollbar-width:thin}
-.cs-t{font-size:10px;font-weight:600;color:#1565c0;text-transform:uppercase;letter-spacing:.05em;margin-bottom:8px;display:flex;justify-content:space-between;align-items:center}
-.chart-wrap{position:relative;height:200px;margin:8px 0}
-.two{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:12px}
+.cs-t{font-size:9px;font-weight:700;color:#1565c0;text-transform:uppercase;letter-spacing:.06em;margin-bottom:5px;display:flex;justify-content:space-between;align-items:center}
+.chart-wrap{position:relative;height:200px;margin:6px 0}
+.two{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:10px}
 @media(max-width:680px){.two{grid-template-columns:1fr}}
-.tw{background:var(--card);border:1px solid var(--bd);border-radius:10px;overflow-x:auto}
-table{width:100%;border-collapse:collapse;font-size:13px}
-th{padding:8px 10px;text-align:left;font-weight:500;color:#1565c0;background:#f0f4ff;border-bottom:1px solid var(--bd);white-space:nowrap;font-size:11px}
-td{padding:8px 11px;border-bottom:1px solid var(--bd);vertical-align:middle}
+
+/* ── TABLES ── */
+.tw{background:#fff;border:1px solid var(--bd);border-radius:8px;overflow-x:auto}
+table{width:100%;border-collapse:collapse;font-size:12px}
+th{padding:7px 10px;text-align:left;font-weight:600;color:#1565c0;background:#f0f4ff;border-bottom:1px solid var(--bd);white-space:nowrap;font-size:10px}
+td{padding:7px 10px;border-bottom:1px solid var(--bd);vertical-align:middle}
 tr:last-child td{border-bottom:none}
 tr:hover td{background:#f8f9ff;cursor:pointer}
-.btn{padding:6px 13px;border:1px solid var(--bd);border-radius:6px;background:var(--card);color:var(--t);font-size:12px;cursor:pointer;white-space:nowrap;transition:background .12s}
+
+/* ── BUTTONS ── */
+.btn{padding:5px 12px;border:1px solid var(--bd);border-radius:6px;background:#fff;color:var(--t);font-size:12px;cursor:pointer;white-space:nowrap;transition:background .12s;font-family:inherit}
 .btn.p{background:var(--g);color:#fff;border-color:var(--g)}.btn.p:hover{background:var(--g2)}
 .btn.danger{border-color:#f09595;color:var(--red)}.btn.danger:hover{background:var(--redbg)}
-.btn.sm{padding:3px 8px;font-size:11px}
-.tb{display:flex;gap:7px;flex-wrap:wrap;margin-bottom:10px;align-items:center}
-.tb input,.tb select{padding:6px 9px;border:1px solid var(--bd);border-radius:6px;background:var(--card);color:var(--t);font-size:12px;outline:none}
-.tb input{flex:1;min-width:140px}
-.pill{display:inline-block;padding:2px 8px;border-radius:10px;font-size:10px;font-weight:600;white-space:nowrap}
+.btn.sm{padding:3px 7px;font-size:11px}
+
+/* ── FORM ELEMENTS ── */
+.tb{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:8px;align-items:center}
+.tb input,.tb select{padding:5px 8px;border:1px solid var(--bd);border-radius:6px;background:#fff;color:var(--t);font-size:12px;outline:none}
+.tb input{flex:1;min-width:130px}
+
+/* ── PILLS ── */
+.pill{display:inline-block;padding:2px 7px;border-radius:10px;font-size:9px;font-weight:600;white-space:nowrap}
 .pill.ok{background:var(--obg);color:var(--ok)}.pill.red{background:var(--redbg);color:var(--red)}
 .pill.pur{background:var(--purbg);color:var(--pur)}.pill.info{background:#e6f1fb;color:#185fa5}
-.rc{font-size:12px;color:var(--mu);margin-bottom:8px;font-weight:500}
-.pg{display:flex;gap:5px;align-items:center;margin-top:9px;font-size:12px}
-.pg button{padding:3px 10px;border:1px solid var(--bd);border-radius:5px;background:var(--card);cursor:pointer;font-size:11px}
+.rc{font-size:11px;color:var(--mu);margin-bottom:6px;font-weight:500}
+.pg{display:flex;gap:5px;align-items:center;margin-top:8px;font-size:12px}
+.pg button{padding:3px 9px;border:1px solid var(--bd);border-radius:5px;background:#fff;cursor:pointer;font-size:11px;font-family:inherit}
 .pg button:disabled{opacity:.4;cursor:not-allowed}
-.tab-row{display:flex;gap:3px;background:var(--bg);padding:3px;border-radius:8px;margin-bottom:12px;flex-wrap:wrap}
-.tab-btn{padding:6px 14px;border-radius:6px;border:none;background:transparent;color:var(--mu);font-size:13px;cursor:pointer}
+
+/* ── VENDO TABS ── */
+.tab-row{display:flex;gap:3px;background:var(--bg);padding:3px;border-radius:8px;margin-bottom:10px;flex-wrap:wrap}
+.tab-btn{padding:5px 12px;border-radius:6px;border:none;background:transparent;color:var(--mu);font-size:12px;cursor:pointer;font-family:inherit}
 .tab-btn.active{background:#1565c0;color:#fff;font-weight:500}
 .subpanel{display:none}.subpanel.active{display:block}
-.top10-item{display:flex;align-items:center;gap:8px;padding:7px 10px;border-bottom:1px solid var(--bd);cursor:pointer;font-size:12px;transition:background .12s}
+
+/* ── TOP20 ITEMS ── */
+.top10-item{display:grid;grid-template-columns:16px 1fr auto;align-items:center;gap:5px;padding:3px 6px;border-bottom:1px solid #f4f6ff;cursor:pointer;font-size:11px;transition:background .1s}
 .top10-item:hover{background:#f8f9ff}
 .top10-item:last-child{border-bottom:none}
+
+/* ── HACK ROWS ── */
 .txn-row-hack{background:#fff5f5!important}
-.lr{display:flex;justify-content:space-between;align-items:center;padding:6px 0;border-bottom:1px solid var(--bd);font-size:12px;cursor:pointer}
-.lr:last-child{border-bottom:none}.lr:hover{background:#f8f9ff;padding-left:4px}
-.lrn{font-weight:500}.lrm{font-size:11px;color:var(--mu);margin-top:1px}
-.area-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:10px;margin-bottom:14px}
-.area-card{background:var(--card);border:1px solid var(--bd);border-radius:10px;padding:14px;cursor:pointer;transition:all .15s;border-top:4px solid #1565c0}
-.area-card:hover{box-shadow:0 4px 16px rgba(30,60,200,.15);transform:translateY(-2px)}
-/* Modal */
+.lr{display:flex;justify-content:space-between;align-items:center;padding:4px 0;border-bottom:1px solid var(--bd);font-size:11px;cursor:pointer}
+.lr:last-child{border-bottom:none}.lr:hover{background:#f8f9ff;padding-left:3px}
+.lrn{font-weight:500}.lrm{font-size:10px;color:var(--mu);margin-top:1px}
+
+/* ── AREA GRID (other panels) ── */
+.area-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:6px;margin-bottom:10px}
+.area-card{background:#fff;border:1px solid var(--bd);border-radius:8px;padding:9px 11px;cursor:pointer;transition:all .12s;border-top:3px solid #1565c0}
+.area-card:hover{box-shadow:0 3px 12px rgba(30,60,200,.12);transform:translateY(-1px)}
+
+/* ── MODAL ── */
 .modal-bg{display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:200;align-items:flex-start;justify-content:center;padding:16px;overflow-y:auto}
 .modal-bg.open{display:flex}
-.modal{background:#fff;border-radius:12px;width:min(700px,100%);padding:20px;margin:auto;max-height:90vh;overflow-y:auto}
-.modal-hd{display:flex;justify-content:space-between;align-items:center;margin-bottom:14px}
-.modal-title{font-size:16px;font-weight:700;color:#1565c0}
+.modal{background:#fff;border-radius:12px;width:min(700px,100%);padding:18px;margin:auto;max-height:90vh;overflow-y:auto}
+.modal-hd{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px}
+.modal-title{font-size:15px;font-weight:700;color:#1565c0}
 .modal-close{background:none;border:none;font-size:22px;cursor:pointer;color:var(--mu)}
-/* Vendo list modal items */
-.vlist-row{padding:10px 14px;border-bottom:1px solid var(--bd);cursor:pointer;transition:background .12s;display:flex;justify-content:space-between;align-items:center}
+.vlist-row{padding:9px 12px;border-bottom:1px solid var(--bd);cursor:pointer;transition:background .12s;display:flex;justify-content:space-between;align-items:center}
 .vlist-row:hover{background:#f0f4ff}
 .vlist-row:last-child{border-bottom:none}
-/* Hacked todo */
-.todo-item{padding:12px 16px;border-bottom:1px solid var(--bd);display:flex;gap:10px;align-items:flex-start;transition:opacity .2s}
+
+/* ── TODO / NOTES ── */
+.todo-item{padding:10px 14px;border-bottom:1px solid var(--bd);display:flex;gap:10px;align-items:flex-start;transition:opacity .2s}
 .todo-item.done{opacity:.5;background:#f9fafb}
 .todo-text.done{text-decoration:line-through;color:var(--mu)}
-.note-input{border:1px solid var(--bd);border-radius:5px;padding:4px 8px;font-size:11px;width:200px;outline:none;color:var(--t)}
+.note-input{border:1px solid var(--bd);border-radius:5px;padding:4px 8px;font-size:11px;width:200px;outline:none;color:var(--t);font-family:inherit}
 .note-input:focus{border-color:#1565c0}
 </style>
 </head>
@@ -96,55 +139,123 @@ tr:hover td{background:#f8f9ff;cursor:pointer}
 <!-- TOP BAR -->
 <div class="topbar">
   <div class="logo">
-    <svg width="26" height="26" viewBox="0 0 100 100">
+    <svg width="28" height="28" viewBox="0 0 100 100">
       <ellipse cx="50" cy="50" rx="48" ry="48" fill="#1a2340"/>
       <path d="M10,35 Q30,20 50,28 Q70,36 90,22" stroke="#F5C518" stroke-width="8" fill="none" stroke-linecap="round"/>
-      <path d="M8,47 Q28,31 50,40 Q72,49 92,34" stroke="#1D9E75" stroke-width="8" fill="none" stroke-linecap="round"/>
-      <path d="M6,58 Q27,42 50,51 Q73,60 94,45" stroke="#4A90D9" stroke-width="8" fill="none" stroke-linecap="round"/>
-      <path d="M8,69 Q28,53 50,62 Q72,71 92,57" stroke="#7B5EA7" stroke-width="8" fill="none" stroke-linecap="round"/>
+      <path d="M8,47 Q28,31 50,40 Q72,49 92,34" stroke="#4ade80" stroke-width="8" fill="none" stroke-linecap="round"/>
+      <path d="M6,58 Q27,42 50,51 Q73,60 94,45" stroke="#60a5fa" stroke-width="8" fill="none" stroke-linecap="round"/>
+      <path d="M8,69 Q28,53 50,62 Q72,71 92,57" stroke="#a78bfa" stroke-width="8" fill="none" stroke-linecap="round"/>
     </svg>
     <div>
       <div style="font-size:13px;font-weight:700;letter-spacing:.03em">SPAWN INTERNETAN</div>
-      <div style="font-size:10px;opacity:.7">Vendo Monitor</div>
+      <div style="font-size:9px;opacity:.65">Vendo Monitor</div>
     </div>
     <span class="sdot"></span>
-    <span style="font-size:11px;opacity:.8" id="top-status">Live</span>
-    <span style="font-size:11px;opacity:.65;margin-left:6px" id="top-clock"></span>
+    <span style="font-size:10px;opacity:.8" id="top-status">Live</span>
   </div>
-  <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
+  <div style="display:flex;gap:7px;align-items:center;flex-wrap:wrap">
     <div style="position:relative">
       <input type="text" id="global-search" placeholder="🔍 Search vendo name..."
-        style="padding:7px 14px;border-radius:8px;border:2px solid rgba(255,255,255,.6);background:white;color:#1a1d2e;font-size:13px;outline:none;width:220px;font-weight:500;"
+        style="padding:6px 12px;border-radius:7px;border:2px solid rgba(255,255,255,.5);background:white;color:#1a1d2e;font-size:12px;outline:none;width:210px;font-weight:500;"
         oninput="globalSearch(this.value)" onfocus="showSearchDrop()" onblur="setTimeout(hideSearchDrop,200)">
-      <div id="search-drop" style="display:none;position:absolute;top:38px;right:0;background:white;border:1px solid var(--bd);border-radius:8px;box-shadow:0 4px 20px rgba(0,0,0,.2);width:320px;max-height:350px;overflow-y:auto;z-index:100;"></div>
+      <div id="search-drop" style="display:none;position:absolute;top:36px;right:0;background:white;border:1px solid var(--bd);border-radius:8px;box-shadow:0 4px 20px rgba(0,0,0,.2);width:320px;max-height:350px;overflow-y:auto;z-index:100;"></div>
     </div>
     <select id="year-select" onchange="changeYear(this.value)"
-      style="padding:4px 10px;border-radius:20px;border:1px solid rgba(255,255,255,.3);background:rgba(255,255,255,.15);color:#fff;font-size:12px;outline:none;cursor:pointer;">
+      style="padding:4px 9px;border-radius:20px;border:1px solid rgba(255,255,255,.3);background:rgba(255,255,255,.15);color:#fff;font-size:11px;outline:none;cursor:pointer;">
       <option value="2026" selected>2026</option>
       <option value="2025-2026">2025-2026</option>
       <option value="2025">2025</option>
       <option value="all">All Years</option>
     </select>
-    <button class="btn p" style="font-size:11px;padding:4px 10px;" onclick="loadDashboard()">⟳ Refresh</button>
-
+    <button class="btn p" style="font-size:11px;padding:4px 9px;background:rgba(255,255,255,.18);border-color:rgba(255,255,255,.3);" onclick="loadDashboard()">⟳ Refresh</button>
   </div>
+</div>
+
+<!-- WHITE ICON NAV BAR -->
+<div class="nav-bar">
   <div class="nav">
-    <button class="active" onclick="showP('dash',this)">Dashboard</button>
-    <button onclick="showP('vendos',this)">Vendos</button>
-    <button onclick="showP('harvest',this)">Harvest</button>
-    <button onclick="showP('suspicious',this);loadSuspicious()" style="border-color:rgba(239,68,68,.5);color:#fca5a5">⚠️ Suspicious</button>
-    <button onclick="showP('devices',this)">📱 Devices</button>
-    <button onclick="showP('analytics',this)">📈 Analytics</button>
-    <button onclick="showP('skipped',this)" style="border-color:rgba(251,191,36,.5);color:#fcd34d">⏭ Skipped</button>
-    <button onclick="showP('notsus',this)" style="border-color:rgba(16,185,129,.5);color:#6ee7b7">✓ Not Suspicious</button>
-    <button onclick="showP('status',this)" style="border-color:rgba(159,225,203,.5);color:#9FE1CB">🖥 System</button>
+    <!-- Dashboard -->
+    <button class="active" onclick="showP('dash',this)">
+      <div class="ni" style="background:#dbeafe">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none"><rect x="3" y="3" width="8" height="8" rx="2" fill="#1565c0"/><rect x="13" y="3" width="8" height="8" rx="2" fill="#1565c0" opacity=".4"/><rect x="3" y="13" width="8" height="8" rx="2" fill="#1565c0" opacity=".4"/><rect x="13" y="13" width="8" height="8" rx="2" fill="#1565c0"/></svg>
+      </div>
+      <span class="nl">Dashboard</span>
+    </button>
+    <!-- Vendos -->
+    <button onclick="showP('vendos',this)">
+      <div class="ni" style="background:#ede9fe">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none"><rect x="4" y="3" width="7" height="10" rx="1.5" fill="#7c3aed"/><rect x="13" y="3" width="7" height="10" rx="1.5" fill="#7c3aed" opacity=".4"/><rect x="3" y="15" width="18" height="6" rx="1.5" fill="#7c3aed"/><circle cx="8" cy="22" r="1.2" fill="#7c3aed"/><circle cx="16" cy="22" r="1.2" fill="#7c3aed"/></svg>
+      </div>
+      <span class="nl">Vendos</span>
+    </button>
+    <!-- Harvest -->
+    <button onclick="showP('harvest',this)">
+      <div class="ni" style="background:#d1fae5">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none"><path d="M12 3 C8 3 4 7 4 12 C4 16 8 20 12 20 C16 20 20 16 20 12" stroke="#16a34a" stroke-width="2" fill="none" stroke-linecap="round"/><path d="M12 3 C14 6 18 6 20 3" stroke="#16a34a" stroke-width="2" fill="none" stroke-linecap="round"/><path d="M12 8 L12 16 M9 13 L12 16 L15 13" stroke="#16a34a" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" fill="none"/></svg>
+      </div>
+      <span class="nl">Harvest</span>
+    </button>
+    <!-- Suspicious -->
+    <button onclick="showP('suspicious',this);loadSuspicious()">
+      <span class="nbadge r" id="nav-sus-badge"></span>
+      <div class="ni" style="background:#fee2e2">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none"><path d="M12 3 L22 20 H2 Z" fill="#fee2e2" stroke="#dc2626" stroke-width="2" stroke-linejoin="round"/><line x1="12" y1="9" x2="12" y2="14" stroke="#dc2626" stroke-width="2" stroke-linecap="round"/><circle cx="12" cy="17.5" r="1" fill="#dc2626"/></svg>
+      </div>
+      <span class="nl" style="color:#dc2626">Suspicious</span>
+    </button>
+    <!-- Devices -->
+    <button onclick="showP('devices',this)">
+      <div class="ni" style="background:#e0f2fe">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none"><rect x="5" y="2" width="9" height="15" rx="2" fill="#0284c7"/><rect x="15" y="6" width="7" height="11" rx="1.5" fill="#0284c7" opacity=".45"/><circle cx="9.5" cy="14.5" r="1" fill="#fff"/></svg>
+      </div>
+      <span class="nl">Devices</span>
+    </button>
+    <!-- Analytics -->
+    <button onclick="showP('analytics',this)">
+      <div class="ni" style="background:#fef9c3">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none"><rect x="3" y="14" width="4" height="7" rx="1" fill="#ca8a04"/><rect x="9" y="9" width="4" height="12" rx="1" fill="#ca8a04" opacity=".6"/><rect x="15" y="4" width="4" height="17" rx="1" fill="#ca8a04"/><path d="M3 12 L9 8 L15 5 L21 3" stroke="#ca8a04" stroke-width="1.5" stroke-linecap="round" fill="none"/></svg>
+      </div>
+      <span class="nl">Analytics</span>
+    </button>
+    <!-- Skipped -->
+    <button onclick="showP('skipped',this)">
+      <span class="nbadge am">67k</span>
+      <div class="ni" style="background:#fef3c7">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="9" stroke="#d97706" stroke-width="2" fill="none"/><path d="M8 12 L16 12 M13 9 L16 12 L13 15" stroke="#d97706" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><line x1="8" y1="8" x2="8" y2="16" stroke="#d97706" stroke-width="2" stroke-linecap="round"/></svg>
+      </div>
+      <span class="nl" style="color:#d97706">Skipped</span>
+    </button>
+    <!-- Not Suspicious -->
+    <button onclick="showP('notsus',this)">
+      <div class="ni" style="background:#dcfce7">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="9" fill="#dcfce7" stroke="#16a34a" stroke-width="2"/><path d="M8 12 L11 15 L16 9" stroke="#16a34a" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      </div>
+      <span class="nl" style="color:#16a34a">Not Sus</span>
+    </button>
+    <!-- System -->
+    <button onclick="showP('status',this)">
+      <div class="ni" style="background:#e0f2fe">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none"><rect x="2" y="5" width="20" height="13" rx="2" stroke="#0369a1" stroke-width="2" fill="none"/><rect x="4" y="7" width="16" height="9" rx="1" fill="#e0f2fe"/><line x1="8" y1="20" x2="16" y2="20" stroke="#0369a1" stroke-width="2" stroke-linecap="round"/><line x1="12" y1="18" x2="12" y2="20" stroke="#0369a1" stroke-width="1.8"/><circle cx="8" cy="11" r="1.3" fill="#0369a1"/><line x1="7" y1="14" x2="17" y2="14" stroke="#0369a1" stroke-width="1.2" stroke-linecap="round"/></svg>
+      </div>
+      <span class="nl">System</span>
+    </button>
+  </div>
+
+  <!-- Date + Time box -->
+  <div class="dt-box">
+    <div>
+      <div class="dt-day" id="dt-day">SATURDAY</div>
+      <div class="dt-date-s" id="dt-date">April 11, 2026</div>
+    </div>
+    <div class="dt-sep"></div>
+    <div class="dt-clk" id="dt-clk">01:48:22 PM</div>
   </div>
 </div>
 
 <!-- BREADCRUMB -->
-<div class="breadbar" id="breadbar" style="background:#0d47a1;padding:8px 16px;gap:12px;">
-  <button class="back-btn" onclick="goBack()" style="background:#fff;color:#1565c0;font-weight:700;padding:5px 14px;border-radius:6px;border:none;cursor:pointer;font-size:13px;">← Back</button>
-  <span id="breadcrumb" style="opacity:.85;flex:1;font-size:13px;"></span>
+<div class="breadbar" id="breadbar">
+  <button class="back-btn" onclick="goBack()">← Back</button>
+  <span id="breadcrumb" style="opacity:.85;flex:1;font-size:12px;"></span>
 </div>
 
 <!-- VENDO LIST MODAL -->
@@ -169,63 +280,69 @@ tr:hover td{background:#f8f9ff;cursor:pointer}
 
 <!-- ══ DASHBOARD ══ -->
 <div id="panel-dash" class="panel active">
-  <div class="stats" id="dash-stats"></div>
-  <div id="suspicious-alert" style="display:none;background:#fee2e2;border:1px solid #fecaca;border-radius:8px;padding:10px 16px;margin-bottom:12px;align-items:center;gap:12px;">
-    <span style="font-size:20px">🚨</span>
-    <div style="flex:1"><div style="font-weight:600;color:#dc2626;font-size:13px">Suspicious transactions detected!</div>
-    <div style="font-size:11px;color:#dc2626;opacity:.8" id="alert-detail"></div></div>
-    <button onclick="showP('suspicious',document.querySelector('.nav button:nth-child(4)'));loadSuspicious()" style="padding:6px 14px;background:#dc2626;color:white;border:none;border-radius:6px;font-size:12px;cursor:pointer;font-weight:600">View Hacked →</button>
+
+  <!-- Stat cards -->
+  <div class="stats" id="dash-stats" style="margin-bottom:7px;"></div>
+
+  <!-- Suspicious alert banner -->
+  <div id="suspicious-alert" style="display:none;background:#fee2e2;border:1px solid #fecaca;border-radius:7px;padding:6px 12px;margin-bottom:7px;align-items:center;gap:10px;">
+    <span>🚨</span>
+    <div style="flex:1;font-size:11px;font-weight:600;color:#dc2626" id="alert-detail"></div>
+    <button onclick="showP('suspicious',document.querySelector('.nav button:nth-child(4)'));loadSuspicious()" style="padding:3px 10px;background:#dc2626;color:white;border:none;border-radius:5px;font-size:11px;cursor:pointer;font-weight:600;font-family:inherit;">View →</button>
   </div>
 
-  <!-- Charts row -->
-  <div style="display:grid;grid-template-columns:2fr 1fr;gap:12px;margin-bottom:12px">
-    <div class="cs">
-      <div class="cs-t">📈 7-Day Sales Trend <span id="trend-range" style="font-weight:400;color:var(--mu)"></span></div>
-      <div class="chart-wrap" style="height:220px"><canvas id="trend-chart"></canvas></div>
-    </div>
-    <div class="cs">
-      <div class="cs-t">🗺 Sales by Area</div>
-      <div style="position:relative;height:220px;margin-top:6px"><canvas id="area-chart"></canvas></div>
-    </div>
-  </div>
+  <!-- 4-column main grid -->
+  <div style="display:grid;grid-template-columns:1fr 1fr 1fr 230px;gap:7px;align-items:start;">
 
-  <!-- Today's quick stats strip -->
-  <div id="today-strip" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:8px;margin-bottom:12px;"></div>
-
-  <!-- Top 10 + Live Panel -->
-  <div style="display:grid;grid-template-columns:1fr 1fr 300px;gap:12px;margin-bottom:12px">
-    <div class="cs">
-      <div class="cs-t">🏆 Top 10 — Strongest</div>
-      <div id="top10-high" class="cs-scroll"></div>
-    </div>
-    <div class="cs">
-      <div class="cs-t">📉 Top 10 — Weakest</div>
-      <div id="top10-low" class="cs-scroll"></div>
-    </div>
-    <div style="display:flex;flex-direction:column;gap:10px;">
-      <!-- Recent Transactions — ABOVE suspicious -->
-      <div class="cs" style="flex:1;border:2px solid #1565c0;background:#f0f4ff;">
-        <div class="cs-t" style="color:#1565c0;font-size:11px;">
-          ⚡ Recent Transactions
-          <span id="live-badge" class="pill ok" style="font-size:9px;margin-left:4px;">● LIVE</span>
-        </div>
-        <div id="recent-txns" style="max-height:210px;overflow-y:auto;"></div>
+    <!-- COL 1: Trend + Top 20 Strongest -->
+    <div style="display:flex;flex-direction:column;gap:7px;">
+      <div class="cs">
+        <div class="cs-t">📈 7-Day Trend <span id="trend-range" style="font-weight:400;color:var(--mu);text-transform:none;letter-spacing:0;font-size:9px;"></span></div>
+        <div style="height:110px;position:relative"><canvas id="trend-chart"></canvas></div>
       </div>
-      <!-- Suspicious — BELOW recent -->
-      <div class="cs" style="border:1.5px solid #fecaca;background:#fff5f5">
-        <div class="cs-t" style="color:#dc2626">🚨 Suspicious <span id="susp-count" class="pill red">0</span></div>
-        <div id="suspicious-sidebar" class="cs-scroll" style="max-height:200px"></div>
-        <div style="padding:6px 0 0;border-top:1px solid #fecaca;margin-top:6px">
-          <button onclick="showP('suspicious',document.querySelector('.nav button:nth-child(4)'));loadSuspicious()" style="width:100%;padding:5px;background:#dc2626;color:white;border:none;border-radius:6px;font-size:11px;cursor:pointer;font-weight:600">View All →</button>
-        </div>
+      <div class="cs">
+        <div class="cs-t">🏆 Top 20 — Strongest</div>
+        <div id="top10-high"></div>
       </div>
     </div>
-  </div>
 
-  <!-- Areas -->
-  <div class="cs" style="margin-bottom:12px;">
-    <div class="cs-t">🗂 Areas — click to explore</div>
-    <div class="area-grid" id="area-grid"></div>
+    <!-- COL 2: Area chart + Top 20 Weakest -->
+    <div style="display:flex;flex-direction:column;gap:7px;">
+      <div class="cs">
+        <div class="cs-t">🗺 Sales by Area</div>
+        <div style="height:110px;position:relative"><canvas id="area-chart"></canvas></div>
+      </div>
+      <div class="cs">
+        <div class="cs-t">📉 Top 20 — Weakest</div>
+        <div id="top10-low"></div>
+      </div>
+    </div>
+
+    <!-- COL 3: Area grid + Today breakdown -->
+    <div style="display:flex;flex-direction:column;gap:7px;">
+      <div class="cs">
+        <div class="cs-t">🗂 Areas</div>
+        <div id="area-grid" style="display:grid;grid-template-columns:1fr 1fr;gap:5px;"></div>
+      </div>
+      <div class="cs">
+        <div class="cs-t">📊 Today by Area</div>
+        <div id="today-strip" style="display:flex;flex-direction:column;gap:2px;"></div>
+      </div>
+    </div>
+
+    <!-- COL 4: Live feed + Suspicious -->
+    <div style="display:flex;flex-direction:column;gap:7px;">
+      <div class="cs" style="border:1.5px solid rgba(21,101,192,.3);background:#f0f7ff;">
+        <div class="cs-t" style="color:#1565c0;">⚡ Live Feed <span id="live-badge" class="pill ok" style="font-size:8px;">● LIVE</span></div>
+        <div id="recent-txns" style="max-height:270px;overflow-y:auto;"></div>
+      </div>
+      <div class="cs" style="border:1.5px solid rgba(220,38,38,.2);background:#fff8f8;">
+        <div class="cs-t" style="color:#dc2626;">🚨 Suspicious <span id="susp-count" class="pill red" style="font-size:8px;">0</span></div>
+        <div id="suspicious-sidebar" style="max-height:200px;overflow-y:auto;"></div>
+        <button onclick="showP('suspicious',document.querySelector('.nav button:nth-child(4)'));loadSuspicious()" style="width:100%;padding:4px;background:#dc2626;color:white;border:none;border-radius:5px;font-size:10px;cursor:pointer;font-weight:700;margin-top:6px;font-family:inherit;">View All →</button>
+      </div>
+    </div>
+
   </div>
 </div>
 
@@ -652,11 +769,25 @@ function yf(y) {
   return `date=gte.${y}-01-01&date=lte.${y}-12-31`;
 }
 
-// ── Clock ─────────────────────────────────────────────────
-setInterval(()=>{
-  document.getElementById("top-clock").textContent =
-    new Date().toLocaleTimeString("en-PH",{hour12:true,hour:"2-digit",minute:"2-digit",second:"2-digit"});
-},1000);
+// ── Clock + Date ──────────────────────────────────────────
+const _DAYS=['SUNDAY','MONDAY','TUESDAY','WEDNESDAY','THURSDAY','FRIDAY','SATURDAY'];
+const _MONTHS=['January','February','March','April','May','June','July','August','September','October','November','December'];
+function _tickClock(){
+  const n=new Date();
+  const h=n.getHours(),m=n.getMinutes(),s=n.getSeconds();
+  const ap=h>=12?'PM':'AM';
+  const hh=((h%12)||12).toString().padStart(2,'0');
+  const el=document.getElementById('dt-clk');
+  if(el)el.textContent=`${hh}:${m.toString().padStart(2,'0')}:${s.toString().padStart(2,'0')} ${ap}`;
+  const dd=document.getElementById('dt-day');
+  if(dd)dd.textContent=_DAYS[n.getDay()];
+  const dt=document.getElementById('dt-date');
+  if(dt)dt.textContent=`${_MONTHS[n.getMonth()]} ${n.getDate()}, ${n.getFullYear()}`;
+  // Also update top-status time
+  const ts=document.getElementById('top-status');
+}
+_tickClock();
+setInterval(_tickClock,1000);
 
 // ── Navigation ────────────────────────────────────────────
 function showP(id, btn) {
@@ -729,12 +860,15 @@ function globalSearch(q) {
     </div>`).join("");
 }
 
-function openVendoFromSearch(vendo, area) {
+async function openVendoFromSearch(vendo, area) {
   document.getElementById("search-drop").style.display = "none";
   document.getElementById("global-search").value = "";
-  // Go to vendos tab then open detail
+  // Switch to vendos panel
   showP("vendos", document.querySelector(".nav button:nth-child(2)"));
-  setTimeout(() => openVendoDetail(vendo, area), 100);
+  // Make sure vendos list is loaded first
+  if (!allVendos.length) await loadVendos();
+  // Short delay for DOM, then open detail
+  setTimeout(() => openVendoDetail(vendo, area), 150);
 }
 
 // ══════════════════════════════════════════════════════════
@@ -762,17 +896,19 @@ async function loadDashboard() {
     const hackedCnt  = hacked.reduce((s,h)=>s+parseInt(h.txn_count||0),0);
 
     document.getElementById("dash-stats").innerHTML = `
-      <div class="stat" onclick="openVendoModal()"><div class="sl">Active Vendos</div><div class="sv pur">${totalVendos.toLocaleString()}</div><div style="font-size:10px;color:var(--mu);margin-top:4px">click to view all</div></div>
-      <div class="stat"><div class="sl">Total Transactions</div><div class="sv blue">${totalTx.toLocaleString()}</div></div>
-      <div class="stat"><div class="sl">Total Sales</div><div class="sv blue">${fmt(totalSales)}</div></div>
-      <div class="stat"><div class="sl">Today's Sales</div><div class="sv green">${fmt(todaySales)}</div></div>
-      <div class="stat" onclick="showP('suspicious',document.querySelector('.nav button:nth-child(4)'))"><div class="sl">Suspicious Txns</div><div class="sv red">${hackedCnt.toLocaleString()}</div></div>
+      <div class="stat" style="border-bottom-color:#7c3aed" onclick="openVendoModal()"><div class="sl">Active Vendos</div><div class="sv pur">${totalVendos.toLocaleString()}</div><div style="font-size:9px;color:var(--mu);margin-top:2px">click to view all</div></div>
+      <div class="stat" style="border-bottom-color:#1565c0"><div class="sl">Total Transactions</div><div class="sv blue">${totalTx.toLocaleString()}</div></div>
+      <div class="stat" style="border-bottom-color:#1565c0"><div class="sl">Total Sales</div><div class="sv blue">${fmt(totalSales)}</div></div>
+      <div class="stat" style="border-bottom-color:#16a34a"><div class="sl">Today's Sales</div><div class="sv green">${fmt(todaySales)}</div></div>
+      <div class="stat" style="border-bottom-color:#dc2626;border-color:rgba(220,38,38,.15)" onclick="showP('suspicious',document.querySelector('.nav button:nth-child(4)'));loadSuspicious()"><div class="sl" style="color:#dc2626">Suspicious Txns</div><div class="sv red">${hackedCnt.toLocaleString()}</div></div>
     `;
 
     if(hackedCnt>0){
       document.getElementById("suspicious-alert").style.display="flex";
       document.getElementById("alert-detail").textContent=`${hackedCnt} suspicious transactions detected`;
       document.getElementById("susp-count").textContent=hackedCnt;
+      const nb=document.getElementById("nav-sus-badge");
+      if(nb)nb.textContent=hackedCnt>999?Math.round(hackedCnt/1000)+'k':hackedCnt;
     }
 
     // 7-day trend
@@ -794,47 +930,37 @@ async function loadDashboard() {
       options:{indexAxis:"y",responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{x:{ticks:{callback:v=>"₱"+(v/1000).toFixed(0)+"K"}}}}
     });
 
-    // Today's quick stats strip — per area
+    // Today by area — vertical list in right column
     const todayByArea = areas.filter(a=>parseFloat(a.today_sales||0)>0).sort((a,b)=>parseFloat(b.today_sales||0)-parseFloat(a.today_sales||0));
-    const totalTodayTxns = areas.reduce((s,a)=>s+parseInt(a.today_txns||0),0);
-    document.getElementById("today-strip").innerHTML = `
-      <div class="stat" style="background:#e8f5e9;border-color:#a5d6a7;padding:10px 12px;">
-        <div class="sl" style="color:#2d6e3b">Today Sales</div>
-        <div class="sv green" style="font-size:18px">${fmt(todaySales)}</div>
-      </div>
-      <div class="stat" style="background:#e3f2fd;border-color:#90caf9;padding:10px 12px;">
-        <div class="sl" style="color:#1565c0">Today Txns</div>
-        <div class="sv blue" style="font-size:18px">${totalTodayTxns.toLocaleString()||"—"}</div>
-      </div>
-      ${todayByArea.slice(0,6).map(a=>`
-      <div class="stat" style="padding:10px 12px;">
-        <div class="sl">${a.area}</div>
-        <div class="sv blue" style="font-size:15px">${fmt(a.today_sales)}</div>
-      </div>`).join("")}
-    `;
+    document.getElementById("today-strip").innerHTML = todayByArea.length
+      ? todayByArea.map(a=>`
+        <div style="display:flex;justify-content:space-between;align-items:center;padding:3px 0;border-bottom:1px solid var(--bd);font-size:12px;">
+          <span style="color:var(--mu);font-size:11px;">${a.area}</span>
+          <span style="font-weight:700;color:#1565c0;">${fmt(a.today_sales)}</span>
+        </div>`).join("")
+      : '<div style="font-size:11px;color:var(--mu);padding:4px 0;">No sales yet today</div>';
     document.getElementById("area-grid").innerHTML = areas.map(a=>`
-      <div class="area-card" onclick="showAreaVendos('${a.area}')">
-        <div style="font-weight:700;font-size:13px;margin-bottom:6px">${a.area}</div>
-        <div style="font-size:18px;font-weight:800;color:#1565c0">${fmt(a.total_sales)}</div>
-        <div style="font-size:11px;color:var(--mu);margin-top:4px">${parseInt(a.txn_count).toLocaleString()} txns · ${a.vendo_count} vendos</div>
-        <div style="font-size:11px;color:var(--ok);margin-top:2px">Today: ${fmt(a.today_sales)}</div>
+      <div onclick="showAreaVendos('${a.area}')" style="background:#f8faff;border:1px solid rgba(30,60,200,.09);border-top:2px solid #1565c0;border-radius:6px;padding:6px 8px;cursor:pointer;transition:box-shadow .12s;" onmouseover="this.style.boxShadow='0 2px 8px rgba(30,60,200,.12)'" onmouseout="this.style.boxShadow=''">
+        <div style="font-size:8px;color:#6b7394;text-transform:uppercase;letter-spacing:.04em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-bottom:1px">${a.area}</div>
+        <div style="font-size:13px;font-weight:700;color:#1565c0">${fmt(a.total_sales)}</div>
+        <div style="font-size:8px;color:#6b7394;margin-top:1px">${parseInt(a.txn_count).toLocaleString()} txns</div>
+        <div style="font-size:9px;color:#16a34a;margin-top:1px">↑ ${fmt(a.today_sales)}</div>
       </div>`).join("");
 
-    // Top 10
-    const top10h = allVendos.slice(0,10);
-    const top10l = [...allVendos].sort((a,b)=>(a.sales||0)-(b.sales||0)).slice(0,10);
-    document.getElementById("top10-high").innerHTML = top10h.map((v,i)=>`
+    // Top 20 strongest + weakest
+    const top20h = allVendos.slice(0,20);
+    const top20l = [...allVendos].sort((a,b)=>(a.sales||0)-(b.sales||0)).slice(0,20);
+    const mkItem = (v,i,isLow) => `
       <div class="top10-item" onclick="openVendoFromSearch('${esc(v.vendo)}','${v.area}')">
-        <span style="font-weight:700;color:${i<3?'#d97706':'var(--mu)'};min-width:20px">${i+1}</span>
-        <div style="flex:1;min-width:0"><div style="font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${v.vendo}</div><div style="font-size:10px;color:var(--mu)">${v.area}</div></div>
-        <span style="font-weight:700;color:var(--ok)">${fmt(v.sales)}</span>
-      </div>`).join("");
-    document.getElementById("top10-low").innerHTML = top10l.map((v,i)=>`
-      <div class="top10-item" onclick="openVendoFromSearch('${esc(v.vendo)}','${v.area}')">
-        <span style="font-weight:700;color:var(--mu);min-width:20px">${i+1}</span>
-        <div style="flex:1;min-width:0"><div style="font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${v.vendo}</div><div style="font-size:10px;color:var(--mu)">${v.area}</div></div>
-        <span style="font-weight:700;color:var(--red)">${fmt(v.sales)}</span>
-      </div>`).join("");
+        <span style="font-weight:700;color:${!isLow&&i<3?'#d97706':'var(--mu)'};min-width:18px;font-size:11px">${i+1}</span>
+        <div style="flex:1;min-width:0">
+          <div style="font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-size:12px">${v.vendo}</div>
+          <div style="font-size:9px;color:var(--mu)">${v.area}</div>
+        </div>
+        <span style="font-weight:700;color:${isLow?'var(--red)':'var(--ok)'};font-size:12px;flex-shrink:0">${fmt(v.sales)}</span>
+      </div>`;
+    document.getElementById("top10-high").innerHTML = top20h.map((v,i)=>mkItem(v,i,false)).join("");
+    document.getElementById("top10-low").innerHTML  = top20l.map((v,i)=>mkItem(v,i,true)).join("");
 
     // Suspicious sidebar
     document.getElementById("suspicious-sidebar").innerHTML = hacked.slice(0,15).map(h=>`
@@ -1484,9 +1610,22 @@ async function removeNotSuspicious(id, vendo, btn) {
 let skippedByVendo = {};
 
 async function loadSkipped() {
-  document.getElementById("skipped-stats").innerHTML='<div style="padding:12px;color:var(--mu)">Loading skipped transactions...</div>';
-  document.getElementById("skipped-todo").innerHTML='<div style="padding:20px;text-align:center;color:var(--mu)">⏳ Fetching data...</div>';
+  document.getElementById("skipped-stats").innerHTML='<div style="padding:8px;color:var(--mu);font-size:12px">⏳ Loading count...</div>';
+  document.getElementById("skipped-todo").innerHTML='<div style="padding:20px;text-align:center;color:var(--mu)">⏳ Fetching skipped transactions — this may take 15–30 seconds due to large dataset...</div>';
 
+  // First get a fast count
+  try {
+    const cr = await fetch(`${SB_URL}/rest/v1/transactions?select=id&is_skipped=eq.true&limit=1`, {
+      headers: {...HDR, "Prefer":"count=exact"}, signal: AbortSignal.timeout(8000)
+    });
+    const range = cr.headers.get("content-range") || "";
+    const cnt = parseInt(range.split("/")[1] || "0");
+    document.getElementById("skipped-stats").innerHTML=`
+      <div class="stat"><div class="sl">Total Skipped</div><div class="sv amber">${cnt.toLocaleString()}</div></div>
+      <div class="stat"><div class="sl">Status</div><div class="sv blue" style="font-size:12px;">⏳ Loading details...</div></div>`;
+  } catch(e) {}
+
+  // Now load full data
   const rows = await sbAll("transactions", "select=id,vendo,area,date,time,ip,mac,amount,voucher,total_time,reason,created_at&is_skipped=eq.true&order=created_at.desc");
   skippedAll = rows;
 
