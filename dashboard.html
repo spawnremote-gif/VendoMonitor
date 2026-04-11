@@ -174,18 +174,25 @@ tr:hover td{background:#f8f9ff;cursor:pointer}
     <span style="font-size:20px">🚨</span>
     <div style="flex:1"><div style="font-weight:600;color:#dc2626;font-size:13px">Suspicious transactions detected!</div>
     <div style="font-size:11px;color:#dc2626;opacity:.8" id="alert-detail"></div></div>
-    <button onclick="showP('suspicious',document.querySelector('.nav button:nth-child(4)'))" style="padding:6px 14px;background:#dc2626;color:white;border:none;border-radius:6px;font-size:12px;cursor:pointer;font-weight:600">View Hacked →</button>
+    <button onclick="showP('suspicious',document.querySelector('.nav button:nth-child(4)'));loadSuspicious()" style="padding:6px 14px;background:#dc2626;color:white;border:none;border-radius:6px;font-size:12px;cursor:pointer;font-weight:600">View Hacked →</button>
   </div>
+
+  <!-- Charts row -->
   <div style="display:grid;grid-template-columns:2fr 1fr;gap:12px;margin-bottom:12px">
     <div class="cs">
-      <div class="cs-t">7-day sales trend <span id="trend-range" style="font-weight:400;color:var(--mu)"></span></div>
-      <div class="chart-wrap"><canvas id="trend-chart"></canvas></div>
+      <div class="cs-t">📈 7-Day Sales Trend <span id="trend-range" style="font-weight:400;color:var(--mu)"></span></div>
+      <div class="chart-wrap" style="height:220px"><canvas id="trend-chart"></canvas></div>
     </div>
     <div class="cs">
-      <div class="cs-t">Sales by area</div>
+      <div class="cs-t">🗺 Sales by Area</div>
       <div style="position:relative;height:220px;margin-top:6px"><canvas id="area-chart"></canvas></div>
     </div>
   </div>
+
+  <!-- Today's quick stats strip -->
+  <div id="today-strip" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:8px;margin-bottom:12px;"></div>
+
+  <!-- Top 10 + Live Panel -->
   <div style="display:grid;grid-template-columns:1fr 1fr 300px;gap:12px;margin-bottom:12px">
     <div class="cs">
       <div class="cs-t">🏆 Top 10 — Strongest</div>
@@ -202,7 +209,7 @@ tr:hover td{background:#f8f9ff;cursor:pointer}
           ⚡ Recent Transactions
           <span id="live-badge" class="pill ok" style="font-size:9px;margin-left:4px;">● LIVE</span>
         </div>
-        <div id="recent-txns" style="max-height:200px;overflow-y:auto;"></div>
+        <div id="recent-txns" style="max-height:210px;overflow-y:auto;"></div>
       </div>
       <!-- Suspicious — BELOW recent -->
       <div class="cs" style="border:1.5px solid #fecaca;background:#fff5f5">
@@ -214,12 +221,11 @@ tr:hover td{background:#f8f9ff;cursor:pointer}
       </div>
     </div>
   </div>
-  <div class="two">
-    <div class="cs">
-      <div class="cs-t">Areas — click to explore</div>
-      <div class="area-grid" id="area-grid"></div>
-    </div>
-    <div class="cs" style="display:none;"></div>
+
+  <!-- Areas -->
+  <div class="cs" style="margin-bottom:12px;">
+    <div class="cs-t">🗂 Areas — click to explore</div>
+    <div class="area-grid" id="area-grid"></div>
   </div>
 </div>
 
@@ -522,9 +528,9 @@ tr:hover td{background:#f8f9ff;cursor:pointer}
 </div>
 
 </div><!-- end .w -->
-<!-- Floating back button -->
+<!-- Floating back button — top right, shown on all sub-pages -->
 <button id="float-back" onclick="goBack()" 
-  style="display:none;position:fixed;bottom:24px;left:24px;background:#1565c0;color:white;border:none;border-radius:50px;padding:10px 20px;font-size:13px;font-weight:700;cursor:pointer;box-shadow:0 4px 16px rgba(21,101,192,.4);z-index:100;">
+  style="display:none;position:fixed;top:110px;right:18px;background:#1565c0;color:white;border:none;border-radius:50px;padding:9px 18px;font-size:13px;font-weight:700;cursor:pointer;box-shadow:0 4px 16px rgba(21,101,192,.5);z-index:200;letter-spacing:.02em;">
   ← Back
 </button>
 
@@ -788,7 +794,24 @@ async function loadDashboard() {
       options:{indexAxis:"y",responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{x:{ticks:{callback:v=>"₱"+(v/1000).toFixed(0)+"K"}}}}
     });
 
-    // Area grid
+    // Today's quick stats strip — per area
+    const todayByArea = areas.filter(a=>parseFloat(a.today_sales||0)>0).sort((a,b)=>parseFloat(b.today_sales||0)-parseFloat(a.today_sales||0));
+    const totalTodayTxns = areas.reduce((s,a)=>s+parseInt(a.today_txns||0),0);
+    document.getElementById("today-strip").innerHTML = `
+      <div class="stat" style="background:#e8f5e9;border-color:#a5d6a7;padding:10px 12px;">
+        <div class="sl" style="color:#2d6e3b">Today Sales</div>
+        <div class="sv green" style="font-size:18px">${fmt(todaySales)}</div>
+      </div>
+      <div class="stat" style="background:#e3f2fd;border-color:#90caf9;padding:10px 12px;">
+        <div class="sl" style="color:#1565c0">Today Txns</div>
+        <div class="sv blue" style="font-size:18px">${totalTodayTxns.toLocaleString()||"—"}</div>
+      </div>
+      ${todayByArea.slice(0,6).map(a=>`
+      <div class="stat" style="padding:10px 12px;">
+        <div class="sl">${a.area}</div>
+        <div class="sv blue" style="font-size:15px">${fmt(a.today_sales)}</div>
+      </div>`).join("")}
+    `;
     document.getElementById("area-grid").innerHTML = areas.map(a=>`
       <div class="area-card" onclick="showAreaVendos('${a.area}')">
         <div style="font-weight:700;font-size:13px;margin-bottom:6px">${a.area}</div>
@@ -820,12 +843,15 @@ async function loadDashboard() {
         <span style="font-weight:700;color:#dc2626">${fmt(h.total_amount)}</span>
       </div>`).join("") || '<div style="padding:20px;text-align:center;color:var(--mu);font-size:12px">No suspicious transactions</div>';
 
-    // Recent — show truly live transactions ordered by created_at
-    document.getElementById("recent-txns").innerHTML = recent.map(t=>{
-      const createdPH = t.created_at ? new Date(t.created_at).toLocaleString("en-PH",{timeZone:"Asia/Manila",month:"short",day:"numeric",hour:"2-digit",minute:"2-digit",hour12:true}) : "";
-      return `<div class="lr">
-        <div><div class="lrn">${t.vendo}</div><div class="lrm">${t.area} · ${t.date} ${t.time}</div><div style="font-size:10px;color:#9FE1CB">received: ${createdPH}</div></div>
-        <span style="font-weight:700;color:#1565c0">${fmt(t.amount)}</span>
+    // Recent — initial render (refreshRecentTxns takes over every 10s)
+    document.getElementById("recent-txns").innerHTML = recent.map((t,i)=>{
+      const phTime = t.created_at ? new Date(t.created_at).toLocaleString("en-PH",{timeZone:"Asia/Manila",month:"short",day:"numeric",hour:"2-digit",minute:"2-digit",hour12:true}) : "";
+      return `<div onclick="openVendoFromSearch('${esc(t.vendo)}','${t.area}')" style="padding:7px 10px;border-bottom:1px solid #dbeafe;cursor:pointer;background:${i===0?'#dbeafe':'#f0f4ff'};display:flex;justify-content:space-between;align-items:center;" onmouseover="this.style.background='#dbeafe'" onmouseout="this.style.background='${i===0?'#dbeafe':'#f0f4ff'}'">
+        <div style="min-width:0;flex:1;">
+          <div style="font-weight:700;font-size:13px;color:#1a1d2e;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${i===0?'🆕 ':''}${t.vendo}</div>
+          <div style="font-size:10px;color:#6b7394;margin-top:1px;">${t.area} · ${phTime}</div>
+        </div>
+        <div style="font-weight:800;font-size:14px;color:#1565c0;margin-left:8px;flex-shrink:0;">${fmt(t.amount)}</div>
       </div>`;
     }).join("");
 
