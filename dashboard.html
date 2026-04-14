@@ -279,13 +279,7 @@ tr:hover td{background:#f8f9ff;cursor:pointer}
 <!-- ══ DASHBOARD ══ -->
 <div id="panel-dash" class="panel active">
 
-  <!-- ⚠️ DUPLICATE DATA WARNING — shown if old Railway still running -->
-  <div id="dup-warning" style="display:none;background:#dc2626;color:#fff;border-radius:8px;padding:10px 14px;margin-bottom:8px;font-size:12px;font-weight:600;display:flex;align-items:center;gap:10px;flex-wrap:wrap">
-    <span style="font-size:18px;flex-shrink:0">🚨</span>
-    <div style="flex:1">⚠️ <strong>DUPLICATE DATA DETECTED</strong> — Old Railway instance (pretty-exploration / spawnremote-gif) may still be running and writing to the same Supabase database. This inflates transaction counts, sales totals, and skipped counts. <strong>STOP the old Railway project immediately.</strong></div>
-    <a href="https://railway.app/project/pretty-exploration" target="_blank" style="background:#fff;color:#dc2626;border-radius:5px;padding:4px 10px;font-size:11px;font-weight:700;text-decoration:none;white-space:nowrap;flex-shrink:0">Stop Old Railway →</a>
-    <button onclick="document.getElementById('dup-warning').style.display='none'" style="background:none;border:none;color:#fff;font-size:18px;cursor:pointer;flex-shrink:0">✕</button>
-  </div>
+
 
   <!-- Stat cards -->
   <div class="stats" id="dash-stats" style="margin-bottom:7px;"></div>
@@ -1194,24 +1188,8 @@ async function loadDashboard() {
       </div>`;
     }).join("");
 
-    // ── Duplicate Railway detection ────────────────────────
-    // If skipped count is very high relative to active txns, old Railway is probably still running
-    try {
-      const cr = await fetch(`${SB_URL}/rest/v1/transactions?select=id&is_skipped=eq.true&limit=1`,
-        { headers:{...HDR,"Prefer":"count=exact"}, signal:AbortSignal.timeout(6000) });
-      const skippedTotal = parseInt((cr.headers.get("content-range")||"").split("/")[1]||"0");
-      const activeTotal  = mainAreas.reduce((s,a)=>s+parseInt(a.txn_count||0),0);
-      const dupBanner    = document.getElementById("dup-warning");
-      // If skipped > 20% of active, flag it
-      if (dupBanner && skippedTotal > 5000 && skippedTotal > activeTotal * 0.2) {
-        dupBanner.style.display = "flex";
-      } else if (dupBanner) {
-        dupBanner.style.display = "none";
-      }
-    } catch(e) {}
-
   } catch(e) {
-    if (e.message !== 'undefined') // sb() already shows connection banner
+    if (e.message !== 'undefined')
       document.getElementById("dash-stats").innerHTML=`<div style="padding:20px;color:red;">Error loading dashboard: ${e.message}</div>`;
   }
 }
