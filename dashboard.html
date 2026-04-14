@@ -1933,35 +1933,6 @@ function toggleSkippedVendo(vendo, checked) {
   }
 }
 
-async function openSkippedDetail(vendo, area) {
-  document.getElementById("skipped-vlist").style.display = "none";
-  document.getElementById("skipped-detail").style.display = "block";
-  document.getElementById("sk-detail-title").textContent = "⏭ " + vendo;
-  document.getElementById("sk-detail-sub").textContent = area + " area · Skipped (duplicate) transactions";
-  showBread(`Skipped → ${vendo}`, closeSkippedDetail);
-
-  const vdata = skippedByVendo[vendo];
-  const rows  = vdata ? vdata.rows : [];
-  document.getElementById("sk-txn-tbody").innerHTML = rows.map((r,i)=>`
-    <tr>
-      <td style="color:var(--mu)">${i+1}</td>
-      <td>${r.date||"—"}</td>
-      <td style="font-family:monospace;font-size:11px">${r.ip||"—"}</td>
-      <td style="font-family:monospace;font-size:11px;color:var(--mu)">${r.mac||"—"}</td>
-      <td style="font-weight:700;color:#d97706">${fmt(r.amount)}</td>
-      <td><span class="pill" style="background:#fef3c7;color:#92400e">${r.reason||"Duplicate"}</span></td>
-      <td style="font-size:11px;color:var(--mu)">${r.created_at ? new Date(r.created_at).toLocaleString("en-PH",{timeZone:"Asia/Manila",hour12:true}) : "—"}</td>
-      <td>
-        <button class="btn sm" style="background:#16a34a;color:white;border-color:#16a34a;font-size:10px" onclick="addSingleToTransactions(${JSON.stringify(r).replace(/"/g,"&quot;")})">✅ Add to Txns</button>
-      </td>
-    </tr>`).join("") || '<tr><td colspan="8" style="text-align:center;padding:20px;color:var(--mu)">No skipped transactions</td></tr>';
-}
-
-function closeSkippedDetail() {
-  document.getElementById("skipped-vlist").style.display = "block";
-  document.getElementById("skipped-detail").style.display = "none";
-}
-
 async function markSkippedLegitimate(vendo, area) {
   if(!confirm(`Mark ALL skipped transactions for "${vendo}" as legitimate? They will appear in vendo transactions!`)) return;
   const vdata = skippedByVendo[vendo];
