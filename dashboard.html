@@ -442,8 +442,8 @@ tr:hover td{background:#f8f9ff;cursor:pointer}
 .hv-right{display:flex;flex-direction:column;overflow:hidden;background:#fff;}
 
 /* stats */
-.hv-stats{display:grid;grid-template-columns:repeat(7,1fr);gap:5px;padding:7px 10px;background:var(--bg);border-bottom:1px solid var(--bd);flex-shrink:0;}
-.hv-stat{background:#fff;border-radius:7px;padding:6px 8px;border-bottom:3px solid #e8eeff;cursor:pointer;}
+.hv-stats{display:grid;grid-template-columns:repeat(7,1fr);gap:4px;padding:5px 8px;background:var(--bg);border-bottom:1px solid var(--bd);flex-shrink:0;}
+.hv-stat{background:#fff;border-radius:6px;padding:4px 6px;border-bottom:3px solid #e8eeff;cursor:pointer;}
 .hv-stat:hover{box-shadow:0 2px 8px rgba(0,0,0,.07);}
 .hv-stat .sl{font-size:7px;color:var(--mu);text-transform:uppercase;letter-spacing:.05em;margin-bottom:1px;}
 .hv-stat .sv{font-size:14px;font-weight:700;}
@@ -454,7 +454,7 @@ tr:hover td{background:#f8f9ff;cursor:pointer}
 .sv-green{color:#16a34a;} .sv-pur{color:#7c3aed;}
 
 /* header bar */
-.hv-hdr{background:#fff;border-bottom:1px solid var(--bd);padding:6px 10px;display:flex;align-items:center;gap:6px;flex-shrink:0;}
+.hv-hdr{background:#fff;border-bottom:1px solid var(--bd);padding:4px 8px;display:flex;align-items:center;gap:5px;flex-shrink:0;}
 .hv-title{font-size:12px;font-weight:700;color:#1565c0;}
 .hv-sub{font-size:10px;color:var(--mu);}
 .hv-hdr-btns{margin-left:auto;display:flex;gap:5px;}
@@ -464,7 +464,7 @@ tr:hover td{background:#f8f9ff;cursor:pointer}
 .hv-btn.red{color:var(--red);border-color:#fca5a5;}
 
 /* urgency filters */
-.hv-filters{padding:5px 10px;border-bottom:1px solid var(--bd);display:flex;align-items:center;gap:4px;flex-wrap:wrap;background:#fff;flex-shrink:0;}
+.hv-filters{padding:3px 8px;border-bottom:1px solid var(--bd);display:flex;align-items:center;gap:3px;flex-wrap:wrap;background:#fff;flex-shrink:0;}
 .hv-filters .flbl{font-size:8px;font-weight:700;color:var(--mu);text-transform:uppercase;letter-spacing:.04em;}
 .uf-btn{padding:2px 9px;border-radius:20px;border:1px solid var(--bd);background:var(--bg);font-size:10px;font-weight:600;cursor:pointer;font-family:inherit;color:var(--mu);}
 .uf-btn.active,.uf-btn:hover{background:#1565c0;color:#fff;border-color:#1565c0;}
@@ -482,20 +482,20 @@ tr:hover td{background:#f8f9ff;cursor:pointer}
 .hv-selcount{margin-left:auto;font-size:10px;color:var(--mu);}
 
 /* route top */
-.hv-route-top{padding:6px 10px;border-bottom:1px solid var(--bd);display:flex;align-items:center;gap:5px;flex-wrap:wrap;flex-shrink:0;background:#f8f9ff;}
+.hv-route-top{padding:4px 8px;border-bottom:1px solid var(--bd);display:flex;align-items:center;gap:4px;flex-wrap:wrap;flex-shrink:0;background:#f8f9ff;}
 .hv-route-top .rlbl{font-size:8px;font-weight:700;color:#1565c0;text-transform:uppercase;letter-spacing:.05em;}
 .hv-inp{padding:4px 7px;border:1px solid var(--bd);border-radius:5px;font-size:11px;font-family:inherit;outline:none;color:var(--t);background:#fff;}
 .hv-inp:focus{border-color:#1565c0;}
 .hv-route-count{margin-left:auto;font-size:10px;color:var(--mu);font-weight:600;}
 
 /* route vendo list */
-.hv-route-list{max-height:108px;overflow-y:auto;border-bottom:2px solid #e8eeff;flex-shrink:0;}
+.hv-route-list{max-height:88px;overflow-y:auto;border-bottom:2px solid #e8eeff;flex-shrink:0;}
 .hv-route-list .rvlbl{font-size:7px;font-weight:700;color:var(--mu);text-transform:uppercase;letter-spacing:.04em;padding:3px 10px;border-bottom:1px solid var(--bd);background:#fafbff;}
-.rv-row{display:grid;grid-template-columns:18px 1fr auto auto;align-items:center;gap:5px;padding:3px 10px;border-bottom:1px solid rgba(30,60,200,.05);}
+.rv-row{display:grid;grid-template-columns:16px 1fr auto auto;align-items:center;gap:4px;padding:2px 8px;border-bottom:1px solid rgba(30,60,200,.04);}
 .rv-row:hover{background:#f8f9ff;}
 .rv-num{font-size:9px;font-weight:700;color:var(--mu);}
-.rv-vname{font-size:11px;font-weight:500;}
-.rv-vmeta{font-size:8px;color:var(--mu);}
+.rv-vname{font-size:10px;font-weight:500;}
+.rv-vmeta{font-size:7px;color:var(--mu);}
 .rv-tgtag{font-size:8px;padding:1px 5px;border-radius:4px;font-weight:600;white-space:nowrap;}
 .rv-tgtag.ok{background:var(--obg);color:var(--ok);}
 .rv-tgtag.no{background:#fef3c7;color:#d97706;}
@@ -505,21 +505,21 @@ tr:hover td{background:#f8f9ff;cursor:pointer}
 .hv-lists{flex:1;display:grid;grid-template-rows:1fr 1px 1fr;overflow:hidden;}
 .hv-list-half{display:grid;grid-template-columns:1fr 58px 64px;overflow:hidden;}
 .hv-list-main{display:flex;flex-direction:column;overflow:hidden;}
-.hv-list-hdr{background:var(--bg);border-bottom:1px solid var(--bd);padding:4px 8px;display:flex;align-items:center;gap:5px;flex-shrink:0;}
+.hv-list-hdr{background:var(--bg);border-bottom:1px solid var(--bd);padding:3px 6px;display:flex;align-items:center;gap:4px;flex-shrink:0;}
 .src-tag{font-size:8px;font-weight:700;text-transform:uppercase;letter-spacing:.05em;}
 .src-tag.sheet{color:#1565c0;} .src-tag.tg{color:#7c3aed;}
 .src-cnt{font-size:8px;color:var(--mu);}
 .hv-search{padding:2px 6px;border:1px solid var(--bd);border-radius:4px;font-size:10px;font-family:inherit;outline:none;width:90px;margin-left:auto;color:var(--t);}
 .hv-vsearch:focus{border-color:#1565c0;}
 .vscroll{flex:1;overflow-y:auto;}
-.vrow{display:grid;grid-template-columns:13px 1fr 36px;align-items:center;gap:4px;padding:3px 7px;border-bottom:1px solid rgba(30,60,200,.05);cursor:pointer;}
+.vrow{display:grid;grid-template-columns:13px 1fr 36px;align-items:center;gap:3px;padding:2px 5px;border-bottom:1px solid rgba(30,60,200,.04);cursor:pointer;}
 .vrow:hover{background:#f8f9ff;}
 .vrow.vsel{background:#eff6ff;}
 .vcb{width:11px;height:11px;accent-color:#1565c0;}
 .vdot-g{width:5px;height:5px;border-radius:50%;background:#16a34a;display:inline-block;margin-right:3px;flex-shrink:0;vertical-align:middle;}
 .vdot-a{width:5px;height:5px;border-radius:50%;background:#d97706;display:inline-block;margin-right:3px;flex-shrink:0;vertical-align:middle;}
-.vname{font-size:11px;font-weight:500;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
-.vmeta{font-size:8px;color:var(--mu);display:flex;gap:3px;margin-top:1px;flex-wrap:nowrap;}
+.vname{font-size:10px;font-weight:500;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;line-height:1.2;}
+.vmeta{font-size:7px;color:var(--mu);display:flex;gap:3px;margin-top:0;flex-wrap:nowrap;}
 .vdays{font-size:9px;font-weight:700;text-align:right;}
 .vdays.vc{color:#dc2626;} .vdays.vh{color:#d97706;} .vdays.vm{color:#7c3aed;} .vdays.vl{color:#16a34a;}
 .vincm{font-size:9px;font-weight:700;text-align:right;}
@@ -529,41 +529,41 @@ tr:hover td{background:#f8f9ff;cursor:pointer}
 .hv-nc{border-left:1px solid var(--bd);background:#fafbff;display:flex;flex-direction:column;overflow:hidden;}
 .hv-nc-hdr{background:var(--bg);border-bottom:1px solid var(--bd);padding:4px 5px;font-size:7px;font-weight:700;color:var(--mu);text-transform:uppercase;letter-spacing:.05em;text-align:center;flex-shrink:0;}
 .hv-nc-scroll{flex:1;overflow-y:auto;padding:3px 4px;}
-.nc-it{background:#fff;border:1px solid var(--bd);border-radius:4px;padding:3px 4px;margin-bottom:3px;cursor:pointer;}
+.nc-it{background:#fff;border:1px solid var(--bd);border-radius:3px;padding:2px 3px;margin-bottom:2px;cursor:pointer;}
 .nc-it.has{border-left:3px solid #1565c0;}
-.nc-iname{font-size:8px;font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
-.nc-inote{font-size:7px;color:var(--mu);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-style:italic;margin-top:1px;}
+.nc-iname{font-size:7px;font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+.nc-inote{font-size:7px;color:var(--mu);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-style:italic;}
 .nc-iadd{font-size:7px;color:#1565c0;text-decoration:underline;cursor:pointer;}
 
 /* add col */
 .hv-ac{border-left:1px solid var(--bd);background:#fff;display:flex;flex-direction:column;overflow:hidden;}
 .hv-ac-hdr{background:#1565c0;padding:4px 4px;font-size:7px;font-weight:700;color:#fff;text-align:center;flex-shrink:0;text-transform:uppercase;letter-spacing:.04em;}
 .hv-ac-scroll{flex:1;overflow-y:auto;padding:3px 4px;}
-.hv-ac-it{margin-bottom:3px;}
-.hv-addbtn{width:100%;padding:3px 3px;border-radius:4px;border:1px solid var(--bd);background:#fff;font-size:8px;color:#1565c0;cursor:pointer;font-family:inherit;font-weight:600;}
-.hv-addbtn:hover{background:var(--bg);}
+.hv-ac-it{margin-bottom:2px;}
+.hv-addbtn{width:100%;padding:2px 2px;border-radius:3px;border:1px solid var(--bd);background:#fff;font-size:7px;color:#1565c0;cursor:pointer;font-family:inherit;font-weight:600;}
+.hv-addbtn:hover{background:var(--bg);}.hv-addbtn.done{background:var(--obg);border-color:#86efac;color:var(--ok);}
 .hv-addbtn.done{background:var(--obg);border-color:#86efac;color:var(--ok);}
 
 /* confirm bar */
-.hv-confirm{background:#fff;border-top:2px solid #1565c0;padding:6px 10px;display:flex;align-items:center;justify-content:space-between;gap:8px;flex-shrink:0;}
-.hv-cinfo{font-size:11px;color:var(--mu);}
+.hv-confirm{background:#fff;border-top:2px solid #1565c0;padding:4px 8px;display:flex;align-items:center;justify-content:space-between;gap:6px;flex-shrink:0;}
+.hv-cinfo{font-size:10px;color:var(--mu);}
 .hv-cinfo strong{color:#1565c0;}
 .hv-cinfo .cwarn{color:#d97706;}
 .hv-cbtnrow{display:flex;gap:5px;}
 
 /* right panel */
-.hv-rp-hdr{background:var(--bg);border-bottom:1px solid var(--bd);padding:6px 10px;display:flex;align-items:center;justify-content:space-between;flex-shrink:0;}
+.hv-rp-hdr{background:var(--bg);border-bottom:1px solid var(--bd);padding:3px 8px;display:flex;align-items:center;justify-content:space-between;flex-shrink:0;}
 .hv-rp-title{font-size:8px;font-weight:700;color:#1565c0;text-transform:uppercase;letter-spacing:.05em;}
 .hv-rp-sub{font-size:8px;color:var(--mu);margin-top:1px;}
-.hv-pending{flex:1;overflow-y:auto;padding:5px 8px;min-height:0;}
-.pi-card{padding:5px 7px;border-radius:6px;border:1px solid var(--bd);margin-bottom:4px;cursor:pointer;}
+.hv-pending{flex:1;overflow-y:auto;padding:3px 6px;min-height:0;}
+.pi-card{padding:3px 6px;border-radius:5px;border:1px solid var(--bd);margin-bottom:3px;cursor:pointer;}
 .pi-card:hover{background:var(--bg);}
 .pi-card.active{background:#eff6ff;border-color:#1565c0;}
 .pi-top{display:flex;justify-content:space-between;align-items:center;}
-.pi-name{font-size:11px;font-weight:600;}
-.pi-income{font-size:11px;font-weight:700;}
+.pi-name{font-size:10px;font-weight:600;}
+.pi-income{font-size:10px;font-weight:700;}
 .pi-income.hot{color:#dc2626;} .pi-income.warm{color:#d97706;}
-.pi-meta{font-size:8px;color:var(--mu);margin-top:2px;display:flex;gap:4px;flex-wrap:wrap;}
+.pi-meta{font-size:7px;color:var(--mu);margin-top:1px;display:flex;gap:3px;flex-wrap:wrap;}
 .hpill{display:inline-block;padding:1px 5px;border-radius:5px;font-size:7px;font-weight:700;}
 .hpill.b{background:#dbeafe;color:#1565c0;} .hpill.g{background:var(--obg);color:var(--ok);}
 .hpill.a{background:#fef3c7;color:#d97706;} .hpill.r{background:var(--redbg);color:var(--red);}
@@ -571,13 +571,13 @@ tr:hover td{background:#f8f9ff;cursor:pointer}
 
 /* notes board */
 .hv-notes-board{border-top:2px solid var(--bd);display:flex;flex-direction:column;overflow:hidden;min-height:0;flex:1;}
-.hv-notes-scroll{flex:1;overflow-y:auto;padding:5px 8px;}
-.hnote{border-radius:5px;padding:5px 8px;margin-bottom:4px;position:relative;padding-right:18px;}
+.hv-notes-scroll{flex:1;overflow-y:auto;padding:3px 6px;}
+.hnote{border-radius:4px;padding:3px 7px 3px 8px;margin-bottom:3px;position:relative;padding-right:16px;}
 .hnote.nb{background:#dbeafe;border-left:3px solid #1565c0;}
 .hnote.nr{background:var(--redbg);border-left:3px solid var(--red);}
 .hnote.na{background:#fef3c7;border-left:3px solid var(--amber);}
 .hnote.ng{background:var(--obg);border-left:3px solid var(--ok);}
-.hnote-text{font-size:10px;line-height:1.4;}
+.hnote-text{font-size:9px;line-height:1.3;}
 .hnote.nb .hnote-text{color:#1e40af;} .hnote.nr .hnote-text{color:#991b1b;}
 .hnote.na .hnote-text{color:#92400e;} .hnote.ng .hnote-text{color:#14532d;}
 .hnote-del{position:absolute;top:3px;right:5px;background:none;border:none;font-size:11px;color:#9ca3af;cursor:pointer;line-height:1;}
@@ -678,18 +678,18 @@ tr:hover td{background:#f8f9ff;cursor:pointer}
             <input class="hv-search" placeholder="Search..." oninput="hvFilterSheet(this.value)">
           </div>
           <div class="vscroll" id="hv-sheet-list">
-            <div class="vrow vsel"><input type="checkbox" class="vcb" checked><div><div class="vname"><span class="vdot-g"></span>Valles</div><div class="vmeta"><span>SINDANGAN</span><span>VLAN 27</span><span>Mar 17</span></div></div><span class="vdays vl">32d</span></div>
-            <div class="vrow"><input type="checkbox" class="vcb"><div><div class="vname"><span class="vdot-a"></span>Polo Net</div><div class="vmeta"><span>DAPITAN</span><span style="color:var(--red)">Jan 2024</span></div></div><span class="vdays vc">826d</span></div>
-            <div class="vrow vsel"><input type="checkbox" class="vcb" checked><div><div class="vname"><span class="vdot-g"></span>Rayl</div><div class="vmeta"><span>SINDANGAN</span><span>VLAN 19</span><span>Mar 6</span></div></div><span class="vdays vh">43d</span></div>
-            <div class="vrow"><input type="checkbox" class="vcb"><div><div class="vname"><span class="vdot-a"></span>COGON</div><div class="vmeta"><span>DIPOLOG</span><span style="color:var(--red)">Apr 2024</span></div></div><span class="vdays vc">735d</span></div>
-            <div class="vrow vsel"><input type="checkbox" class="vcb" checked><div><div class="vname"><span class="vdot-g"></span>Inday Zamora</div><div class="vmeta"><span>SINDANGAN</span><span>VLAN 30</span><span>Mar 3</span></div></div><span class="vdays vh">46d</span></div>
-            <div class="vrow"><input type="checkbox" class="vcb"><div><div class="vname"><span class="vdot-a"></span>Polo Wifi</div><div class="vmeta"><span>DAPITAN</span><span style="color:var(--red)">May 2024</span></div></div><span class="vdays vc">705d</span></div>
-            <div class="vrow vsel"><input type="checkbox" class="vcb" checked><div><div class="vname"><span class="vdot-g"></span>Dumajel</div><div class="vmeta"><span>SINDANGAN</span><span>VLAN 28</span><span>Mar 17</span></div></div><span class="vdays vl">32d</span></div>
-            <div class="vrow"><input type="checkbox" class="vcb"><div><div class="vname"><span class="vdot-a"></span>BANDERA</div><div class="vmeta"><span>DIPOLOG</span><span style="color:var(--red)">Apr 2024</span></div></div><span class="vdays vc">726d</span></div>
-            <div class="vrow"><input type="checkbox" class="vcb"><div><div class="vname"><span class="vdot-a"></span>SINAMAN</div><div class="vmeta"><span>DIPOLOG</span><span style="color:var(--red)">Apr 2024</span></div></div><span class="vdays vc">723d</span></div>
-            <div class="vrow"><input type="checkbox" class="vcb"><div><div class="vname"><span class="vdot-g"></span>Felly Bano</div><div class="vmeta"><span>SINDANGAN</span><span>VLAN 37</span><span>Mar 14</span></div></div><span class="vdays vl">35d</span></div>
-            <div class="vrow vsel"><input type="checkbox" class="vcb" checked><div><div class="vname"><span class="vdot-g"></span>sugabo</div><div class="vmeta"><span>SINDANGAN</span><span>VLAN 13</span><span>Mar 5</span></div></div><span class="vdays vh">44d</span></div>
-            <div class="vrow"><input type="checkbox" class="vcb"><div><div class="vname"><span class="vdot-g"></span>Dumajel</div><div class="vmeta"><span>SINDANGAN</span><span>VLAN 28</span><span>Mar 17</span></div></div><span class="vdays vl">32d</span></div>
+            <div class="vrow vsel"><input type="checkbox" class="vcb" checked><div><div class="vname"><span class="vdot-g"></span>Valles</div><div class="vmeta"><span>SINDANGAN</span><span>VLAN 27</span><span>Mar 17</span></div></div><span class="vdays vl">1mo 2d</span></div>
+            <div class="vrow"><input type="checkbox" class="vcb"><div><div class="vname"><span class="vdot-a"></span>Polo Net</div><div class="vmeta"><span>DAPITAN</span><span style="color:var(--red)">Jan 2024</span></div></div><span class="vdays vc">27mo 16d</span></div>
+            <div class="vrow vsel"><input type="checkbox" class="vcb" checked><div><div class="vname"><span class="vdot-g"></span>Rayl</div><div class="vmeta"><span>SINDANGAN</span><span>VLAN 19</span><span>Mar 6</span></div></div><span class="vdays vh">1mo 13d</span></div>
+            <div class="vrow"><input type="checkbox" class="vcb"><div><div class="vname"><span class="vdot-a"></span>COGON</div><div class="vmeta"><span>DIPOLOG</span><span style="color:var(--red)">Apr 2024</span></div></div><span class="vdays vc">24mo 15d</span></div>
+            <div class="vrow vsel"><input type="checkbox" class="vcb" checked><div><div class="vname"><span class="vdot-g"></span>Inday Zamora</div><div class="vmeta"><span>SINDANGAN</span><span>VLAN 30</span><span>Mar 3</span></div></div><span class="vdays vh">1mo 16d</span></div>
+            <div class="vrow"><input type="checkbox" class="vcb"><div><div class="vname"><span class="vdot-a"></span>Polo Wifi</div><div class="vmeta"><span>DAPITAN</span><span style="color:var(--red)">May 2024</span></div></div><span class="vdays vc">23mo 15d</span></div>
+            <div class="vrow vsel"><input type="checkbox" class="vcb" checked><div><div class="vname"><span class="vdot-g"></span>Dumajel</div><div class="vmeta"><span>SINDANGAN</span><span>VLAN 28</span><span>Mar 17</span></div></div><span class="vdays vl">1mo 2d</span></div>
+            <div class="vrow"><input type="checkbox" class="vcb"><div><div class="vname"><span class="vdot-a"></span>BANDERA</div><div class="vmeta"><span>DIPOLOG</span><span style="color:var(--red)">Apr 2024</span></div></div><span class="vdays vc">24mo 6d</span></div>
+            <div class="vrow"><input type="checkbox" class="vcb"><div><div class="vname"><span class="vdot-a"></span>SINAMAN</div><div class="vmeta"><span>DIPOLOG</span><span style="color:var(--red)">Apr 2024</span></div></div><span class="vdays vc">24mo 3d</span></div>
+            <div class="vrow"><input type="checkbox" class="vcb"><div><div class="vname"><span class="vdot-g"></span>Felly Bano</div><div class="vmeta"><span>SINDANGAN</span><span>VLAN 37</span><span>Mar 14</span></div></div><span class="vdays vl">1mo 5d</span></div>
+            <div class="vrow vsel"><input type="checkbox" class="vcb" checked><div><div class="vname"><span class="vdot-g"></span>sugabo</div><div class="vmeta"><span>SINDANGAN</span><span>VLAN 13</span><span>Mar 5</span></div></div><span class="vdays vh">1mo 14d</span></div>
+            <div class="vrow"><input type="checkbox" class="vcb"><div><div class="vname"><span class="vdot-g"></span>Dumajel</div><div class="vmeta"><span>SINDANGAN</span><span>VLAN 28</span><span>Mar 17</span></div></div><span class="vdays vl">1mo 2d</span></div>
           </div>
         </div>
         <!-- Sheet notes col -->
@@ -916,6 +916,16 @@ function hvClearRoute() {
   hvUpdateRouteCount();
 }
 
+function formatOverdue(days) {
+  if (!days && days !== 0) return '—';
+  days = parseInt(days);
+  if (days < 31) return days + 'd';
+  const months = Math.floor(days / 30);
+  const remainder = days % 30;
+  if (remainder === 0) return months + ' mo';
+  return months + ' mo ' + remainder + 'd';
+}
+
 function hvConfirmRoute() {
   const col = document.getElementById('hv-collector').value;
   const dt = document.getElementById('hv-date').value;
@@ -965,6 +975,14 @@ function hvAddNote() {
 function hvDelNote(btn) {
   btn.closest('.hnote').remove();
 }
+function fmtAge(days) {
+  days = parseInt(days);
+  if (!days) return '—';
+  if (days < 31) return days + 'd';
+  const mo = Math.floor(days / 30);
+  const d = days % 30;
+  return d === 0 ? mo + 'mo' : mo + 'mo ' + d + 'd';
+}
 
 /* pending card click */
 document.addEventListener('DOMContentLoaded', () => {
@@ -978,6 +996,11 @@ document.addEventListener('DOMContentLoaded', () => {
   const today = new Date().toISOString().split('T')[0];
   document.getElementById('hv-date').value = today;
   hvUpdateRouteCount();
+  // Format all overdue day badges
+  document.querySelectorAll('.vdays').forEach(el => {
+    const raw = parseInt(el.textContent);
+    if (!isNaN(raw)) el.textContent = formatOverdue(raw);
+  });
 });
 </script>
 
