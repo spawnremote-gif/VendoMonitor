@@ -1413,9 +1413,7 @@ function hvConfirmRoute(){
   const n=document.querySelectorAll('#hv-rv-scroll .hv-rv').length;
   if(!col){alert('Please enter a collector name first.');document.getElementById('hv-collector')?.focus();return;}
   if(!dt){alert('Please select a harvest date.');document.getElementById('hv-date')?.focus();return;}
-  if(!n){alert('No vendos added to route yet.
-
-Click "+ add" on vendos from the center list.');return;}
+  if(!n){alert('No vendos added to route yet. Click + add on vendos from the center list.');return;}
   const code=Math.random().toString(36).substring(2,8).toUpperCase();
   alert(`✅ Route confirmed!
 
@@ -1446,7 +1444,7 @@ function hvAddNote(){
   const txt=inp?.value?.trim();if(!txt)return;
   const cls={b:'b',a:'a',g:'g',r:'r'}[hvNoteColorVal]||'b';
   const div=document.createElement('div');div.className=`hv-nc ${cls}`;
-  div.innerHTML=txt+'<button class="hv-nx" onclick="this.closest('.hv-nc').remove()">×</button>';
+  div.innerHTML=txt+'<button class="hv-nx" onclick="this.closest(\'.hv-nc\').remove()">×</button>';
   document.getElementById('hv-nchips').prepend(div);
   inp.value='';
 }
