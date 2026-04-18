@@ -697,22 +697,23 @@ tr:hover td{background:#f8f9ff;cursor:pointer}
 
 <!-- AREA TABS -->
 <div class="hv-areas" id="hv-area-tabs">
-  <button class="area-tab on" onclick="hvArea('all',this)">All areas <span class="atc">338</span></button>
-  <button class="area-tab" onclick="hvArea('DAPITAN',this)">📍 Dapitan <span class="atc">106</span></button>
-  <button class="area-tab" onclick="hvArea('DIPOLOG',this)">📍 Dipolog <span class="atc">89</span></button>
-  <button class="area-tab" onclick="hvArea('SINDANGAN',this)">📍 Sindangan <span class="atc">72</span></button>
-  <button class="area-tab" onclick="hvArea('ROXAS',this)">📍 Roxas <span class="atc">34</span></button>
-  <button class="area-tab" onclick="hvArea('POLANCO',this)">📍 Polanco <span class="atc">18</span></button>
-  <button class="area-tab" onclick="hvArea('SINAMAN',this)">📍 Sinaman <span class="atc">12</span></button>
-  <button class="area-tab" onclick="hvArea('MINAOG',this)">📍 Minaog <span class="atc">7</span></button>
-  <button class="area-tab" style="color:#dc2626;" onclick="hvArea('critical',this)">🔴 Critical <span class="atc" style="background:#fee2e2;color:#dc2626;">24</span></button>
-  <button class="area-tab" style="color:#7c3aed;" onclick="hvArea('new',this)">🆕 New vendos <span class="atc" style="background:#ede9fe;color:#7c3aed;">2</span></button>
+  <button class="area-tab on" onclick="hvArea('all',this)">All areas <span class="atc" id="atc-all">2,253</span></button>
+  <button class="area-tab" onclick="hvArea('DAPITAN',this)">📍 Dapitan <span class="atc" id="atc-dapitan">480</span></button>
+  <button class="area-tab" onclick="hvArea('DIPOLOG',this)">📍 Dipolog <span class="atc" id="atc-dipolog">239</span></button>
+  <button class="area-tab" onclick="hvArea('SINDANGAN',this)">📍 Sindangan <span class="atc" id="atc-sindangan">207</span></button>
+  <button class="area-tab" onclick="hvArea('ROXAS',this)">📍 Roxas <span class="atc" id="atc-roxas">28</span></button>
+  <button class="area-tab" onclick="hvArea('POLANCO',this)">📍 Polanco <span class="atc" id="atc-polanco">155</span></button>
+  <button class="area-tab" onclick="hvArea('SINAMAN',this)">📍 Sinaman <span class="atc" id="atc-sinaman">237</span></button>
+  <button class="area-tab" onclick="hvArea('MINAOG',this)">📍 Minaog <span class="atc" id="atc-minaog">170</span></button>
+  <button class="area-tab" onclick="hvArea('MIX AREAS',this)">🔀 Mix areas <span class="atc" id="atc-mix">737</span></button>
+  <button class="area-tab" style="color:#dc2626;" onclick="hvArea('critical',this)">🔴 Critical <span class="atc" style="background:#fee2e2;color:#dc2626;" id="atc-critical">—</span></button>
+  <button class="area-tab" style="color:#7c3aed;" onclick="hvArea('new',this)">🆕 New <span class="atc" style="background:#ede9fe;color:#7c3aed;" id="atc-new">—</span></button>
 </div>
 
 <!-- FILTER ROW -->
 <div class="hv-filters" id="hv-filters">
   <span style="font-size:9px;font-weight:700;color:var(--mu);text-transform:uppercase;letter-spacing:.04em;margin-right:2px;">Filter:</span>
-  <button class="hff on" onclick="hvFilt('all',this)">All (338)</button>
+  <button class="hff on" onclick="hvFilt('all',this)" id="hff-all">All (2,253)</button>
   <button class="hff crit" onclick="hvFilt('critical',this)">🔴 Critical (24)</button>
   <button class="hff high" onclick="hvFilt('high',this)">🟡 High (63)</button>
   <button class="hff med" onclick="hvFilt('medium',this)">🟣 Medium (57)</button>
@@ -721,7 +722,7 @@ tr:hover td{background:#f8f9ff;cursor:pointer}
   <button class="hff" style="border-color:#fcd34d;color:#d97706;" onclick="hvFilt('unmatched',this)">⚠ Unmatched (193)</button>
   <button class="hff" style="border-color:#c4b5fd;color:#7c3aed;" onclick="hvFilt('new',this)">🆕 New (2)</button>
   <input class="hv-search" id="hv-search-inp" placeholder="🔍 Search name..." oninput="hvSearch(this.value)">
-  <span style="font-size:10px;color:var(--mu);margin-left:6px;" id="hv-sel-count">338 vendos</span>
+  <span style="font-size:10px;color:var(--mu);margin-left:6px;" id="hv-sel-count">Loading...</span>
 </div>
 
 <!-- MAIN 3-COL PAGE -->
@@ -1546,9 +1547,15 @@ async function hvLoadVendos() {
 
   // Try to load from vendos table first
   try {
-    const r = await fetch(`${SB}/rest/v1/vendos?select=*&order=area.asc,sheet_name.asc&limit=1000`, {
-      headers: {'apikey': KEY, 'Authorization': 'Bearer ' + KEY}
+    // Load in batches to avoid timeout - start with first 200
+    const controller = new AbortController();
+    const timer = setTimeout(() => controller.abort(), 8000);
+    const r = await fetch(`${SB}/rest/v1/vendos?select=id,tg_name,sheet_name,area,vlan,is_traced,last_harvest_date,admin_notes&order=is_traced.desc,area.asc,tg_name.asc&limit=500&offset=0`, {
+      headers: {'apikey': KEY, 'Authorization': 'Bearer ' + KEY},
+      signal: controller.signal,
     });
+    clearTimeout(timer);
+    if (!r.ok) throw new Error('HTTP ' + r.status);
     const data = await r.json();
     
     if (data && data.length > 0) {
@@ -1605,13 +1612,37 @@ async function hvLoadVendos() {
           ${addBtn}`;
         scroll.appendChild(div);
       });
+      // Update area tab counts dynamically
+      const areaCounts = {};
+      data.forEach(v => {
+        const a = v.area || 'MIX AREAS';
+        areaCounts[a] = (areaCounts[a] || 0) + 1;
+      });
+      const atcMap = {
+        'DAPITAN':'atc-dapitan','DIPOLOG':'atc-dipolog','SINDANGAN':'atc-sindangan',
+        'ROXAS':'atc-roxas','POLANCO':'atc-polanco','SINAMAN':'atc-sinaman',
+        'MINAOG':'atc-minaog','MIX AREAS':'atc-mix'
+      };
+      Object.entries(atcMap).forEach(([area, id]) => {
+        const el = document.getElementById(id);
+        if (el) el.textContent = areaCounts[area] || 0;
+      });
+      const allEl = document.getElementById('atc-all');
+      if (allEl) allEl.textContent = data.length;
+
       hvApplyFilter();
       return;
     }
   } catch(e) {
-    console.log('vendos table empty or error, using static demo data');
+    console.log('vendos load error:', e.message);
+    // Show error notice above static demo rows
+    const scroll = document.getElementById('vc-scroll');
+    const notice = document.createElement('div');
+    notice.style.cssText = 'background:#fef3c7;border-left:3px solid #d97706;padding:8px 12px;font-size:11px;color:#92400e;margin-bottom:4px;';
+    notice.textContent = 'Showing demo data — live load failed: ' + e.message;
+    if (scroll && scroll.firstChild) scroll.insertBefore(notice, scroll.firstChild);
   }
-  // If vendos table empty, static demo rows stay as-is
+  // Static demo rows stay as fallback
   hvApplyFilter();
 }
 
