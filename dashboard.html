@@ -434,576 +434,821 @@ tr:hover td{background:#f8f9ff;cursor:pointer}
 
 <!-- ══ HARVEST ══ -->
 <div id="panel-harvest" class="panel">
-
-<!-- ══ HARVEST STYLES ══ -->
 <style>
-.hv-wrap{display:grid;grid-template-columns:1fr 264px;height:calc(100vh - 118px);min-height:500px;background:var(--bg);gap:0;}
-.hv-left{display:flex;flex-direction:column;overflow:hidden;background:#fff;border-right:1px solid var(--bd);}
-.hv-right{display:flex;flex-direction:column;overflow:hidden;background:#fff;}
+/* ══ HARVEST STYLES ══ */
 
-/* stats */
-.hv-stats{display:grid;grid-template-columns:repeat(7,1fr);gap:4px;padding:4px 8px;background:var(--bg);border-bottom:1px solid var(--bd);flex-shrink:0;}
-.hv-stat{background:#fff;border-radius:6px;padding:4px 6px;border-bottom:3px solid #e8eeff;cursor:pointer;}
-.hv-stat:hover{box-shadow:0 2px 8px rgba(0,0,0,.07);}
-.hv-stat .sl{font-size:7px;color:var(--mu);text-transform:uppercase;letter-spacing:.05em;margin-bottom:1px;}
-.hv-stat .sv{font-size:14px;font-weight:700;}
-.hv-stat.s-blue{border-bottom-color:#1565c0;} .hv-stat.s-red{border-bottom-color:#dc2626;}
-.hv-stat.s-amber{border-bottom-color:#d97706;} .hv-stat.s-green{border-bottom-color:#16a34a;}
-.hv-stat.s-pur{border-bottom-color:#7c3aed;}
-.sv-blue{color:#1565c0;} .sv-red{color:#dc2626;} .sv-amber{color:#d97706;}
-.sv-green{color:#16a34a;} .sv-pur{color:#7c3aed;}
+.brand{font-size:13px;font-weight:700;display:flex;align-items:center;gap:6px;}
+.dot{width:7px;height:7px;border-radius:50%;background:#4ade80;display:inline-block;}
+.clk{font-size:13px;font-weight:700;background:rgba(255,255,255,.15);padding:2px 9px;border-radius:5px;}
+.hbtn.b{background:#1565c0;color:#fff;border-color:#1565c0;}
+.hbtn.g{background:#16a34a;color:#fff;border-color:#16a34a;}
+.ff.on{background:#1565c0;color:#fff;border-color:#1565c0;}
 
-/* header bar */
-.hv-hdr{background:#fff;border-bottom:1px solid var(--bd);padding:3px 8px;display:flex;align-items:center;gap:5px;flex-shrink:0;}
-.hv-title{font-size:12px;font-weight:700;color:#1565c0;}
-.hv-sub{font-size:10px;color:var(--mu);}
-.hv-hdr-btns{margin-left:auto;display:flex;gap:5px;}
-.hv-btn{padding:3px 10px;border-radius:5px;border:1px solid var(--bd);background:#fff;font-size:11px;color:var(--t);cursor:pointer;font-family:inherit;}
-.hv-btn.blue{background:#1565c0;color:#fff;border-color:#1565c0;}
-.hv-btn.green{background:#16a34a;color:#fff;border-color:#16a34a;}
-.hv-btn.red{color:var(--red);border-color:#fca5a5;}
+/* 3 COLUMNS */
+.page{flex:1;display:grid;grid-template-columns:210px 1fr 210px;overflow:hidden;min-height:0;}
 
-/* urgency filters */
-.hv-filters{padding:2px 8px;border-bottom:1px solid var(--bd);display:flex;align-items:center;gap:3px;flex-wrap:wrap;background:#fff;flex-shrink:0;}
-.hv-filters .flbl{font-size:8px;font-weight:700;color:var(--mu);text-transform:uppercase;letter-spacing:.04em;}
-.uf-btn{padding:2px 9px;border-radius:20px;border:1px solid var(--bd);background:var(--bg);font-size:10px;font-weight:600;cursor:pointer;font-family:inherit;color:var(--mu);}
-.uf-btn.active,.uf-btn:hover{background:#1565c0;color:#fff;border-color:#1565c0;}
-.uf-btn.uc{border-color:#fca5a5;color:#dc2626;background:#fff5f5;}
-.uf-btn.uc.active{background:#dc2626;color:#fff;}
-.uf-btn.uh{border-color:#fcd34d;color:#d97706;background:#fffbeb;}
-.uf-btn.uh.active{background:#d97706;color:#fff;}
-.uf-btn.um{border-color:#c4b5fd;color:#7c3aed;background:#f5f3ff;}
-.uf-btn.um.active{background:#7c3aed;color:#fff;}
-.uf-btn.ul{border-color:#86efac;color:#16a34a;background:#f0fdf4;}
-.uf-btn.ul.active{background:#16a34a;color:#fff;}
-.uf-btn.utg{border-color:#c4b5fd;color:#7c3aed;}
-.uf-btn.uut{border-color:#fcd34d;color:#d97706;}
-.uf-sep{width:1px;height:14px;background:var(--bd);}
-.hv-selcount{margin-left:auto;font-size:10px;color:var(--mu);}
+/* COL 1: ROUTE */
+.rc{display:flex;flex-direction:column;overflow:hidden;background:#f8f9ff;border-right:1px solid rgba(30,60,200,.12);}
+.rc-hdr{background:#1565c0;color:#fff;padding:6px 8px;flex-shrink:0;}
+.rc-title{font-size:10px;font-weight:700;}
+.rc-sub{font-size:8px;opacity:.8;margin-top:1px;}
+.rc-form{padding:6px 8px;border-bottom:1px solid rgba(30,60,200,.1);flex-shrink:0;display:flex;flex-direction:column;gap:5px;}
+.rc-lbl{font-size:8px;color:#6b7394;font-weight:600;margin-bottom:2px;}
+.rc-inp{padding:4px 7px;border:1px solid rgba(30,60,200,.18);border-radius:5px;font-size:10px;font-family:inherit;outline:none;color:#1a1d2e;background:#fff;width:100%;}
+.rc-inp:focus{border-color:#1565c0;}
+.rv-scroll{flex:1;overflow-y:auto;}
+.rv{display:grid;grid-template-columns:16px 1fr auto;align-items:start;gap:4px;padding:5px 8px;border-bottom:1px solid rgba(30,60,200,.06);background:#fff;margin-bottom:2px;}
+.rv:hover{background:#f0f4ff;}
+.rv-num{font-size:9px;font-weight:700;color:#6b7394;margin-top:1px;}
+.rv-name{font-size:10px;font-weight:600;color:#1a1d2e;line-height:1.2;}
+.rv-names{display:flex;flex-direction:column;gap:1px;}
+.rv-sheet{font-size:10px;font-weight:600;color:#1565c0;}
+.rv-tg{font-size:9px;color:#6b7394;}
+.rv-tg.ok{color:#15803d;}
+.rv-tg.no{color:#d97706;}
+.rv-area{font-size:8px;color:#9ca3af;margin-top:2px;}
+.rv-del{background:none;border:none;color:#dc2626;font-size:13px;cursor:pointer;padding:2px;line-height:1;margin-top:1px;}
+.rc-bottom{padding:6px 8px;border-top:2px solid #1565c0;flex-shrink:0;background:#fff;}
+.confirm-btn{width:100%;padding:7px;background:#16a34a;color:#fff;border:none;border-radius:6px;font-size:11px;font-weight:700;cursor:pointer;font-family:inherit;margin-bottom:4px;}
+.clear-btn{width:100%;padding:4px;background:#fff;color:#dc2626;border:1px solid #fca5a5;border-radius:6px;font-size:10px;cursor:pointer;font-family:inherit;}
+.conf-info{font-size:9px;color:#6b7394;text-align:center;margin-top:4px;}
+.cw{color:#d97706;}
 
-/* route top */
-.hv-route-top{padding:3px 8px;border-bottom:1px solid var(--bd);display:flex;align-items:center;gap:4px;flex-wrap:wrap;flex-shrink:0;background:#f8f9ff;}
-.hv-route-top .rlbl{font-size:8px;font-weight:700;color:#1565c0;text-transform:uppercase;letter-spacing:.05em;}
-.hv-inp{padding:4px 7px;border:1px solid var(--bd);border-radius:5px;font-size:11px;font-family:inherit;outline:none;color:var(--t);background:#fff;}
-.hv-inp:focus{border-color:#1565c0;}
-.hv-route-count{margin-left:auto;font-size:10px;color:var(--mu);font-weight:600;}
+/* COL 2: COMBINED VENDO LIST */
+.vc{display:flex;flex-direction:column;overflow:hidden;background:#fff;border-right:1px solid rgba(30,60,200,.12);}
+.vc-hdr{background:#f0f4ff;border-bottom:1px solid rgba(30,60,200,.1);padding:4px 8px;display:flex;align-items:center;gap:6px;flex-shrink:0;}
+.vc-title{font-size:9px;font-weight:700;color:#1565c0;text-transform:uppercase;letter-spacing:.05em;}
+.vc-search{padding:3px 7px;border:1px solid rgba(30,60,200,.12);border-radius:5px;font-size:10px;font-family:inherit;outline:none;width:110px;margin-left:auto;color:#1a1d2e;}
+.vc-scroll{flex:1;overflow-y:auto;}
 
-/* route vendo list */
-.hv-route-list{max-height:70px;overflow-y:auto;border-bottom:1px solid #e8eeff;flex-shrink:0;}
-.hv-route-list .rvlbl{font-size:7px;font-weight:700;color:var(--mu);text-transform:uppercase;letter-spacing:.04em;padding:3px 10px;border-bottom:1px solid var(--bd);background:#fafbff;}
-.rv-row{display:grid;grid-template-columns:16px 1fr auto auto;align-items:center;gap:4px;padding:2px 8px;border-bottom:1px solid rgba(30,60,200,.04);}
-.rv-row:hover{background:#f8f9ff;}
-.rv-num{font-size:9px;font-weight:700;color:var(--mu);}
-.rv-vname{font-size:10px;font-weight:500;}
-.rv-vmeta{font-size:7px;color:var(--mu);}
-.rv-tgtag{font-size:8px;padding:1px 5px;border-radius:4px;font-weight:600;white-space:nowrap;}
-.rv-tgtag.ok{background:var(--obg);color:var(--ok);}
-.rv-tgtag.no{background:#fef3c7;color:#d97706;}
-.rv-del{background:none;border:none;color:var(--red);font-size:12px;cursor:pointer;line-height:1;padding:0 2px;}
+/* THE VENDO ROW - one row per physical machine */
+/* columns: cb | dot | sheet name | tg name | area/vlan | overdue | income | note | add */
+.vr{display:grid;grid-template-columns:13px 8px minmax(0,1.2fr) minmax(0,1fr) minmax(0,1fr) 52px 46px 18px auto;align-items:center;gap:5px;padding:5px 8px;border-bottom:1px solid rgba(30,60,200,.06);cursor:pointer;}
+.vr:hover{background:#f8f9ff;}
+.vr.sel{background:#eff6ff;}
+.vcb{width:11px;height:11px;accent-color:#1565c0;flex-shrink:0;}
+.vdot-g{width:6px;height:6px;border-radius:50%;background:#16a34a;flex-shrink:0;}
+.vdot-a{width:6px;height:6px;border-radius:50%;background:#d97706;flex-shrink:0;}
+.vdot-b{width:6px;height:6px;border-radius:50%;background:#1565c0;flex-shrink:0;}
 
-/* two-list area */
-.hv-lists{flex:1;display:grid;grid-template-rows:1fr 1px 1fr;overflow:hidden;}
-.hv-list-half{display:grid;grid-template-columns:1fr 58px 64px;overflow:hidden;}
-.hv-list-main{display:flex;flex-direction:column;overflow:hidden;}
-.hv-list-hdr{background:var(--bg);border-bottom:1px solid var(--bd);padding:2px 6px;display:flex;align-items:center;gap:4px;flex-shrink:0;}
-.src-tag{font-size:8px;font-weight:700;text-transform:uppercase;letter-spacing:.05em;}
-.src-tag.sheet{color:#1565c0;} .src-tag.tg{color:#7c3aed;}
-.src-cnt{font-size:8px;color:var(--mu);}
-.hv-search{padding:2px 6px;border:1px solid var(--bd);border-radius:4px;font-size:10px;font-family:inherit;outline:none;width:90px;margin-left:auto;color:var(--t);}
-.hv-vsearch:focus{border-color:#1565c0;}
-.vscroll{flex:1;overflow-y:auto;}
-.vrow{display:grid;grid-template-columns:13px 1fr 40px;align-items:center;gap:2px;padding:1px 5px;border-bottom:1px solid rgba(30,60,200,.04);cursor:pointer;}
-.vrow:hover{background:#f8f9ff;}
-.vrow.vsel{background:#eff6ff;}
-.vcb{width:11px;height:11px;accent-color:#1565c0;}
-.vdot-g{width:5px;height:5px;border-radius:50%;background:#16a34a;display:inline-block;margin-right:3px;flex-shrink:0;vertical-align:middle;}
-.vdot-a{width:5px;height:5px;border-radius:50%;background:#d97706;display:inline-block;margin-right:3px;flex-shrink:0;vertical-align:middle;}
-.vname{font-size:10px;font-weight:500;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;line-height:1.1;}
-.vmeta{font-size:7px;color:var(--mu);display:flex;gap:3px;margin-top:0;flex-wrap:nowrap;}
-.vdays{font-size:9px;font-weight:700;text-align:right;}
-.vdays.vc{color:#dc2626;} .vdays.vh{color:#d97706;} .vdays.vm{color:#7c3aed;} .vdays.vl{color:#16a34a;}
-.vincm{font-size:9px;font-weight:700;text-align:right;}
-.vincm.hot{color:#dc2626;} .vincm.warm{color:#d97706;}
+/* sheet name cell */
+.vsheet{min-width:0;}
+.vsname{font-size:10px;font-weight:600;color:#1565c0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+.vslbl{font-size:7px;color:#9ca3af;line-height:1;}
 
-/* notes col */
-.hv-nc{border-left:1px solid var(--bd);background:#fafbff;display:flex;flex-direction:column;overflow:hidden;}
-.hv-nc-hdr{background:var(--bg);border-bottom:1px solid var(--bd);padding:4px 5px;font-size:7px;font-weight:700;color:var(--mu);text-transform:uppercase;letter-spacing:.05em;text-align:center;flex-shrink:0;}
-.hv-nc-scroll{flex:1;overflow-y:auto;padding:3px 4px;}
-.nc-it{background:#fff;border:1px solid var(--bd);border-radius:3px;padding:2px 3px;margin-bottom:2px;cursor:pointer;}
-.nc-it.has{border-left:3px solid #1565c0;}
-.nc-iname{font-size:7px;font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
-.nc-inote{font-size:7px;color:var(--mu);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-style:italic;}
-.nc-iadd{font-size:7px;color:#1565c0;text-decoration:underline;cursor:pointer;}
+/* tg name cell */
+.vtg{min-width:0;}
+.vtname{font-size:10px;font-weight:500;color:#1a1d2e;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+.vtlbl{font-size:7px;color:#9ca3af;line-height:1;}
+.vtmatch{font-size:9px;color:#d97706;font-style:italic;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+.vtmatch-btn{font-size:8px;color:#1565c0;background:none;border:none;cursor:pointer;padding:0;text-decoration:underline;font-family:inherit;}
 
-/* add col */
-.hv-ac{border-left:1px solid var(--bd);background:#fff;display:flex;flex-direction:column;overflow:hidden;}
-.hv-ac-hdr{background:#1565c0;padding:4px 4px;font-size:7px;font-weight:700;color:#fff;text-align:center;flex-shrink:0;text-transform:uppercase;letter-spacing:.04em;}
-.hv-ac-scroll{flex:1;overflow-y:auto;padding:3px 4px;}
-.hv-ac-it{margin-bottom:2px;}
-.hv-addbtn{width:100%;padding:2px 2px;border-radius:3px;border:1px solid var(--bd);background:#fff;font-size:7px;color:#1565c0;cursor:pointer;font-family:inherit;font-weight:600;}
-.hv-addbtn:hover{background:var(--bg);}.hv-addbtn.done{background:var(--obg);border-color:#86efac;color:var(--ok);}
-.hv-addbtn.done{background:var(--obg);border-color:#86efac;color:var(--ok);}
+/* area cell */
+.varea{min-width:0;}
+.vaname{font-size:9px;color:#6b7394;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+.vavlan{font-size:8px;color:#9ca3af;}
 
-/* confirm bar */
-.hv-confirm{background:#fff;border-top:2px solid #1565c0;padding:4px 8px;display:flex;align-items:center;justify-content:space-between;gap:6px;flex-shrink:0;}
-.hv-cinfo{font-size:10px;color:var(--mu);}
-.hv-cinfo strong{color:#1565c0;}
-.hv-cinfo .cwarn{color:#d97706;}
-.hv-cbtnrow{display:flex;gap:5px;}
+/* overdue cell */
+.vdays{font-size:9px;font-weight:700;text-align:right;white-space:nowrap;}
+.vdays.c{color:#dc2626;}.vdays.h{color:#d97706;}.vdays.m{color:#7c3aed;}.vdays.l{color:#16a34a;}
+.vdays.na{color:#9ca3af;font-weight:400;}
 
-/* right panel */
-.hv-rp-hdr{background:var(--bg);border-bottom:1px solid var(--bd);padding:3px 8px;display:flex;align-items:center;justify-content:space-between;flex-shrink:0;}
-.hv-rp-title{font-size:8px;font-weight:700;color:#1565c0;text-transform:uppercase;letter-spacing:.05em;}
-.hv-rp-sub{font-size:8px;color:var(--mu);margin-top:1px;}
-.hv-pending{flex:1;overflow-y:auto;padding:3px 6px;min-height:0;}
-.pi-card{padding:3px 6px;border-radius:5px;border:1px solid var(--bd);margin-bottom:3px;cursor:pointer;}
-.pi-card:hover{background:var(--bg);}
-.pi-card.active{background:#eff6ff;border-color:#1565c0;}
-.pi-top{display:flex;justify-content:space-between;align-items:center;}
-.pi-name{font-size:10px;font-weight:600;}
-.pi-income{font-size:10px;font-weight:700;}
-.pi-income.hot{color:#dc2626;} .pi-income.warm{color:#d97706;}
-.pi-meta{font-size:7px;color:var(--mu);margin-top:1px;display:flex;gap:3px;flex-wrap:wrap;}
-.hpill{display:inline-block;padding:1px 5px;border-radius:5px;font-size:7px;font-weight:700;}
-.hpill.b{background:#dbeafe;color:#1565c0;} .hpill.g{background:var(--obg);color:var(--ok);}
-.hpill.a{background:#fef3c7;color:#d97706;} .hpill.r{background:var(--redbg);color:var(--red);}
-.hpill.gray{background:#f1efe8;color:#5f5e5a;}
+/* income cell */
+.vinc{font-size:9px;font-weight:700;text-align:right;white-space:nowrap;}
+.vinc.hot{color:#dc2626;}.vinc.warm{color:#d97706;}.vinc.na{color:#9ca3af;font-weight:400;}
 
-/* notes board */
-.hv-notes-board{border-top:2px solid var(--bd);display:flex;flex-direction:column;overflow:hidden;min-height:0;flex:1;}
-.hv-notes-scroll{flex:1;overflow-y:auto;padding:3px 6px;}
-.hnote{border-radius:4px;padding:3px 7px 3px 8px;margin-bottom:3px;position:relative;padding-right:16px;}
-.hnote.nb{background:#dbeafe;border-left:3px solid #1565c0;}
-.hnote.nr{background:var(--redbg);border-left:3px solid var(--red);}
-.hnote.na{background:#fef3c7;border-left:3px solid var(--amber);}
-.hnote.ng{background:var(--obg);border-left:3px solid var(--ok);}
-.hnote-text{font-size:9px;line-height:1.3;}
-.hnote.nb .hnote-text{color:#1e40af;} .hnote.nr .hnote-text{color:#991b1b;}
-.hnote.na .hnote-text{color:#92400e;} .hnote.ng .hnote-text{color:#14532d;}
-.hnote-del{position:absolute;top:3px;right:5px;background:none;border:none;font-size:11px;color:#9ca3af;cursor:pointer;line-height:1;}
-.hv-notes-add{padding:6px 8px;border-top:1px solid var(--bd);flex-shrink:0;}
-.hv-notes-inp{width:100%;padding:4px 7px;border:1px solid var(--bd);border-radius:5px;font-size:10px;font-family:inherit;outline:none;margin-bottom:4px;color:var(--t);}
-.hv-notes-inp:focus{border-color:#1565c0;}
-.hv-cdots{display:flex;gap:4px;align-items:center;margin-bottom:4px;}
-.hv-cdot{width:12px;height:12px;border-radius:50%;cursor:pointer;border:2px solid transparent;}
-.hv-cdot.sel{border-color:#1a1d2e;}
-.hv-notes-savebtn{width:100%;padding:4px;background:#1565c0;color:#fff;border:none;border-radius:5px;font-size:10px;font-weight:600;cursor:pointer;font-family:inherit;}
-.hv-notes-savebtn:hover{background:#0d47a1;}
+/* note icon */
+.ni{width:16px;height:16px;border:none;border-radius:3px;cursor:pointer;padding:0;display:flex;align-items:center;justify-content:center;background:transparent;flex-shrink:0;}
+.ni.has{background:#dbeafe;}
+.ni.rednote{background:#fee2e2;}
+.ni:hover{background:#dbeafe;}
 
-/* dividers */
-.hv-dh{height:1px;background:var(--bd);}
-.hv-dv{width:1px;background:var(--bd);}
+/* add button */
+.ab{padding:2px 8px;border-radius:12px;border:1px solid rgba(30,60,200,.2);background:#fff;font-size:8px;color:#1565c0;cursor:pointer;font-family:inherit;font-weight:600;flex-shrink:0;white-space:nowrap;}
+.ab:hover{background:#f0f4ff;}
+.ab.dn{background:#dcfce7;border-color:#86efac;color:#15803d;}
+
+/* table header */
+.vthead{display:grid;grid-template-columns:13px 8px minmax(0,1.2fr) minmax(0,1fr) minmax(0,1fr) 52px 46px 18px auto;align-items:center;gap:5px;padding:3px 8px;background:#f0f4ff;border-bottom:1px solid rgba(30,60,200,.1);flex-shrink:0;}
+.vth{font-size:7px;font-weight:700;color:#6b7394;text-transform:uppercase;letter-spacing:.04em;}
+.vth.r{text-align:right;}
+
+/* matched badge */
+.matched{display:inline-block;font-size:7px;padding:1px 4px;border-radius:3px;background:#dcfce7;color:#15803d;font-weight:600;}
+.unmatched{display:inline-block;font-size:7px;padding:1px 4px;border-radius:3px;background:#fef3c7;color:#d97706;font-weight:600;}
+
+/* COL 3: RIGHT */
+.right-col{display:flex;flex-direction:column;overflow:hidden;background:#fff;}
+.rph{background:#f0f4ff;border-bottom:1px solid rgba(30,60,200,.1);padding:4px 8px;display:flex;align-items:center;justify-content:space-between;flex-shrink:0;}
+.rpt{font-size:8px;font-weight:700;color:#1565c0;text-transform:uppercase;letter-spacing:.05em;}
+.rpc{font-size:8px;padding:1px 5px;border-radius:4px;background:#fee2e2;color:#dc2626;font-weight:700;}
+.pscr{overflow-y:auto;padding:3px 6px;flex:1;min-height:0;}
+.pi{padding:4px 6px;border-radius:5px;border:1px solid rgba(30,60,200,.1);margin-bottom:3px;cursor:pointer;}
+.pi:hover{background:#f0f4ff;}
+.pi.on{background:#eff6ff;border-color:#1565c0;}
+.pi-t{display:flex;justify-content:space-between;align-items:center;}
+.pi-n{font-size:10px;font-weight:600;}
+.pi-i{font-size:10px;font-weight:700;}
+.pi-i.hot{color:#dc2626;}.pi-i.warm{color:#d97706;}
+.pi-m{font-size:8px;color:#6b7394;margin-top:1px;}
+.hp{display:inline-block;padding:1px 4px;border-radius:3px;font-size:7px;font-weight:700;margin-right:3px;}
+.hp.b{background:#dbeafe;color:#1565c0;}.hp.gy{background:#f1efe8;color:#5f5e5a;}
+.notes-sec{border-top:2px solid rgba(30,60,200,.1);display:flex;flex-direction:column;flex-shrink:0;}
+.notes-hdr{background:#f0f4ff;border-bottom:1px solid rgba(30,60,200,.1);padding:3px 8px;display:flex;align-items:center;justify-content:space-between;flex-shrink:0;}
+.nchips{padding:3px 7px;display:flex;flex-direction:column;gap:2px;max-height:90px;overflow-y:auto;}
+.nc{border-radius:3px;padding:3px 7px 3px 9px;font-size:9px;line-height:1.35;position:relative;padding-right:16px;}
+.nc.nb{background:#dbeafe;border-left:3px solid #1565c0;color:#1e40af;}
+.nc.nr{background:#fee2e2;border-left:3px solid #dc2626;color:#991b1b;}
+.nc.na{background:#fef3c7;border-left:3px solid #d97706;color:#92400e;}
+.nc.ng{background:#dcfce7;border-left:3px solid #16a34a;color:#14532d;}
+.nx{position:absolute;top:2px;right:4px;background:none;border:none;font-size:10px;color:#9ca3af;cursor:pointer;}
+.cdots{display:flex;gap:4px;padding:3px 7px 2px;}
+.cd{width:11px;height:11px;border-radius:50%;cursor:pointer;border:2px solid transparent;}
+.cd.s{border-color:#1a1d2e;}
+.nadd{padding:3px 7px 5px;display:flex;gap:4px;}
+.ninp{flex:1;padding:3px 7px;border:1px solid rgba(30,60,200,.15);border-radius:5px;font-size:10px;font-family:inherit;outline:none;color:#1a1d2e;}
+.nsb{padding:3px 10px;background:#1565c0;color:#fff;border:none;border-radius:5px;font-size:10px;font-weight:600;cursor:pointer;font-family:inherit;}
+
+/* POPUPS */
+.popbg{display:none;position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:200;align-items:center;justify-content:center;}
+.popbg.show{display:flex;}
+.pop{background:#fff;border-radius:10px;padding:16px;}
+.pp-t{font-size:12px;font-weight:700;color:#1565c0;margin-bottom:10px;display:flex;justify-content:space-between;align-items:center;}
+.pp-x{background:none;border:none;font-size:18px;color:#6b7394;cursor:pointer;line-height:1;}
+/* note popup */
+#note-pop .pop{width:280px;}
+.pp-ta{width:100%;padding:8px;border:1px solid rgba(30,60,200,.15);border-radius:6px;font-size:11px;font-family:inherit;resize:none;height:72px;outline:none;color:#1a1d2e;margin-bottom:10px;display:block;}
+.pp-ta:focus{border-color:#1565c0;}
+.pp-row{display:flex;gap:6px;}
+.pp-sv{flex:1;padding:6px;background:#1565c0;color:#fff;border:none;border-radius:5px;font-size:11px;font-weight:600;cursor:pointer;font-family:inherit;}
+.pp-cl{padding:6px 10px;border:1px solid rgba(30,60,200,.15);border-radius:5px;font-size:11px;color:#dc2626;background:#fff;cursor:pointer;font-family:inherit;}
+/* match popup */
+#match-pop .pop{width:340px;}
+.match-vendo{font-size:11px;color:#6b7394;margin-bottom:10px;}
+.match-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:12px;}
+.match-box{background:#f0f4ff;border-radius:6px;padding:8px;}
+.match-box-lbl{font-size:8px;font-weight:700;color:#6b7394;text-transform:uppercase;letter-spacing:.04em;margin-bottom:3px;}
+.match-box-val{font-size:11px;font-weight:600;color:#1565c0;}
+.match-box-val.na{color:#d97706;font-style:italic;font-weight:400;}
+.match-inp{width:100%;padding:5px 8px;border:1px solid rgba(30,60,200,.18);border-radius:5px;font-size:11px;font-family:inherit;outline:none;color:#1a1d2e;margin-top:4px;}
+.match-inp:focus{border-color:#1565c0;}
+.match-btns{display:flex;gap:6px;}
+.match-save{flex:1;padding:6px;background:#1565c0;color:#fff;border:none;border-radius:5px;font-size:11px;font-weight:600;cursor:pointer;font-family:inherit;}
+.match-skip{padding:6px 10px;border:1px solid rgba(30,60,200,.15);border-radius:5px;font-size:11px;color:#6b7394;background:#fff;cursor:pointer;font-family:inherit;}
+
+
+*{box-sizing:border-box;margin:0;padding:0;}
+.section{background:#fff;border:1px solid rgba(30,60,200,.12);border-radius:10px;padding:16px;margin-bottom:16px;}
+.section-title{font-size:10px;font-weight:700;color:#1565c0;text-transform:uppercase;letter-spacing:.06em;margin-bottom:12px;display:flex;align-items:center;gap:6px;}
+.section-title .stag{font-size:8px;padding:2px 7px;border-radius:10px;background:#dbeafe;color:#1565c0;font-weight:600;text-transform:none;letter-spacing:0;}
+
+/* GLOBAL THRESHOLDS */
+.thresh-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
+.thresh-item{background:#f0f4ff;border-radius:8px;padding:12px;}
+.tl{font-size:10px;font-weight:600;color:#6b7394;margin-bottom:4px;}
+.td{font-size:11px;color:#1a1d2e;margin-bottom:8px;}
+.thresh-row{display:flex;align-items:center;gap:8px;}
+.thresh-inp{padding:5px 8px;border:1px solid rgba(30,60,200,.18);border-radius:6px;font-size:13px;font-weight:700;color:#1565c0;font-family:inherit;outline:none;width:80px;text-align:center;}
+.thresh-inp:focus{border-color:#1565c0;}
+.thresh-unit{font-size:11px;color:#6b7394;}
+.thresh-note{font-size:9px;color:#9ca3af;margin-top:5px;}
+.save-btn{padding:5px 14px;background:#1565c0;color:#fff;border:none;border-radius:6px;font-size:11px;font-weight:600;cursor:pointer;font-family:inherit;margin-top:10px;}
+.save-btn:hover{background:#0d47a1;}
+
+/* PREVIEW OF WHAT TRIGGERS */
+.trigger-preview{background:#f8f9ff;border:1px solid rgba(30,60,200,.1);border-radius:7px;padding:10px 12px;margin-top:10px;}
+.tp-title{font-size:9px;font-weight:700;color:#6b7394;text-transform:uppercase;letter-spacing:.05em;margin-bottom:6px;}
+.tp-rule{display:flex;align-items:center;gap:6px;font-size:10px;color:#1a1d2e;margin-bottom:4px;}
+.tp-rule .dot{width:6px;height:6px;border-radius:50%;flex-shrink:0;}
+.tp-rule .dot.bl{background:#1565c0;}
+.tp-rule .dot.am{background:#d97706;}
+.tp-rule strong{color:#1565c0;}
+
+/* PER-VENDO SCHEDULE TABLE */
+.vtable{width:100%;border-collapse:collapse;}
+.vtable th{padding:6px 10px;text-align:left;font-size:8px;font-weight:700;color:#1565c0;background:#f0f4ff;border-bottom:1px solid rgba(30,60,200,.12);text-transform:uppercase;letter-spacing:.05em;}
+.vtable td{padding:6px 10px;border-bottom:1px solid rgba(30,60,200,.06);font-size:11px;vertical-align:middle;}
+.vtable tr:hover td{background:#f8f9ff;}
+
+.vname-cell{font-weight:600;color:#1565c0;}
+.vtg-cell{color:#6b7394;font-size:10px;}
+.matched{font-size:8px;padding:1px 5px;border-radius:3px;background:#dcfce7;color:#15803d;font-weight:600;}
+.unmatched{font-size:8px;padding:1px 5px;border-radius:3px;background:#fef3c7;color:#d97706;font-weight:600;}
+.using-global{font-size:9px;color:#9ca3af;font-style:italic;}
+.using-custom{font-size:9px;color:#1565c0;font-weight:600;}
+
+/* interval input inline */
+.int-row{display:flex;align-items:center;gap:5px;}
+.int-inp{width:48px;padding:3px 6px;border:1px solid rgba(30,60,200,.18);border-radius:5px;font-size:11px;font-family:inherit;outline:none;color:#1a1d2e;text-align:center;}
+.int-inp:focus{border-color:#1565c0;}
+.int-unit{font-size:10px;color:#6b7394;}
+.int-clear{background:none;border:none;color:#9ca3af;font-size:11px;cursor:pointer;padding:0 2px;}
+.int-clear:hover{color:#dc2626;}
+.int-save{padding:2px 8px;background:#1565c0;color:#fff;border:none;border-radius:4px;font-size:9px;font-weight:600;cursor:pointer;font-family:inherit;}
+
+/* countdown */
+.countdown{display:inline-flex;align-items:center;gap:4px;font-size:10px;font-weight:600;}
+.countdown.due{color:#dc2626;}
+.countdown.soon{color:#d97706;}
+.countdown.ok{color:#16a34a;}
+.cd-bar{height:4px;width:60px;background:#e8eeff;border-radius:2px;overflow:hidden;display:inline-block;vertical-align:middle;margin-left:4px;}
+.cd-fill{height:100%;border-radius:2px;}
+
+/* SOURCE TOGGLE */
+.source-toggle{display:flex;gap:4px;margin-bottom:12px;}
+.stgl{padding:4px 12px;border-radius:20px;border:1px solid rgba(30,60,200,.15);background:#fff;font-size:10px;font-weight:600;cursor:pointer;font-family:inherit;color:#6b7394;}
+.stgl.on{background:#1565c0;color:#fff;border-color:#1565c0;}
+
+.pill{display:inline-block;padding:1px 6px;border-radius:5px;font-size:8px;font-weight:700;}
+.pill.b{background:#dbeafe;color:#1565c0;}
+.pill.g{background:#dcfce7;color:#15803d;}
+.pill.a{background:#fef3c7;color:#d97706;}
+.pill.r{background:#fee2e2;color:#dc2626;}
+
+/* tab system */
+.hv-tab{display:none;}
+.hv-tab.active{display:block;}
+.hv-tab-page{display:none;}
+.hv-tab-page.active{display:flex;flex-direction:column;}
+#panel-harvest .page{height:calc(100vh - 286px);min-height:400px;}
+#panel-harvest.active{display:block!important;}
+/* records tab */
+.rec-table{width:100%;border-collapse:collapse;font-size:11px;}
+.rec-table th{padding:6px 10px;text-align:left;font-size:9px;font-weight:700;color:#1565c0;background:#f0f4ff;border-bottom:1px solid rgba(30,60,200,.12);text-transform:uppercase;letter-spacing:.05em;white-space:nowrap;}
+.rec-table td{padding:5px 10px;border-bottom:1px solid rgba(30,60,200,.06);}
+.rec-table tr:hover td{background:#f8f9ff;}
 </style>
 
-<!-- ══ HARVEST PANEL BODY ══ -->
-
-<!-- STATS -->
-<div class="hv-stats">
-  <div class="hv-stat s-blue"><div class="sl">Total vendos</div><div class="sv sv-blue">764</div></div>
-  <div class="hv-stat s-red"><div class="sl">Critical &gt;90d</div><div class="sv sv-red" id="hstat-crit">24</div></div>
-  <div class="hv-stat s-amber"><div class="sl">High 61–90d</div><div class="sv sv-amber" id="hstat-high">63</div></div>
-  <div class="hv-stat s-pur"><div class="sl">Medium 31–60d</div><div class="sv sv-pur" id="hstat-med">57</div></div>
-  <div class="hv-stat s-green"><div class="sl">Low &gt;30d</div><div class="sv sv-green" id="hstat-low">194</div></div>
-  <div class="hv-stat s-amber"><div class="sl">TG &gt;₱3,000</div><div class="sv sv-amber" id="hstat-tg">87</div></div>
-  <div class="hv-stat s-blue"><div class="sl">Untraced</div><div class="sv sv-blue" id="hstat-untr">193</div></div>
-</div>
-
-<!-- HEADER -->
-<div class="hv-hdr">
-  <div>
-    <div class="hv-title">Harvest route builder</div>
-    <div class="hv-sub">Select vendos from Sheet or Telegram · add to route · confirm to assign collector</div>
-  </div>
-  <div class="hv-hdr-btns">
-    <button class="hv-btn">Records</button>
-    <button class="hv-btn">Schedule</button>
-    <button class="hv-btn blue" onclick="hvNewRoute()">+ New route</button>
+<div class="toolbar">
+  <div><div class="ttl">Harvest route builder</div><div class="tsub">One vendo · two names · Sheet name + TG name · match as you go · add to route</div></div>
+  <div style="margin-left:auto;display:flex;gap:5px;">
+    <button class="hbtn" onclick="hvShowTab('route',this)">Route builder</button>
+    <button class="hbtn" onclick="hvShowTab('schedule',this)">Schedule</button>
+    <button class="hbtn" onclick="hvShowTab('records',this)">Records</button>
+    <button class="hbtn b">+ New route</button>
   </div>
 </div>
 
-<!-- URGENCY FILTERS -->
-<div class="hv-filters">
-  <span class="flbl">Filter:</span>
-  <button class="uf-btn active" onclick="hvSetFilter('all',this)">All (338)</button>
-  <button class="uf-btn uc" onclick="hvSetFilter('critical',this)">Critical (24)</button>
-  <button class="uf-btn uh" onclick="hvSetFilter('high',this)">High (63)</button>
-  <button class="uf-btn um" onclick="hvSetFilter('medium',this)">Medium (57)</button>
-  <button class="uf-btn ul" onclick="hvSetFilter('low',this)">Low (194)</button>
-  <div class="uf-sep"></div>
-  <button class="uf-btn utg" onclick="hvSetFilter('tg',this)">TG &gt;₱3k (87)</button>
-  <button class="uf-btn uut" onclick="hvSetFilter('untraced',this)">Untraced (193)</button>
-  <span class="hv-selcount" id="hv-selcount">0 selected</span>
+<div class="filters">
+  <span style="font-size:8px;font-weight:700;color:#6b7394;text-transform:uppercase;letter-spacing:.04em;">Filter:</span>
+  <button class="ff on">All (338)</button>
+  <button class="ff" style="border-color:#fca5a5;color:#dc2626;background:#fff5f5;">Critical (24)</button>
+  <button class="ff" style="border-color:#fcd34d;color:#d97706;background:#fffbeb;">High (63)</button>
+  <button class="ff" style="border-color:#c4b5fd;color:#7c3aed;background:#f5f3ff;">Medium (57)</button>
+  <button class="ff" style="border-color:#86efac;color:#16a34a;background:#f0fdf4;">Low (194)</button>
+  <span style="width:1px;height:13px;background:rgba(30,60,200,.1);margin:0 2px;"></span>
+  <button class="ff" style="color:#d97706;border-color:#fcd34d;">Unmatched (193)</button>
+  <span style="margin-left:auto;font-size:9px;color:#6b7394;">0 selected</span>
 </div>
 
-<!-- MAIN WRAP -->
-<div class="hv-wrap">
+<div class="page">
 
-  <!-- ══ LEFT ══ -->
-  <div class="hv-left">
-
-    <!-- Route controls -->
-    <div class="hv-route-top">
-      <span class="rlbl">Route</span>
-      <input class="hv-inp" id="hv-collector" placeholder="Collector name" style="width:130px;">
-      <input class="hv-inp" type="date" id="hv-date" style="width:130px;">
-      <select class="hv-inp" id="hv-area-sel" style="width:110px;">
-        <option value="">All areas</option>
-        <option>DAPITAN</option><option>DIPOLOG</option><option>SINDANGAN</option>
-        <option>SINAMAN</option><option>ROXAS</option><option>POLANCO</option>
-      </select>
-      <span class="hv-route-count" id="hv-route-count">0 vendos in route</span>
+  <!-- COL 1: ROUTE -->
+  <div class="rc">
+    <div class="rc-hdr">
+      <div class="rc-title">Route details</div>
+      <div class="rc-sub">Collector · date · vendos assigned</div>
     </div>
-
-    <!-- Route vendo list -->
-    <div class="hv-route-list">
-      <div class="rvlbl">Vendos added to this route — all selected below will appear here</div>
-      <div id="hv-rv-list">
-        <div class="rv-row"><span class="rv-num">1</span><div><div class="rv-vname">Valles</div><div class="rv-vmeta">SINDANGAN · VLAN 27</div></div><span class="rv-tgtag ok">TG: valles</span><button class="rv-del" onclick="hvRemoveRoute(this)">×</button></div>
-        <div class="rv-row"><span class="rv-num">2</span><div><div class="rv-vname">Rayl</div><div class="rv-vmeta">SINDANGAN · VLAN 19</div></div><span class="rv-tgtag ok">TG: rayl</span><button class="rv-del" onclick="hvRemoveRoute(this)">×</button></div>
-        <div class="rv-row"><span class="rv-num">3</span><div><div class="rv-vname">Polo Net</div><div class="rv-vmeta">DAPITAN · no VLAN</div></div><span class="rv-tgtag no">TG: untraced</span><button class="rv-del" onclick="hvRemoveRoute(this)">×</button></div>
-        <div class="rv-row"><span class="rv-num">4</span><div><div class="rv-vname">Inday Zamora</div><div class="rv-vmeta">SINDANGAN · VLAN 30</div></div><span class="rv-tgtag ok">TG: indayzamora</span><button class="rv-del" onclick="hvRemoveRoute(this)">×</button></div>
-        <div class="rv-row"><span class="rv-num">5</span><div><div class="rv-vname">sugabo</div><div class="rv-vmeta">SINDANGAN · VLAN 13</div></div><span class="rv-tgtag ok">TG: sugabo</span><button class="rv-del" onclick="hvRemoveRoute(this)">×</button></div>
-      </div>
+    <div class="rc-form">
+      <div><div class="rc-lbl">Collector name</div><input class="rc-inp" placeholder="e.g. Juan dela Cruz"></div>
+      <div><div class="rc-lbl">Harvest date</div><input class="rc-inp" type="date"></div>
+      <div><div class="rc-lbl">Area</div><select class="rc-inp"><option>All areas</option><option>DAPITAN</option><option>DIPOLOG</option><option>SINDANGAN</option></select></div>
     </div>
-
-    <!-- Two lists stacked -->
-    <div class="hv-lists">
-
-      <!-- SHEET LIST -->
-      <div class="hv-list-half">
-        <div class="hv-list-main">
-          <div class="hv-list-hdr">
-            <span class="src-tag sheet">Google Sheet</span>
-            <span class="src-cnt">338 overdue · &gt;1 month since last collection</span>
-            <input class="hv-search" placeholder="Search..." oninput="hvFilterSheet(this.value)">
-          </div>
-          <div class="vscroll" id="hv-sheet-list">
-            <div class="vrow vsel"><input type="checkbox" class="vcb" checked><div><div class="vname"><span class="vdot-g"></span>Valles</div><div class="vmeta"><span>SINDANGAN</span><span>VLAN 27</span><span>Mar 17</span></div></div><span class="vdays vl">1mo 2d</span></div>
-            <div class="vrow"><input type="checkbox" class="vcb"><div><div class="vname"><span class="vdot-a"></span>Polo Net</div><div class="vmeta"><span>DAPITAN</span><span style="color:var(--red)">Jan 2024</span></div></div><span class="vdays vc">27mo 16d</span></div>
-            <div class="vrow vsel"><input type="checkbox" class="vcb" checked><div><div class="vname"><span class="vdot-g"></span>Rayl</div><div class="vmeta"><span>SINDANGAN</span><span>VLAN 19</span><span>Mar 6</span></div></div><span class="vdays vh">1mo 13d</span></div>
-            <div class="vrow"><input type="checkbox" class="vcb"><div><div class="vname"><span class="vdot-a"></span>COGON</div><div class="vmeta"><span>DIPOLOG</span><span style="color:var(--red)">Apr 2024</span></div></div><span class="vdays vc">24mo 15d</span></div>
-            <div class="vrow vsel"><input type="checkbox" class="vcb" checked><div><div class="vname"><span class="vdot-g"></span>Inday Zamora</div><div class="vmeta"><span>SINDANGAN</span><span>VLAN 30</span><span>Mar 3</span></div></div><span class="vdays vh">1mo 16d</span></div>
-            <div class="vrow"><input type="checkbox" class="vcb"><div><div class="vname"><span class="vdot-a"></span>Polo Wifi</div><div class="vmeta"><span>DAPITAN</span><span style="color:var(--red)">May 2024</span></div></div><span class="vdays vc">23mo 15d</span></div>
-            <div class="vrow vsel"><input type="checkbox" class="vcb" checked><div><div class="vname"><span class="vdot-g"></span>Dumajel</div><div class="vmeta"><span>SINDANGAN</span><span>VLAN 28</span><span>Mar 17</span></div></div><span class="vdays vl">1mo 2d</span></div>
-            <div class="vrow"><input type="checkbox" class="vcb"><div><div class="vname"><span class="vdot-a"></span>BANDERA</div><div class="vmeta"><span>DIPOLOG</span><span style="color:var(--red)">Apr 2024</span></div></div><span class="vdays vc">24mo 6d</span></div>
-            <div class="vrow"><input type="checkbox" class="vcb"><div><div class="vname"><span class="vdot-a"></span>SINAMAN</div><div class="vmeta"><span>DIPOLOG</span><span style="color:var(--red)">Apr 2024</span></div></div><span class="vdays vc">24mo 3d</span></div>
-            <div class="vrow"><input type="checkbox" class="vcb"><div><div class="vname"><span class="vdot-g"></span>Felly Bano</div><div class="vmeta"><span>SINDANGAN</span><span>VLAN 37</span><span>Mar 14</span></div></div><span class="vdays vl">1mo 5d</span></div>
-            <div class="vrow vsel"><input type="checkbox" class="vcb" checked><div><div class="vname"><span class="vdot-g"></span>sugabo</div><div class="vmeta"><span>SINDANGAN</span><span>VLAN 13</span><span>Mar 5</span></div></div><span class="vdays vh">1mo 14d</span></div>
-            <div class="vrow"><input type="checkbox" class="vcb"><div><div class="vname"><span class="vdot-g"></span>Dumajel</div><div class="vmeta"><span>SINDANGAN</span><span>VLAN 28</span><span>Mar 17</span></div></div><span class="vdays vl">1mo 2d</span></div>
-          </div>
+    <div class="rc-cnt">5 vendos in this route</div>
+    <div class="rv-scroll">
+      <div class="rv">
+        <span class="rv-num">1</span>
+        <div class="rv-names">
+          <div class="rv-sheet">Valles</div>
+          <div class="rv-tg ok">TG: valles ✓</div>
+          <div class="rv-area">SINDANGAN · VLAN 27</div>
         </div>
-        <!-- Sheet notes col -->
-        <div class="hv-nc">
-          <div class="hv-nc-hdr">Notes<br>per vendo</div>
-          <div class="hv-nc-scroll">
-            <div class="nc-it has"><div class="nc-iname">Valles</div><div class="nc-inote">Check coin box</div></div>
-            <div class="nc-it"><div class="nc-iname">Polo Net</div><div class="nc-inote"><span class="nc-iadd">+ add note</span></div></div>
-            <div class="nc-it has"><div class="nc-iname">Rayl</div><div class="nc-inote">High earner</div></div>
-            <div class="nc-it"><div class="nc-iname">COGON</div><div class="nc-inote"><span class="nc-iadd">+ add note</span></div></div>
-            <div class="nc-it has"><div class="nc-iname">Inday Zamora</div><div class="nc-inote">Coin slot issue</div></div>
-            <div class="nc-it"><div class="nc-iname">Polo Wifi</div><div class="nc-inote"><span class="nc-iadd">+ add note</span></div></div>
-            <div class="nc-it"><div class="nc-iname">Dumajel</div><div class="nc-inote"><span class="nc-iadd">+ add note</span></div></div>
-            <div class="nc-it"><div class="nc-iname">BANDERA</div><div class="nc-inote"><span class="nc-iadd">+ add note</span></div></div>
-            <div class="nc-it"><div class="nc-iname">SINAMAN</div><div class="nc-inote"><span class="nc-iadd">+ add note</span></div></div>
-            <div class="nc-it has"><div class="nc-iname">Felly Bano</div><div class="nc-inote">Confirm active</div></div>
-            <div class="nc-it has"><div class="nc-iname">sugabo</div><div class="nc-inote">Match to sheet</div></div>
-            <div class="nc-it"><div class="nc-iname">Dumajel</div><div class="nc-inote"><span class="nc-iadd">+ add note</span></div></div>
-          </div>
-        </div>
-        <!-- Sheet add col -->
-        <div class="hv-ac">
-          <div class="hv-ac-hdr">Add<br>to route</div>
-          <div class="hv-ac-scroll">
-            <div class="hv-ac-it"><button class="hv-addbtn done" onclick="hvToggleAdd(this)">✓ added</button></div>
-            <div class="hv-ac-it"><button class="hv-addbtn" onclick="hvToggleAdd(this)">+ add</button></div>
-            <div class="hv-ac-it"><button class="hv-addbtn done" onclick="hvToggleAdd(this)">✓ added</button></div>
-            <div class="hv-ac-it"><button class="hv-addbtn" onclick="hvToggleAdd(this)">+ add</button></div>
-            <div class="hv-ac-it"><button class="hv-addbtn done" onclick="hvToggleAdd(this)">✓ added</button></div>
-            <div class="hv-ac-it"><button class="hv-addbtn" onclick="hvToggleAdd(this)">+ add</button></div>
-            <div class="hv-ac-it"><button class="hv-addbtn done" onclick="hvToggleAdd(this)">✓ added</button></div>
-            <div class="hv-ac-it"><button class="hv-addbtn" onclick="hvToggleAdd(this)">+ add</button></div>
-            <div class="hv-ac-it"><button class="hv-addbtn" onclick="hvToggleAdd(this)">+ add</button></div>
-            <div class="hv-ac-it"><button class="hv-addbtn" onclick="hvToggleAdd(this)">+ add</button></div>
-            <div class="hv-ac-it"><button class="hv-addbtn done" onclick="hvToggleAdd(this)">✓ added</button></div>
-            <div class="hv-ac-it"><button class="hv-addbtn" onclick="hvToggleAdd(this)">+ add</button></div>
-          </div>
-        </div>
+        <button class="rv-del" onclick="this.closest('.rv').remove()">×</button>
       </div>
-
-      <div class="hv-dh"></div>
-
-      <!-- TELEGRAM LIST -->
-      <div class="hv-list-half">
-        <div class="hv-list-main">
-          <div class="hv-list-hdr">
-            <span class="src-tag tg">Telegram</span>
-            <span class="src-cnt">87 vendos · &gt;₱3,000 income · unharvested this month</span>
-            <input class="hv-search" placeholder="Search TG..." oninput="hvFilterTG(this.value)">
-          </div>
-          <div class="vscroll" id="hv-tg-list">
-            <div class="vrow vsel"><input type="checkbox" class="vcb" checked><div><div class="vname"><span class="vdot-g"></span>valles <span style="font-size:8px;color:var(--mu);margin-left:3px;">→ Valles</span></div><div class="vmeta"><span>SINDANGAN</span><span>VLAN 27</span><span>Mar 17</span></div></div><span class="vincm warm">₱3,762</span></div>
-            <div class="vrow vsel"><input type="checkbox" class="vcb" checked><div><div class="vname"><span class="vdot-g"></span>rayl <span style="font-size:8px;color:var(--mu);margin-left:3px;">→ Rayl</span></div><div class="vmeta"><span>SINDANGAN</span><span>VLAN 19</span><span>Mar 6</span></div></div><span class="vincm hot">₱4,458</span></div>
-            <div class="vrow"><input type="checkbox" class="vcb"><div><div class="vname"><span class="vdot-a"></span>sugabo <span style="font-size:8px;color:#d97706;margin-left:3px;">unmatched</span></div><div class="vmeta"><span>SINDANGAN</span><span>VLAN 13</span></div></div><span class="vincm hot">₱5,209</span></div>
-            <div class="vrow vsel"><input type="checkbox" class="vcb" checked><div><div class="vname"><span class="vdot-g"></span>indayzamora <span style="font-size:8px;color:var(--mu);margin-left:3px;">→ Inday Zamora</span></div><div class="vmeta"><span>SINDANGAN</span><span>VLAN 30</span></div></div><span class="vincm warm">₱3,233</span></div>
-            <div class="vrow"><input type="checkbox" class="vcb"><div><div class="vname"><span class="vdot-a"></span>cindy34 <span style="font-size:8px;color:#d97706;margin-left:3px;">unmatched</span></div><div class="vmeta"><span>SINDANGAN</span><span>VLAN 34</span></div></div><span class="vincm hot">₱6,175</span></div>
-            <div class="vrow"><input type="checkbox" class="vcb"><div><div class="vname"><span class="vdot-a"></span>island <span style="font-size:8px;color:#d97706;margin-left:3px;">unmatched</span></div><div class="vmeta"><span>DAPITAN</span><span>VLAN 32</span></div></div><span class="vincm hot">₱4,900</span></div>
-            <div class="vrow"><input type="checkbox" class="vcb"><div><div class="vname"><span class="vdot-g"></span>joansyJSB <span style="font-size:8px;color:var(--mu);margin-left:3px;">→ Joan Sy / JSB</span></div><div class="vmeta"><span>SINDANGAN</span><span>VLAN 46</span></div></div><span class="vincm hot">₱5,358</span></div>
-            <div class="vrow"><input type="checkbox" class="vcb"><div><div class="vname"><span class="vdot-g"></span>dumajel <span style="font-size:8px;color:var(--mu);margin-left:3px;">→ Dumajel</span></div><div class="vmeta"><span>SINDANGAN</span><span>VLAN 28</span></div></div><span class="vincm warm">₱3,886</span></div>
-            <div class="vrow"><input type="checkbox" class="vcb"><div><div class="vname"><span class="vdot-a"></span>manigos <span style="font-size:8px;color:#d97706;margin-left:3px;">unmatched</span></div><div class="vmeta"><span>SINDANGAN</span><span>VLAN 36</span></div></div><span class="vincm hot">₱3,039</span></div>
-            <div class="vrow"><input type="checkbox" class="vcb"><div><div class="vname"><span class="vdot-g"></span>lea49 <span style="font-size:8px;color:var(--mu);margin-left:3px;">→ Lea</span></div><div class="vmeta"><span>SINDANGAN</span><span>VLAN 49</span></div></div><span class="vincm warm">₱3,150</span></div>
-          </div>
+      <div class="rv">
+        <span class="rv-num">2</span>
+        <div class="rv-names">
+          <div class="rv-sheet">Rayl</div>
+          <div class="rv-tg ok">TG: rayl ✓</div>
+          <div class="rv-area">SINDANGAN · VLAN 19</div>
         </div>
-        <!-- TG notes col -->
-        <div class="hv-nc">
-          <div class="hv-nc-hdr">Notes<br>per vendo</div>
-          <div class="hv-nc-scroll">
-            <div class="nc-it has"><div class="nc-iname">valles</div><div class="nc-inote">Check coin box</div></div>
-            <div class="nc-it has"><div class="nc-iname">rayl</div><div class="nc-inote">High earner</div></div>
-            <div class="nc-it has"><div class="nc-iname">sugabo</div><div class="nc-inote">Find sheet match</div></div>
-            <div class="nc-it"><div class="nc-iname">indayzamora</div><div class="nc-inote"><span class="nc-iadd">+ add note</span></div></div>
-            <div class="nc-it has"><div class="nc-iname">cindy34</div><div class="nc-inote">Find sheet name</div></div>
-            <div class="nc-it has"><div class="nc-iname">island</div><div class="nc-inote">₱8,218 gap — inv.</div></div>
-            <div class="nc-it"><div class="nc-iname">joansyJSB</div><div class="nc-inote"><span class="nc-iadd">+ add note</span></div></div>
-            <div class="nc-it"><div class="nc-iname">dumajel</div><div class="nc-inote"><span class="nc-iadd">+ add note</span></div></div>
-            <div class="nc-it"><div class="nc-iname">manigos</div><div class="nc-inote"><span class="nc-iadd">+ add note</span></div></div>
-            <div class="nc-it"><div class="nc-iname">lea49</div><div class="nc-inote"><span class="nc-iadd">+ add note</span></div></div>
-          </div>
-        </div>
-        <!-- TG add col -->
-        <div class="hv-ac">
-          <div class="hv-ac-hdr">Add<br>to route</div>
-          <div class="hv-ac-scroll">
-            <div class="hv-ac-it"><button class="hv-addbtn done" onclick="hvToggleAdd(this)">✓ added</button></div>
-            <div class="hv-ac-it"><button class="hv-addbtn done" onclick="hvToggleAdd(this)">✓ added</button></div>
-            <div class="hv-ac-it"><button class="hv-addbtn" onclick="hvToggleAdd(this)">+ add</button></div>
-            <div class="hv-ac-it"><button class="hv-addbtn done" onclick="hvToggleAdd(this)">✓ added</button></div>
-            <div class="hv-ac-it"><button class="hv-addbtn" onclick="hvToggleAdd(this)">+ add</button></div>
-            <div class="hv-ac-it"><button class="hv-addbtn" onclick="hvToggleAdd(this)">+ add</button></div>
-            <div class="hv-ac-it"><button class="hv-addbtn" onclick="hvToggleAdd(this)">+ add</button></div>
-            <div class="hv-ac-it"><button class="hv-addbtn" onclick="hvToggleAdd(this)">+ add</button></div>
-            <div class="hv-ac-it"><button class="hv-addbtn" onclick="hvToggleAdd(this)">+ add</button></div>
-            <div class="hv-ac-it"><button class="hv-addbtn" onclick="hvToggleAdd(this)">+ add</button></div>
-          </div>
-        </div>
+        <button class="rv-del" onclick="this.closest('.rv').remove()">×</button>
       </div>
-
-    </div><!-- end hv-lists -->
-
-    <!-- CONFIRM BAR -->
-    <div class="hv-confirm">
-      <div class="hv-cinfo"><strong id="hv-conf-count">5 vendos</strong> · Collector: <strong id="hv-conf-col">—</strong> · <span id="hv-conf-date">—</span> · <span class="cwarn" id="hv-conf-warn">3 untraced TG names — flagged in PWA</span></div>
-      <div class="hv-cbtnrow">
-        <button class="hv-btn red" onclick="hvClearRoute()">Clear route</button>
-        <button class="hv-btn green" onclick="hvConfirmRoute()">Confirm route →</button>
+      <div class="rv">
+        <span class="rv-num">3</span>
+        <div class="rv-names">
+          <div class="rv-sheet">Polo Net</div>
+          <div class="rv-tg no">TG: untraced ⚠</div>
+          <div class="rv-area">DAPITAN</div>
+        </div>
+        <button class="rv-del" onclick="this.closest('.rv').remove()">×</button>
+      </div>
+      <div class="rv">
+        <span class="rv-num">4</span>
+        <div class="rv-names">
+          <div class="rv-sheet">Inday Zamora</div>
+          <div class="rv-tg ok">TG: indayzamora ✓</div>
+          <div class="rv-area">SINDANGAN · VLAN 30</div>
+        </div>
+        <button class="rv-del" onclick="this.closest('.rv').remove()">×</button>
+      </div>
+      <div class="rv">
+        <span class="rv-num">5</span>
+        <div class="rv-names">
+          <div class="rv-sheet">—</div>
+          <div class="rv-tg ok">TG: sugabo ✓</div>
+          <div class="rv-area">SINDANGAN · VLAN 13</div>
+        </div>
+        <button class="rv-del" onclick="this.closest('.rv').remove()">×</button>
       </div>
     </div>
+    <div class="rc-bottom">
+      <button class="confirm-btn">Confirm route →</button>
+      <button class="clear-btn">Clear route</button>
+      <div class="conf-info"><span class="cw">1 untraced TG name — flagged in PWA</span></div>
+    </div>
+  </div>
 
-  </div><!-- end hv-left -->
-
-  <!-- ══ RIGHT ══ -->
-  <div class="hv-right">
-
-    <!-- PENDING -->
-    <div style="flex:1;display:flex;flex-direction:column;overflow:hidden;min-height:0;">
-      <div class="hv-rp-hdr">
-        <div>
-          <div class="hv-rp-title">Pending — not yet harvested</div>
-          <div class="hv-rp-sub">Based on active routes · click for collector + last harvest details</div>
-        </div>
-        <span class="hpill r">12</span>
-      </div>
-      <div class="hv-pending" id="hv-pending-list">
-        <div class="pi-card active">
-          <div class="pi-top"><div class="pi-name">Valles <span class="hpill b">Both</span></div><span class="pi-income warm">₱3,762</span></div>
-          <div class="pi-meta"><span>SINDANGAN</span><span>·</span><span>Juan dela Cruz</span><span>·</span><span style="color:#d97706;">Last: Mar 17 · 1mo 2d ago</span></div>
-        </div>
-        <div class="pi-card">
-          <div class="pi-top"><div class="pi-name">Rayl <span class="hpill b">Both</span></div><span class="pi-income hot">₱4,458</span></div>
-          <div class="pi-meta"><span>SINDANGAN</span><span>·</span><span style="color:var(--red);">Last: Mar 6 · 1mo 13d ago</span></div>
-        </div>
-        <div class="pi-card">
-          <div class="pi-top"><div class="pi-name">sugabo <span class="hpill gray">TG only</span></div><span class="pi-income hot">₱5,209</span></div>
-          <div class="pi-meta"><span>SINDANGAN</span><span>·</span><span style="color:#d97706;">Last: Mar 5 · 44d · unmatched</span></div>
-        </div>
-        <div class="pi-card">
-          <div class="pi-top"><div class="pi-name">Inday Zamora <span class="hpill b">Both</span></div><span class="pi-income warm">₱3,233</span></div>
-          <div class="pi-meta"><span>SINDANGAN</span><span>·</span><span style="color:#d97706;">Last: Mar 3 · 1mo 16d ago</span></div>
-        </div>
-        <div class="pi-card">
-          <div class="pi-top"><div class="pi-name">island <span class="hpill gray">TG only</span></div><span class="pi-income hot">₱4,900</span></div>
-          <div class="pi-meta"><span>DAPITAN · VLAN 32</span><span>·</span><span style="color:var(--red);">₱8,218 gap — investigate</span></div>
-        </div>
-        <div class="pi-card">
-          <div class="pi-top"><div class="pi-name">Joan Sy / JSB <span class="hpill b">Both</span></div><span class="pi-income hot">₱5,358</span></div>
-          <div class="pi-meta"><span>SINDANGAN</span><span>·</span><span style="color:var(--red);">Last: Dec 2025 · 3mo 22d ago</span></div>
-        </div>
-        <div class="pi-card">
-          <div class="pi-top"><div class="pi-name">cindy34 <span class="hpill gray">TG only</span></div><span class="pi-income hot">₱6,175</span></div>
-          <div class="pi-meta"><span>SINDANGAN · VLAN 34</span><span>·</span><span style="color:#d97706;">Unmatched · find sheet name</span></div>
-        </div>
-      </div>
+  <!-- COL 2: ONE COMBINED VENDO LIST -->
+  <div class="vc">
+    <div class="vc-hdr">
+      <span class="vc-title">Vendos — one row per machine</span>
+      <span class="vc-cnt">338 overdue · both names shown · click match to link</span>
+      <input class="vc-search" placeholder="Search any name...">
     </div>
 
-    <!-- NOTES BOARD -->
-    <div class="hv-notes-board">
-      <div class="hv-rp-hdr">
-        <div class="hv-rp-title">Notes</div>
-        <div class="hv-cdots">
-          <div class="hv-cdot sel" style="background:#1565c0;" onclick="hvSelColor('blue',this)"></div>
-          <div class="hv-cdot" style="background:#d97706;" onclick="hvSelColor('amber',this)"></div>
-          <div class="hv-cdot" style="background:#16a34a;" onclick="hvSelColor('green',this)"></div>
-          <div class="hv-cdot" style="background:#dc2626;" onclick="hvSelColor('red',this)"></div>
-        </div>
-      </div>
-      <div class="hv-notes-scroll" id="hv-notes-list">
-        <div class="hnote nr"><div class="hnote-text">Island vendo May 7 — ₱8,218 gap. Coin box vs system, MikroTik logs, change password.</div><button class="hnote-del" onclick="hvDelNote(this)">×</button></div>
-        <div class="hnote na"><div class="hnote-text">COGON / BANDERA / SINAMAN — no TG name found. Ask Sindangan GC.</div><button class="hnote-del" onclick="hvDelNote(this)">×</button></div>
-        <div class="hnote ng"><div class="hnote-text">Onis ✅ Labadlabad ✅ Navasca ✅ Baguio ✅ Emay ✅ — cleared Apr 2026</div><button class="hnote-del" onclick="hvDelNote(this)">×</button></div>
-        <div class="hnote nb"><div class="hnote-text">Polo Net 826d overdue — verify if active or pulled out before adding to route.</div><button class="hnote-del" onclick="hvDelNote(this)">×</button></div>
-        <div class="hnote na"><div class="hnote-text">sugabo / cindy34 — high income, no sheet match yet. Priority matching needed.</div><button class="hnote-del" onclick="hvDelNote(this)">×</button></div>
-      </div>
-      <div class="hv-notes-add">
-        <input class="hv-notes-inp" id="hv-note-inp" placeholder="Type a note...">
-        <button class="hv-notes-savebtn" onclick="hvAddNote()">+ Add note</button>
-      </div>
+    <!-- TABLE HEADER -->
+    <div class="vthead">
+      <div></div>
+      <div></div>
+      <div class="vth">Sheet name</div>
+      <div class="vth">TG name</div>
+      <div class="vth">Area / VLAN</div>
+      <div class="vth r">Overdue</div>
+      <div class="vth r">TG income</div>
+      <div></div>
+      <div></div>
     </div>
 
-  </div><!-- end hv-right -->
+    <div class="vc-scroll">
 
-</div><!-- end hv-wrap -->
+      <!-- MATCHED — both names known, both sources have data -->
+      <div class="vr sel">
+        <input type="checkbox" class="vcb" checked>
+        <div class="vdot-g" title="Matched"></div>
+        <div class="vsheet">
+          <div class="vsname">Valles</div>
+          <div class="vslbl">sheet</div>
+        </div>
+        <div class="vtg">
+          <div class="vtname">valles</div>
+          <div class="vslbl">telegram <span class="matched">✓ matched</span></div>
+        </div>
+        <div class="varea"><div class="vaname">SINDANGAN</div><div class="vavlan">VLAN 27</div></div>
+        <span class="vdays l">1mo 2d</span>
+        <span class="vinc warm">₱3,762</span>
+        <button class="ni has" onclick="openNote('Valles / valles','Check coin box — possible jamming')" title="Has note"><svg width="10" height="10" viewBox="0 0 12 12" fill="none"><rect x="1" y="1" width="10" height="10" rx="2" stroke="#1565c0" stroke-width="1.2"/><path d="M3 4h6M3 6.5h4" stroke="#1565c0" stroke-width="1" stroke-linecap="round"/></svg></button>
+        <button class="ab dn" onclick="toggleAdd(this)">✓ added</button>
+      </div>
+
+      <!-- MATCHED -->
+      <div class="vr sel">
+        <input type="checkbox" class="vcb" checked>
+        <div class="vdot-g" title="Matched"></div>
+        <div class="vsheet"><div class="vsname">Rayl</div><div class="vslbl">sheet</div></div>
+        <div class="vtg"><div class="vtname">rayl</div><div class="vslbl">telegram <span class="matched">✓ matched</span></div></div>
+        <div class="varea"><div class="vaname">SINDANGAN</div><div class="vavlan">VLAN 19</div></div>
+        <span class="vdays h">1mo 13d</span>
+        <span class="vinc hot">₱4,458</span>
+        <button class="ni has" onclick="openNote('Rayl / rayl','High earner — priority harvest')" title="Has note"><svg width="10" height="10" viewBox="0 0 12 12" fill="none"><rect x="1" y="1" width="10" height="10" rx="2" stroke="#1565c0" stroke-width="1.2"/><path d="M3 4h6M3 6.5h4" stroke="#1565c0" stroke-width="1" stroke-linecap="round"/></svg></button>
+        <button class="ab dn" onclick="toggleAdd(this)">✓ added</button>
+      </div>
+
+      <!-- SHEET ONLY — no TG match yet -->
+      <div class="vr">
+        <input type="checkbox" class="vcb">
+        <div class="vdot-a" title="Sheet only — TG untraced"></div>
+        <div class="vsheet"><div class="vsname">Polo Net</div><div class="vslbl">sheet</div></div>
+        <div class="vtg">
+          <div class="vtmatch">TG name not found</div>
+          <button class="vtmatch-btn" onclick="openMatch('Polo Net','—')">+ find TG name</button>
+        </div>
+        <div class="varea"><div class="vaname">DAPITAN</div><div class="vavlan">no VLAN</div></div>
+        <span class="vdays c">27mo 16d</span>
+        <span class="vinc na">—</span>
+        <button class="ni" onclick="openNote('Polo Net','')" title="No note"><svg width="10" height="10" viewBox="0 0 12 12" fill="none"><rect x="1" y="1" width="10" height="10" rx="2" stroke="#9ca3af" stroke-width="1.2"/><path d="M3 4h6M3 6.5h4" stroke="#9ca3af" stroke-width="1" stroke-linecap="round"/></svg></button>
+        <button class="ab" onclick="toggleAdd(this)">+ add</button>
+      </div>
+
+      <!-- MATCHED -->
+      <div class="vr sel">
+        <input type="checkbox" class="vcb" checked>
+        <div class="vdot-g" title="Matched"></div>
+        <div class="vsheet"><div class="vsname">Inday Zamora</div><div class="vslbl">sheet</div></div>
+        <div class="vtg"><div class="vtname">indayzamora</div><div class="vslbl">telegram <span class="matched">✓ matched</span></div></div>
+        <div class="varea"><div class="vaname">SINDANGAN</div><div class="vavlan">VLAN 30</div></div>
+        <span class="vdays h">1mo 16d</span>
+        <span class="vinc warm">₱3,233</span>
+        <button class="ni has" onclick="openNote('Inday Zamora / indayzamora','Coin slot issue — check before collecting')" title="Has note"><svg width="10" height="10" viewBox="0 0 12 12" fill="none"><rect x="1" y="1" width="10" height="10" rx="2" stroke="#1565c0" stroke-width="1.2"/><path d="M3 4h6M3 6.5h4" stroke="#1565c0" stroke-width="1" stroke-linecap="round"/></svg></button>
+        <button class="ab dn" onclick="toggleAdd(this)">✓ added</button>
+      </div>
+
+      <!-- TG ONLY — no sheet match yet -->
+      <div class="vr">
+        <input type="checkbox" class="vcb">
+        <div class="vdot-a" title="TG only — sheet unmatched"></div>
+        <div class="vsheet">
+          <div class="vtmatch">Sheet name not found</div>
+          <button class="vtmatch-btn" onclick="openMatch('—','sugabo')">+ find sheet name</button>
+        </div>
+        <div class="vtg"><div class="vtname">sugabo</div><div class="vslbl">telegram <span class="unmatched">unmatched</span></div></div>
+        <div class="varea"><div class="vaname">SINDANGAN</div><div class="vavlan">VLAN 13</div></div>
+        <span class="vdays na">—</span>
+        <span class="vinc hot">₱5,209</span>
+        <button class="ni has" onclick="openNote('sugabo (TG)','Find sheet match — high earner')" title="Has note"><svg width="10" height="10" viewBox="0 0 12 12" fill="none"><rect x="1" y="1" width="10" height="10" rx="2" stroke="#1565c0" stroke-width="1.2"/><path d="M3 4h6M3 6.5h4" stroke="#1565c0" stroke-width="1" stroke-linecap="round"/></svg></button>
+        <button class="ab dn" onclick="toggleAdd(this)">✓ added</button>
+      </div>
+
+      <!-- TG ONLY — island with gap alert -->
+      <div class="vr">
+        <input type="checkbox" class="vcb">
+        <div class="vdot-a" title="TG only — gap detected"></div>
+        <div class="vsheet">
+          <div class="vtmatch">Sheet name not found</div>
+          <button class="vtmatch-btn" onclick="openMatch('—','island')">+ find sheet name</button>
+        </div>
+        <div class="vtg"><div class="vtname">island</div><div class="vslbl">telegram <span class="unmatched">unmatched</span></div></div>
+        <div class="varea"><div class="vaname">DAPITAN</div><div class="vavlan">VLAN 32</div></div>
+        <span class="vdays na">—</span>
+        <span class="vinc hot">₱4,900</span>
+        <button class="ni rednote" onclick="openNote('island (TG)','₱8,218 gap — investigate May 7. Coin box + MikroTik logs.')" title="Gap alert!"><svg width="10" height="10" viewBox="0 0 12 12" fill="none"><rect x="1" y="1" width="10" height="10" rx="2" stroke="#dc2626" stroke-width="1.2"/><path d="M3 4h6M3 6.5h4" stroke="#dc2626" stroke-width="1" stroke-linecap="round"/></svg></button>
+        <button class="ab" onclick="toggleAdd(this)">+ add</button>
+      </div>
+
+      <!-- MATCHED -->
+      <div class="vr">
+        <input type="checkbox" class="vcb">
+        <div class="vdot-g" title="Matched"></div>
+        <div class="vsheet"><div class="vsname">Joan Sy / JSB</div><div class="vslbl">sheet</div></div>
+        <div class="vtg"><div class="vtname">joansyJSB</div><div class="vslbl">telegram <span class="matched">✓ matched</span></div></div>
+        <div class="varea"><div class="vaname">SINDANGAN</div><div class="vavlan">VLAN 46</div></div>
+        <span class="vdays c">3mo 22d</span>
+        <span class="vinc hot">₱5,358</span>
+        <button class="ni" onclick="openNote('Joan Sy / joansyJSB','')" title="No note"><svg width="10" height="10" viewBox="0 0 12 12" fill="none"><rect x="1" y="1" width="10" height="10" rx="2" stroke="#9ca3af" stroke-width="1.2"/><path d="M3 4h6M3 6.5h4" stroke="#9ca3af" stroke-width="1" stroke-linecap="round"/></svg></button>
+        <button class="ab" onclick="toggleAdd(this)">+ add</button>
+      </div>
+
+      <!-- TG ONLY -->
+      <div class="vr">
+        <input type="checkbox" class="vcb">
+        <div class="vdot-a"></div>
+        <div class="vsheet">
+          <div class="vtmatch">Sheet name not found</div>
+          <button class="vtmatch-btn" onclick="openMatch('—','cindy34')">+ find sheet name</button>
+        </div>
+        <div class="vtg"><div class="vtname">cindy34</div><div class="vslbl">telegram <span class="unmatched">unmatched</span></div></div>
+        <div class="varea"><div class="vaname">SINDANGAN</div><div class="vavlan">VLAN 34</div></div>
+        <span class="vdays na">—</span>
+        <span class="vinc hot">₱6,175</span>
+        <button class="ni has" onclick="openNote('cindy34 (TG)','Find sheet name — very high income')" title="Has note"><svg width="10" height="10" viewBox="0 0 12 12" fill="none"><rect x="1" y="1" width="10" height="10" rx="2" stroke="#1565c0" stroke-width="1.2"/><path d="M3 4h6M3 6.5h4" stroke="#1565c0" stroke-width="1" stroke-linecap="round"/></svg></button>
+        <button class="ab" onclick="toggleAdd(this)">+ add</button>
+      </div>
+
+      <!-- SHEET ONLY -->
+      <div class="vr">
+        <input type="checkbox" class="vcb">
+        <div class="vdot-a"></div>
+        <div class="vsheet"><div class="vsname">COGON</div><div class="vslbl">sheet</div></div>
+        <div class="vtg">
+          <div class="vtmatch">TG name not found</div>
+          <button class="vtmatch-btn" onclick="openMatch('COGON','—')">+ find TG name</button>
+        </div>
+        <div class="varea"><div class="vaname">DIPOLOG</div><div class="vavlan">no VLAN</div></div>
+        <span class="vdays c">24mo 15d</span>
+        <span class="vinc na">—</span>
+        <button class="ni" onclick="openNote('COGON','')" title="No note"><svg width="10" height="10" viewBox="0 0 12 12" fill="none"><rect x="1" y="1" width="10" height="10" rx="2" stroke="#9ca3af" stroke-width="1.2"/><path d="M3 4h6M3 6.5h4" stroke="#9ca3af" stroke-width="1" stroke-linecap="round"/></svg></button>
+        <button class="ab" onclick="toggleAdd(this)">+ add</button>
+      </div>
+
+      <!-- MATCHED -->
+      <div class="vr">
+        <input type="checkbox" class="vcb">
+        <div class="vdot-g"></div>
+        <div class="vsheet"><div class="vsname">Dumajel</div><div class="vslbl">sheet</div></div>
+        <div class="vtg"><div class="vtname">dumajel</div><div class="vslbl">telegram <span class="matched">✓ matched</span></div></div>
+        <div class="varea"><div class="vaname">SINDANGAN</div><div class="vavlan">VLAN 28</div></div>
+        <span class="vdays l">1mo 2d</span>
+        <span class="vinc warm">₱3,886</span>
+        <button class="ni" onclick="openNote('Dumajel / dumajel','')" title="No note"><svg width="10" height="10" viewBox="0 0 12 12" fill="none"><rect x="1" y="1" width="10" height="10" rx="2" stroke="#9ca3af" stroke-width="1.2"/><path d="M3 4h6M3 6.5h4" stroke="#9ca3af" stroke-width="1" stroke-linecap="round"/></svg></button>
+        <button class="ab" onclick="toggleAdd(this)">+ add</button>
+      </div>
+
+      <!-- SHEET ONLY -->
+      <div class="vr">
+        <input type="checkbox" class="vcb">
+        <div class="vdot-a"></div>
+        <div class="vsheet"><div class="vsname">BANDERA</div><div class="vslbl">sheet</div></div>
+        <div class="vtg">
+          <div class="vtmatch">TG name not found</div>
+          <button class="vtmatch-btn" onclick="openMatch('BANDERA','—')">+ find TG name</button>
+        </div>
+        <div class="varea"><div class="vaname">DIPOLOG</div><div class="vavlan">no VLAN</div></div>
+        <span class="vdays c">24mo 6d</span>
+        <span class="vinc na">—</span>
+        <button class="ni" onclick="openNote('BANDERA','')" title="No note"><svg width="10" height="10" viewBox="0 0 12 12" fill="none"><rect x="1" y="1" width="10" height="10" rx="2" stroke="#9ca3af" stroke-width="1.2"/><path d="M3 4h6M3 6.5h4" stroke="#9ca3af" stroke-width="1" stroke-linecap="round"/></svg></button>
+        <button class="ab" onclick="toggleAdd(this)">+ add</button>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- COL 3: RIGHT -->
+  <div class="right-col">
+    <div class="rph">
+      <div><div class="rpt">Pending — not yet harvested</div><div style="font-size:8px;color:#6b7394;margin-top:1px;">Active routes · click for details</div></div>
+      <span class="rpc">12</span>
+    </div>
+    <div class="pscr">
+      <div class="pi on"><div class="pi-t"><div class="pi-n">Valles <span class="hp b">Both</span></div><span class="pi-i warm">₱3,762</span></div><div class="pi-m">SINDANGAN · Juan · <span style="color:#d97706;">1mo 2d ago</span></div></div>
+      <div class="pi"><div class="pi-t"><div class="pi-n">Rayl <span class="hp b">Both</span></div><span class="pi-i hot">₱4,458</span></div><div class="pi-m">SINDANGAN · <span style="color:#dc2626;">1mo 13d ago</span></div></div>
+      <div class="pi"><div class="pi-t"><div class="pi-n">sugabo <span class="hp gy">TG only</span></div><span class="pi-i hot">₱5,209</span></div><div class="pi-m">SINDANGAN · <span style="color:#d97706;">unmatched</span></div></div>
+      <div class="pi"><div class="pi-t"><div class="pi-n">island <span class="hp gy">TG only</span></div><span class="pi-i hot">₱4,900</span></div><div class="pi-m">DAPITAN · <span style="color:#dc2626;">₱8,218 gap</span></div></div>
+      <div class="pi"><div class="pi-t"><div class="pi-n">cindy34 <span class="hp gy">TG only</span></div><span class="pi-i hot">₱6,175</span></div><div class="pi-m">SINDANGAN · <span style="color:#d97706;">find sheet name</span></div></div>
+      <div class="pi"><div class="pi-t"><div class="pi-n">Joan Sy / JSB <span class="hp b">Both</span></div><span class="pi-i hot">₱5,358</span></div><div class="pi-m">SINDANGAN · <span style="color:#dc2626;">3mo 22d ago</span></div></div>
+      <div class="pi"><div class="pi-t"><div class="pi-n">Inday Zamora <span class="hp b">Both</span></div><span class="pi-i warm">₱3,233</span></div><div class="pi-m">SINDANGAN · <span style="color:#d97706;">1mo 16d ago</span></div></div>
+    </div>
+    <div class="notes-sec">
+      <div class="notes-hdr">
+        <span class="rpt">Notes board</span>
+        <button style="padding:2px 7px;border-radius:4px;border:1px solid rgba(30,60,200,.15);background:#fff;font-size:9px;color:#1565c0;cursor:pointer;font-family:inherit;font-weight:600;">+ Add note</button>
+      </div>
+      <div class="nchips" id="nchips">
+        <div class="nc nr">Island vendo May 7 — ₱8,218 gap. Coin box + MikroTik.<button class="nx" onclick="this.closest('.nc').remove()">×</button></div>
+        <div class="nc na">COGON / BANDERA — no TG name. Ask Sindangan GC.<button class="nx" onclick="this.closest('.nc').remove()">×</button></div>
+        <div class="nc ng">Onis ✅ Labadlabad ✅ Navasca ✅ Baguio ✅ Emay ✅<button class="nx" onclick="this.closest('.nc').remove()">×</button></div>
+        <div class="nc nb">Polo Net 27mo overdue — verify active or pulled out.<button class="nx" onclick="this.closest('.nc').remove()">×</button></div>
+      </div>
+      <div class="cdots">
+        <div class="cd s" style="background:#1565c0;" onclick="sc('b',this)"></div>
+        <div class="cd" style="background:#d97706;" onclick="sc('a',this)"></div>
+        <div class="cd" style="background:#16a34a;" onclick="sc('g',this)"></div>
+        <div class="cd" style="background:#dc2626;" onclick="sc('r',this)"></div>
+      </div>
+      <div class="nadd">
+        <input class="ninp" id="ninp" placeholder="Type a note...">
+        <button class="nsb" onclick="addNote()">+</button>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<!-- NOTE POPUP -->
+<div class="popbg" id="note-pop">
+  <div class="pop">
+    <div class="pp-t"><span id="pp-nm">Note</span><button class="pp-x" onclick="closePopup('note-pop')">×</button></div>
+    <textarea class="pp-ta" id="pp-ta" placeholder="Type a note for this vendo..."></textarea>
+    <div class="pp-row">
+      <button class="pp-sv" onclick="closePopup('note-pop')">Save note</button>
+      <button class="pp-cl" onclick="document.getElementById('pp-ta').value=''">Clear</button>
+    </div>
+  </div>
+</div>
+
+<!-- MATCH POPUP -->
+<div class="popbg" id="match-pop">
+  <div class="pop">
+    <div class="pp-t"><span id="mp-title">Match vendo names</span><button class="pp-x" onclick="closePopup('match-pop')">×</button></div>
+    <div class="match-vendo">Link the Sheet name and TG name for the same physical vendo. Once saved, it's permanent — shown as matched in all future sessions.</div>
+    <div class="match-grid">
+      <div class="match-box">
+        <div class="match-box-lbl">Sheet name</div>
+        <div class="match-box-val" id="mp-sheet">—</div>
+      </div>
+      <div class="match-box">
+        <div class="match-box-lbl">TG name</div>
+        <div class="match-box-val" id="mp-tg">—</div>
+      </div>
+    </div>
+    <div style="margin-bottom:10px;">
+      <div class="match-box-lbl" id="mp-inp-lbl">Enter the missing name</div>
+      <input class="match-inp" id="mp-inp" placeholder="Type name to search...">
+      <div class="match-hint" id="mp-hint">Search will show matching names from Supabase</div>
+    </div>
+    <div class="match-btns">
+      <button class="match-save" onclick="closePopup('match-pop')">Save match →</button>
+      <button class="match-skip" onclick="closePopup('match-pop')">Add to route without match</button>
+    </div>
+  </div>
+</div>
 
 <script>
-/* ── Harvest JS ── */
-let hvNoteColor = 'blue';
-
-function hvSetFilter(f, btn) {
-  document.querySelectorAll('.uf-btn').forEach(b => b.classList.remove('active'));
-  btn.classList.add('active');
+let nc='b';
+function openNote(n,t){document.getElementById('pp-nm').textContent='Note — '+n;document.getElementById('pp-ta').value=t||'';document.getElementById('note-pop').classList.add('show');setTimeout(()=>document.getElementById('pp-ta').focus(),80);}
+function openMatch(sheet,tg){
+  document.getElementById('mp-title').textContent='Match names — '+( sheet!='—'?sheet:tg);
+  document.getElementById('mp-sheet').textContent=sheet;document.getElementById('mp-sheet').className='match-box-val'+(sheet=='—'?' na':'');
+  document.getElementById('mp-tg').textContent=tg;document.getElementById('mp-tg').className='match-box-val'+(tg=='—'?' na':'');
+  document.getElementById('mp-inp-lbl').textContent=sheet=='—'?'Enter the sheet name for this vendo':'Enter the TG name for this vendo';
+  document.getElementById('mp-inp').value='';document.getElementById('mp-inp').placeholder=sheet=='—'?'Sheet name...':'TG name (e.g. valles, rayl)...';
+  document.getElementById('match-pop').classList.add('show');setTimeout(()=>document.getElementById('mp-inp').focus(),80);
 }
-
-function hvNewRoute() {
-  document.getElementById('hv-collector').value = '';
-  document.getElementById('hv-date').value = '';
-  alert('Route cleared. Enter collector name and date to start a new route.');
-}
-
-function hvRemoveRoute(btn) {
-  btn.closest('.rv-row').remove();
-  hvUpdateRouteCount();
-}
-
-function hvToggleAdd(btn) {
-  const done = btn.classList.contains('done');
-  btn.classList.toggle('done', !done);
-  btn.textContent = done ? '+ add' : '✓ added';
-  hvUpdateRouteCount();
-}
-
-function hvUpdateRouteCount() {
-  const n = document.querySelectorAll('#hv-rv-list .rv-row').length;
-  document.getElementById('hv-route-count').textContent = n + ' vendos in route';
-  document.getElementById('hv-conf-count').textContent = n + ' vendos';
-  const col = document.getElementById('hv-collector').value || '—';
-  const dt = document.getElementById('hv-date').value || '—';
-  document.getElementById('hv-conf-col').textContent = col;
-  document.getElementById('hv-conf-date').textContent = dt;
-}
-
-function hvClearRoute() {
-  if (!confirm('Clear all vendos from this route?')) return;
-  document.getElementById('hv-rv-list').innerHTML = '';
-  document.querySelectorAll('.hv-addbtn.done').forEach(b => { b.classList.remove('done'); b.textContent = '+ add'; });
-  hvUpdateRouteCount();
-}
-
-function formatOverdue(days) {
-  if (!days && days !== 0) return '—';
-  days = parseInt(days);
-  if (days < 31) return days + 'd';
-  const months = Math.floor(days / 30);
-  const remainder = days % 30;
-  if (remainder === 0) return months + ' mo';
-  return months + ' mo ' + remainder + 'd';
-}
-
-function hvConfirmRoute() {
-  const col = document.getElementById('hv-collector').value;
-  const dt = document.getElementById('hv-date').value;
-  if (!col || !dt) { alert('Please enter collector name and date before confirming.'); return; }
-  const n = document.querySelectorAll('#hv-rv-list .rv-row').length;
-  alert('Route confirmed!
-
-' + n + ' vendos assigned to ' + col + ' on ' + dt + '.
-
-Route saved to Supabase.');
-}
-
-function hvFilterSheet(q) {
-  const rows = document.querySelectorAll('#hv-sheet-list .vrow');
-  rows.forEach(r => {
-    const name = r.querySelector('.vname').textContent.toLowerCase();
-    r.style.display = name.includes(q.toLowerCase()) ? '' : 'none';
-  });
-}
-
-function hvFilterTG(q) {
-  const rows = document.querySelectorAll('#hv-tg-list .vrow');
-  rows.forEach(r => {
-    const name = r.querySelector('.vname').textContent.toLowerCase();
-    r.style.display = name.includes(q.toLowerCase()) ? '' : 'none';
-  });
-}
-
-function hvSelColor(color, dot) {
-  hvNoteColor = color;
-  document.querySelectorAll('.hv-cdot').forEach(d => d.classList.remove('sel'));
-  dot.classList.add('sel');
-}
-
-function hvAddNote() {
-  const inp = document.getElementById('hv-note-inp');
-  const text = inp.value.trim();
-  if (!text) return;
-  const cls = { blue:'nb', amber:'na', green:'ng', red:'nr' }[hvNoteColor] || 'nb';
-  const div = document.createElement('div');
-  div.className = 'hnote ' + cls;
-  div.innerHTML = '<div class="hnote-text">' + text + '</div><button class="hnote-del" onclick="hvDelNote(this)">×</button>';
-  document.getElementById('hv-notes-list').prepend(div);
-  inp.value = '';
-}
-
-function hvDelNote(btn) {
-  btn.closest('.hnote').remove();
-}
-function fmtAge(days) {
-  days = parseInt(days);
-  if (!days) return '—';
-  if (days < 31) return days + 'd';
-  const mo = Math.floor(days / 30);
-  const d = days % 30;
-  return d === 0 ? mo + 'mo' : mo + 'mo ' + d + 'd';
-}
-
-/* pending card click */
-document.addEventListener('DOMContentLoaded', () => {
-  document.querySelectorAll('.pi-card').forEach(card => {
-    card.addEventListener('click', () => {
-      document.querySelectorAll('.pi-card').forEach(c => c.classList.remove('active'));
-      card.classList.add('active');
-    });
-  });
-  // set today's date
-  const today = new Date().toISOString().split('T')[0];
-  document.getElementById('hv-date').value = today;
-  hvUpdateRouteCount();
-  // Format all overdue day badges
-  document.querySelectorAll('.vdays').forEach(el => {
-    const raw = parseInt(el.textContent);
-    if (!isNaN(raw)) el.textContent = formatOverdue(raw);
-  });
-});
+function closePopup(id){document.getElementById(id).classList.remove('show');}
+function toggleAdd(b){const d=b.classList.contains('dn');b.classList.toggle('dn',!d);b.textContent=d?'+ add':'✓ added';}
+function sc(c,d){nc=c;document.querySelectorAll('.cd').forEach(x=>x.classList.remove('s'));d.classList.add('s');}
+function addNote(){const i=document.getElementById('ninp');const t=i.value.trim();if(!t)return;const m={b:'nb',a:'na',g:'ng',r:'nr'}[nc]||'nb';const d=document.createElement('div');d.className='nc '+m;d.innerHTML=t+'<button class="nx" onclick="this.closest(\'.nc\').remove()">×</button>';document.getElementById('nchips').prepend(d);i.value='';}
+document.querySelectorAll('.popbg').forEach(p=>p.addEventListener('click',function(e){if(e.target===this)this.classList.remove('show');}));
+function tick(){const n=new Date();let h=n.getHours(),m=n.getMinutes(),s=n.getSeconds();const a=h>=12?'PM':'AM';h=h%12||12;document.getElementById('clk').textContent=String(h).padStart(2,'0')+':'+String(m).padStart(2,'0')+':'+String(s).padStart(2,'0')+' '+a;}
+tick();setInterval(tick,1000);
 </script>
 
+<!-- SCHEDULE TAB -->
+<div class="hv-tab" id="hv-tab-schedule" style="padding:16px;overflow-y:auto;max-height:calc(100vh - 286px);">
+
+  <div class="section">
+    <div class="section-title">Global thresholds <span class="stag">applies to all vendos without a custom schedule</span></div>
+    <div class="thresh-grid">
+      <div class="thresh-item">
+        <div class="tl">Minimum TG income to alert</div>
+        <div class="td">Flag a vendo when Telegram income this month exceeds this amount</div>
+        <div class="thresh-row">
+          <span style="font-size:13px;font-weight:700;color:#6b7394;">₱</span>
+          <input class="thresh-inp" type="number" value="3000" min="0" step="500" id="min-income" oninput="updatePreview()">
+          <span class="thresh-unit">per month</span>
+        </div>
+        <div class="thresh-note">Vendos earning more than this get flagged for harvest</div>
+      </div>
+      <div class="thresh-item">
+        <div class="tl">Maximum days since last harvest</div>
+        <div class="td">Flag a vendo when it has not been harvested for this many days</div>
+        <div class="thresh-row">
+          <input class="thresh-inp" type="number" value="30" min="1" max="365" id="max-days" oninput="updatePreview()">
+          <span class="thresh-unit">days</span>
+        </div>
+        <div class="thresh-note">Overdue vendos beyond this appear in the alert list</div>
+      </div>
+    </div>
+    <div class="trigger-preview">
+      <div class="tp-title">Alert triggers when — (live preview)</div>
+      <div class="tp-rule"><span class="dot bl"></span>Not harvested in more than <strong id="prev-days">30</strong> days (from Google Sheet)</div>
+      <div class="tp-rule"><span class="dot am"></span>Earned more than <strong id="prev-income">₱3,000</strong> this month in Telegram with no harvest record</div>
+      <div class="tp-rule"><span class="dot bl"></span>Either condition alone is enough — both = shown as "Both"</div>
+    </div>
+    <button class="save-btn" onclick="saveGlobal()">Save global thresholds</button>
+  </div>
+
+  <div class="section">
+    <div class="section-title">Per-vendo custom schedule <span class="stag">overrides global thresholds</span></div>
+    <div class="source-toggle">
+      <button class="stgl on" onclick="hvSchedFilter('all',this)">All vendos</button>
+      <button class="stgl" onclick="hvSchedFilter('custom',this)">Has custom schedule</button>
+      <button class="stgl" onclick="hvSchedFilter('none',this)">No schedule set</button>
+      <input style="padding:3px 8px;border:1px solid rgba(30,60,200,.15);border-radius:5px;font-size:10px;font-family:inherit;outline:none;margin-left:auto;width:140px;color:#1a1d2e;" placeholder="Search vendo...">
+    </div>
+    <table class="vtable">
+      <thead><tr>
+        <th>Sheet name</th><th>TG name</th><th>Area</th><th>Match</th>
+        <th>Harvest every</th><th>Last harvested</th><th>Next due</th><th>Using</th>
+      </tr></thead>
+      <tbody>
+        <tr><td class="vname-cell">Valles</td><td class="vtg-cell">valles</td><td style="font-size:10px;color:#6b7394;">SINDANGAN</td><td><span class="matched">✓ matched</span></td><td><div class="int-row"><input class="int-inp" type="number" value="14"><span class="int-unit">days</span><button class="int-save">Save</button><button class="int-clear">×</button></div></td><td style="font-size:10px;color:#6b7394;">Mar 17, 2026</td><td><div class="countdown due">Mar 31 (overdue)</div><div class="cd-bar"><div class="cd-fill" style="width:100%;background:#dc2626;"></div></div></td><td><span class="using-custom">Custom 14d</span></td></tr>
+        <tr><td class="vname-cell">Cindy Mae Jungoy</td><td class="vtg-cell">cindy34</td><td style="font-size:10px;color:#6b7394;">SINDANGAN</td><td><span class="unmatched">unmatched</span></td><td><div class="int-row"><input class="int-inp" type="number" value="7"><span class="int-unit">days</span><button class="int-save">Save</button><button class="int-clear">×</button></div></td><td style="font-size:10px;color:#6b7394;">Mar 19, 2026</td><td><div class="countdown due">Mar 26 (overdue)</div><div class="cd-bar"><div class="cd-fill" style="width:100%;background:#dc2626;"></div></div></td><td><span class="using-custom">Custom 7d</span></td></tr>
+        <tr><td class="vname-cell">Rayl</td><td class="vtg-cell">rayl</td><td style="font-size:10px;color:#6b7394;">SINDANGAN</td><td><span class="matched">✓ matched</span></td><td><div class="int-row"><input class="int-inp" type="number" placeholder="—"><span class="int-unit">days</span><button class="int-save">Save</button></div></td><td style="font-size:10px;color:#6b7394;">Mar 6, 2026</td><td><div class="countdown due">Apr 5 (overdue)</div><div class="cd-bar"><div class="cd-fill" style="width:100%;background:#dc2626;"></div></div></td><td><span class="using-global">Global (30d)</span></td></tr>
+        <tr><td class="vname-cell">Inday Zamora</td><td class="vtg-cell">indayzamora</td><td style="font-size:10px;color:#6b7394;">SINDANGAN</td><td><span class="matched">✓ matched</span></td><td><div class="int-row"><input class="int-inp" type="number" value="21"><span class="int-unit">days</span><button class="int-save">Save</button><button class="int-clear">×</button></div></td><td style="font-size:10px;color:#6b7394;">Apr 8, 2026</td><td><div class="countdown ok">Apr 29 (11d left)</div><div class="cd-bar"><div class="cd-fill" style="width:43%;background:#16a34a;"></div></div></td><td><span class="using-custom">Custom 21d</span></td></tr>
+        <tr><td class="vname-cell">Dumajel</td><td class="vtg-cell">dumajel</td><td style="font-size:10px;color:#6b7394;">SINDANGAN</td><td><span class="matched">✓ matched</span></td><td><div class="int-row"><input class="int-inp" type="number" placeholder="—"><span class="int-unit">days</span><button class="int-save">Save</button></div></td><td style="font-size:10px;color:#6b7394;">Mar 17, 2026</td><td><div class="countdown soon">Apr 16 (2d left)</div><div class="cd-bar"><div class="cd-fill" style="width:88%;background:#d97706;"></div></div></td><td><span class="using-global">Global (30d)</span></td></tr>
+        <tr><td class="vtg-cell" style="font-style:italic;">—</td><td class="vname-cell">island</td><td style="font-size:10px;color:#6b7394;">DAPITAN</td><td><span class="unmatched">unmatched</span></td><td><div class="int-row"><input class="int-inp" type="number" placeholder="—"><span class="int-unit">days</span><button class="int-save">Save</button></div></td><td style="font-size:10px;color:#dc2626;">Unknown</td><td><div class="countdown due" style="font-size:9px;">⚠ ₱8,218 gap</div></td><td><span class="using-global">Global (30d)</span></td></tr>
+        <tr><td class="vname-cell">Felly Bano</td><td class="vtg-cell">fellybano</td><td style="font-size:10px;color:#6b7394;">SINDANGAN</td><td><span class="matched">✓ matched</span></td><td><div class="int-row"><input class="int-inp" type="number" placeholder="—"><span class="int-unit">days</span><button class="int-save">Save</button></div></td><td style="font-size:10px;color:#6b7394;">Mar 14, 2026</td><td><div class="countdown due">Apr 13 (overdue)</div><div class="cd-bar"><div class="cd-fill" style="width:100%;background:#dc2626;"></div></div></td><td><span class="using-global">Global (30d)</span></td></tr>
+      </tbody>
+    </table>
+    <div style="margin-top:10px;font-size:9px;color:#9ca3af;">2 vendos with custom schedules · 5 overdue · 1 due within 7 days</div>
+  </div>
+
+</div>
+
+<!-- RECORDS TAB -->
+<div class="hv-tab" id="hv-tab-records" style="padding:12px;overflow-y:auto;max-height:calc(100vh - 286px);">
+  <div style="background:#fff;border:1px solid rgba(30,60,200,.1);border-radius:8px;overflow:hidden;">
+    <div style="background:#f0f4ff;padding:6px 10px;display:flex;align-items:center;gap:6px;border-bottom:1px solid rgba(30,60,200,.1);">
+      <span style="font-size:9px;font-weight:700;color:#1565c0;text-transform:uppercase;letter-spacing:.05em;">Harvest records</span>
+      <span style="font-size:9px;color:#6b7394;">All submitted harvest data</span>
+      <input style="padding:3px 8px;border:1px solid rgba(30,60,200,.15);border-radius:5px;font-size:10px;font-family:inherit;outline:none;margin-left:auto;width:140px;color:#1a1d2e;" placeholder="Search vendo...">
+      <select style="padding:3px 7px;border:1px solid rgba(30,60,200,.15);border-radius:5px;font-size:10px;font-family:inherit;outline:none;color:#1a1d2e;"><option>All areas</option><option>DAPITAN</option><option>DIPOLOG</option><option>SINDANGAN</option></select>
+    </div>
+    <div style="overflow-x:auto;">
+      <table class="rec-table">
+        <thead><tr>
+          <th>Sheet name</th><th>TG name</th><th>Area</th><th>Harvest date</th>
+          <th>Collector</th><th>Total coins</th><th>Free time</th><th>Old coins</th>
+          <th>Net collectible</th><th>Spawn share</th><th>Customer share</th><th>Source</th><th>Notes</th>
+        </tr></thead>
+        <tbody id="hv-rec-tbody">
+          <tr><td colspan="13" style="text-align:center;padding:30px;color:#6b7394;font-size:11px;">No harvest records yet — submit first harvest from the PWA or mark as harvested in route builder</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<script>
+function updatePreview(){
+  const d=document.getElementById('max-days').value||30;
+  const i=document.getElementById('min-income').value||3000;
+  document.getElementById('prev-days').textContent=d;
+  document.getElementById('prev-income').textContent='₱'+parseInt(i).toLocaleString();
+}
+function saveGlobal(){
+  alert('Global thresholds saved:\n• Min TG income: ₱'+document.getElementById('min-income').value+'\n• Max days: '+document.getElementById('max-days').value+' days\n\nThis will update the alert list immediately.');
+}
+</script>
+
+<script>
+/* ── HARVEST TAB SYSTEM ── */
+let hvActiveTab = 'route';
+
+function hvShowTab(tab, btn) {
+  hvActiveTab = tab;
+  // Update button styles
+  document.querySelectorAll('#panel-harvest .hbtn').forEach(b => b.classList.remove('b'));
+  if (btn) btn.classList.add('b');
+  // Show/hide main page (route builder)
+  const page = document.querySelector('#panel-harvest .page');
+  const schedTab = document.getElementById('hv-tab-schedule');
+  const recTab = document.getElementById('hv-tab-records');
+  const filterRow = document.querySelector('#panel-harvest .filters');
+  if (tab === 'route') {
+    if (page) page.style.display = 'grid';
+    if (filterRow) filterRow.style.display = 'flex';
+    if (schedTab) schedTab.style.display = 'none';
+    if (recTab) recTab.style.display = 'none';
+  } else if (tab === 'schedule') {
+    if (page) page.style.display = 'none';
+    if (filterRow) filterRow.style.display = 'none';
+    if (schedTab) schedTab.style.display = 'block';
+    if (recTab) recTab.style.display = 'none';
+  } else if (tab === 'records') {
+    if (page) page.style.display = 'none';
+    if (filterRow) filterRow.style.display = 'none';
+    if (schedTab) schedTab.style.display = 'none';
+    if (recTab) recTab.style.display = 'block';
+    loadRecords();
+  }
+}
+
+function hvSchedFilter(f, btn) {
+  document.querySelectorAll('.stgl').forEach(b => b.classList.remove('on'));
+  btn.classList.add('on');
+}
+
+function updatePreview() {
+  const d = document.getElementById('max-days').value || 30;
+  const i = document.getElementById('min-income').value || 3000;
+  document.getElementById('prev-days').textContent = d;
+  document.getElementById('prev-income').textContent = '₱' + parseInt(i).toLocaleString();
+}
+
+function saveGlobal() {
+  const d = document.getElementById('max-days').value;
+  const i = document.getElementById('min-income').value;
+  alert('Saved!\n• Min TG income: ₱' + parseInt(i).toLocaleString() + '\n• Max days: ' + d + ' days');
+}
+
+async function loadRecords() {
+  try {
+    const data = await sbAll('harvests', 'select=*&order=harvest_date.desc&limit=100');
+    const tbody = document.getElementById('hv-rec-tbody');
+    if (!data || !data.length) {
+      tbody.innerHTML = '<tr><td colspan="13" style="text-align:center;padding:30px;color:#6b7394;">No harvest records yet</td></tr>';
+      return;
+    }
+    tbody.innerHTML = data.map(r => {
+      const net = parseFloat(r.net_collectible || 0);
+      const spawn = parseFloat(r.spawn_share || 0);
+      const cust = parseFloat(r.customer_share || 0);
+      const src = r.source === 'pwa' ? '<span style="background:#dcfce7;color:#15803d;font-size:8px;padding:1px 5px;border-radius:3px;font-weight:600;">PWA</span>' :
+                  '<span style="background:#dbeafe;color:#1565c0;font-size:8px;padding:1px 5px;border-radius:3px;font-weight:600;">Admin</span>';
+      return `<tr>
+        <td style="font-weight:500;">${r.sheet_name || '—'}</td>
+        <td style="color:#6b7394;">${r.tg_name || '—'}</td>
+        <td style="color:#6b7394;font-size:10px;">${r.area || '—'}</td>
+        <td style="font-size:10px;">${r.harvest_date || '—'}</td>
+        <td style="font-size:10px;">${r.collector || '—'}</td>
+        <td style="font-weight:600;color:#1565c0;">${fmt(r.coins_total)}</td>
+        <td style="color:#6b7394;">${fmt(r.coins_free)}</td>
+        <td style="color:#6b7394;">${fmt(r.coins_old)}</td>
+        <td style="font-weight:700;color:#16a34a;">${fmt(net)}</td>
+        <td style="font-weight:600;">${fmt(spawn)}</td>
+        <td style="font-size:10px;">${fmt(cust)}</td>
+        <td>${src}</td>
+        <td style="font-size:10px;color:#6b7394;max-width:120px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${r.notes || '—'}</td>
+      </tr>`;
+    }).join('');
+  } catch(e) {
+    document.getElementById('hv-rec-tbody').innerHTML = '<tr><td colspan="13" style="text-align:center;padding:20px;color:#dc2626;">Error loading records</td></tr>';
+  }
+}
+</script>
+
+</div>
 
 <!-- ══ SUSPICIOUS — TODO LIST ══ -->
 <div id="panel-suspicious" class="panel">
