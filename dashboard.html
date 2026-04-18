@@ -188,7 +188,7 @@ tr:hover td{background:#f8f9ff;cursor:pointer}
       <span class="nl">Vendos</span>
     </button>
     <!-- Harvest -->
-    <button onclick="showP('harvest',this)">
+    <button onclick="showP('harvest',this);setTimeout(function(){if(typeof hvLoadVendos==='function')hvLoadVendos();},300)">
       <div class="ni" style="background:#d1fae5">
         <svg width="13" height="13" viewBox="0 0 24 24" fill="none"><path d="M12 3 C8 3 4 7 4 12 C4 16 8 20 12 20 C16 20 20 16 20 12" stroke="#16a34a" stroke-width="2" fill="none" stroke-linecap="round"/><path d="M12 3 C14 6 18 6 20 3" stroke="#16a34a" stroke-width="2" fill="none" stroke-linecap="round"/><path d="M12 8 L12 16 M9 13 L12 16 L15 13" stroke="#16a34a" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" fill="none"/></svg>
       </div>
@@ -437,27 +437,27 @@ tr:hover td{background:#f8f9ff;cursor:pointer}
 <style>
 /* ══ HARVEST PANEL v3 ══ */
 #panel-harvest.active{display:block!important;}
-.hv-head{background:#fff;border-bottom:2px solid var(--bd);flex-shrink:0;}
-.hv-toprow{padding:8px 14px;display:flex;align-items:center;justify-content:space-between;gap:10px;border-bottom:1px solid var(--bd);}
+.hv-head{background:#fff;border-bottom:2px solid var(--bd);flex-shrink:0;display:block!important;}
+.hv-toprow{padding:8px 14px;display:flex!important;align-items:center;justify-content:space-between;gap:10px;border-bottom:1px solid var(--bd);}
 .hv-title{font-size:14px;font-weight:700;color:var(--blue);}
-.hv-tabs{display:flex;gap:5px;}
-.hvtab{padding:5px 14px;border-radius:6px;border:1px solid var(--bd);background:#fff;font-size:11px;color:var(--mu);cursor:pointer;font-family:inherit;font-weight:500;}
-.hvtab:hover{background:var(--bg);border-color:var(--blue);color:var(--blue);}
-.hvtab.on{background:var(--blue);color:#fff;border-color:var(--blue);font-weight:600;}
-.hvtab.new{background:#16a34a;color:#fff;border-color:#16a34a;font-weight:600;}
-.hv-guide{background:#f0f7ff;border-bottom:1px solid #dbeafe;padding:7px 14px;display:flex;align-items:center;gap:0;flex-shrink:0;}
+.hv-tabs{display:flex!important;gap:5px;}
+.hv-hvtab{padding:5px 14px;border-radius:6px;border:1px solid var(--bd);background:#fff;font-size:11px;color:var(--mu);cursor:pointer;font-family:inherit;font-weight:500;}
+.hv-hvtab:hover{background:var(--bg);border-color:var(--blue);color:var(--blue);}
+.hv-hvtab.on{background:var(--blue);color:#fff;border-color:var(--blue);font-weight:600;}
+.hv-hvtab.new{background:#16a34a;color:#fff;border-color:#16a34a;font-weight:600;}
+.hv-guide{background:#f0f7ff;border-bottom:1px solid #dbeafe;padding:7px 14px;display:flex!important;align-items:center;gap:6px;flex-shrink:0;}
 .hv-step-item{display:flex;align-items:center;gap:6px;flex:1;}
 .hv-step-bubble{width:20px;height:20px;border-radius:50%;background:var(--blue);color:#fff;font-size:10px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
 .hv-step-text{font-size:11px;color:var(--t);line-height:1.3;}
 .hv-step-text strong{color:var(--blue);display:block;font-size:11px;font-weight:700;}
 .hv-step-arrow{font-size:14px;color:#93c5fd;margin:0 4px;flex-shrink:0;}
-.hv-areas{background:#fff;border-bottom:1px solid var(--bd);padding:0 14px;display:flex;align-items:stretch;flex-shrink:0;overflow-x:auto;}
+.hv-areas{background:#fff;border-bottom:1px solid var(--bd);padding:0 14px;display:flex!important;align-items:stretch;flex-shrink:0;overflow-x:auto;}
 .area-tab{padding:6px 12px;border:none;border-bottom:3px solid transparent;background:transparent;font-size:11px;font-weight:600;color:var(--mu);cursor:pointer;font-family:inherit;white-space:nowrap;}
 .area-tab:hover{color:var(--blue);background:var(--bg);}
 .area-tab.on{border-bottom-color:var(--blue);color:var(--blue);}
 .atc{font-size:9px;background:#e8eeff;color:var(--blue);padding:1px 5px;border-radius:8px;margin-left:4px;font-weight:700;}
 .area-tab.on .atc{background:var(--blue);color:#fff;}
-.hv-filters{background:var(--bg);border-bottom:1px solid var(--bd);padding:4px 14px;display:flex;align-items:center;gap:4px;flex-shrink:0;}
+.hv-filters{background:var(--bg);border-bottom:1px solid var(--bd);padding:4px 14px;display:flex!important;align-items:center;gap:4px;flex-shrink:0;}
 .hff{padding:3px 10px;border-radius:20px;border:1px solid var(--bd);background:#fff;font-size:10px;font-weight:600;cursor:pointer;font-family:inherit;color:var(--mu);}
 .hff:hover{border-color:var(--blue);color:var(--blue);}
 .hff.on{background:var(--blue);color:#fff;border-color:var(--blue);}
@@ -468,8 +468,8 @@ tr:hover td{background:#f8f9ff;cursor:pointer}
 .hff-sep{width:1px;height:14px;background:var(--bd);}
 .hv-search{padding:4px 10px;border:1px solid var(--bd);border-radius:20px;font-size:11px;font-family:inherit;outline:none;width:160px;margin-left:auto;background:#fff;color:var(--t);}
 .hv-search:focus{border-color:var(--blue);}
-.hv-page{display:grid;grid-template-columns:240px 1fr 230px;height:calc(100vh - 232px);min-height:400px;overflow:hidden;}
-.hv-rc{display:flex;flex-direction:column;overflow:hidden;background:#fff;border-right:1px solid var(--bd);}
+.hv-page{display:grid!important;grid-template-columns:240px 1fr 230px;height:calc(100vh - 232px);min-height:400px;overflow:hidden;}
+.hv-rc{display:flex!important;flex-direction:column;overflow:hidden;background:#fff;border-right:1px solid var(--bd);}
 .hv-rc-hdr{background:var(--blue);color:#fff;padding:8px 12px;flex-shrink:0;}
 .hv-rc-title{font-size:12px;font-weight:700;}
 .hv-rc-sub{font-size:10px;opacity:.8;margin-top:1px;}
@@ -496,7 +496,7 @@ tr:hover td{background:#f8f9ff;cursor:pointer}
 .hv-confirm-btn:hover{background:#15803d;}
 .hv-clear-btn{width:100%;padding:5px;background:#fff;color:var(--red);border:1px solid #fca5a5;border-radius:6px;font-size:11px;cursor:pointer;font-family:inherit;}
 .hv-warn{font-size:10px;color:#d97706;text-align:center;background:#fffbeb;border-radius:5px;padding:4px 8px;}
-.hv-vc{display:flex;flex-direction:column;overflow:hidden;background:#fff;border-right:1px solid var(--bd);}
+.hv-vc{display:flex!important;flex-direction:column;overflow:hidden;background:#fff;border-right:1px solid var(--bd);}
 .hv-vc-hdr{background:var(--bg);border-bottom:1px solid var(--bd);padding:5px 10px;display:flex;align-items:center;gap:6px;flex-shrink:0;flex-wrap:wrap;}
 .hv-vc-title{font-size:10px;font-weight:700;color:var(--blue);text-transform:uppercase;letter-spacing:.05em;}
 .hv-legend{display:flex;align-items:center;gap:8px;font-size:10px;color:var(--mu);}
@@ -504,7 +504,7 @@ tr:hover td{background:#f8f9ff;cursor:pointer}
 .hv-vthead{display:grid;grid-template-columns:14px 10px minmax(0,1.5fr) minmax(0,1.2fr) minmax(0,1fr) 100px 22px 80px;align-items:center;gap:6px;padding:5px 10px;background:var(--bg);border-bottom:1px solid var(--bd);flex-shrink:0;}
 .hv-vth{font-size:9px;font-weight:700;color:var(--mu);text-transform:uppercase;letter-spacing:.04em;}
 .hv-scroll{flex:1;overflow-y:auto;}
-.hv-vr{display:grid;grid-template-columns:14px 10px minmax(0,1.5fr) minmax(0,1.2fr) minmax(0,1fr) 100px 22px 80px;align-items:center;gap:6px;padding:7px 10px;border-bottom:1px solid rgba(30,60,200,.05);cursor:pointer;}
+.hv-vr{display:grid!important;grid-template-columns:14px 10px minmax(0,1.5fr) minmax(0,1.2fr) minmax(0,1fr) 100px 22px 80px;align-items:center;gap:6px;padding:7px 10px;border-bottom:1px solid rgba(30,60,200,.05);cursor:pointer;pointer-events:all;}
 .hv-vr:hover{background:#f8f9ff;}
 .hv-vr.sel{background:#eff6ff;}
 .hv-vcb{width:12px;height:12px;accent-color:var(--blue);flex-shrink:0;}
@@ -530,7 +530,7 @@ tr:hover td{background:#f8f9ff;cursor:pointer}
 .matched-badge{display:inline-block;font-size:9px;padding:1px 5px;border-radius:3px;background:#dcfce7;color:#15803d;font-weight:600;}
 .unmatched-badge{display:inline-block;font-size:9px;padding:1px 5px;border-radius:3px;background:#fef3c7;color:#d97706;font-weight:600;}
 .new-badge{display:inline-block;font-size:9px;padding:1px 5px;border-radius:3px;background:#ede9fe;color:#7c3aed;font-weight:600;}
-.hv-rp{display:flex;flex-direction:column;overflow:hidden;background:#fff;}
+.hv-rp{display:flex!important;flex-direction:column;overflow:hidden;background:#fff;}
 .hv-rp-hdr{background:var(--bg);border-bottom:1px solid var(--bd);padding:5px 10px;display:flex;align-items:center;justify-content:space-between;flex-shrink:0;}
 .hv-rp-title{font-size:9px;font-weight:700;color:var(--blue);text-transform:uppercase;letter-spacing:.05em;}
 .hv-rp-cnt{font-size:10px;padding:2px 7px;border-radius:10px;background:var(--redbg);color:var(--red);font-weight:700;}
@@ -662,10 +662,10 @@ tr:hover td{background:#f8f9ff;cursor:pointer}
       <div class="hv-title">🌾 Harvest route builder</div>
     </div>
     <div class="hv-tabs">
-      <button class="hvtab on" id="hbtn-route" onclick="hvShowTab('route',this)">📋 Route builder</button>
-      <button class="hvtab" id="hbtn-schedule" onclick="hvShowTab('schedule',this)">⏰ Schedule</button>
-      <button class="hvtab" id="hbtn-records" onclick="hvShowTab('records',this)">📊 Records</button>
-      <button class="hvtab new" onclick="hvNewRoute()">+ New route</button>
+      <button class="hv-hvtab on" id="hbtn-route" onclick="hvShowTab('route',this)">📋 Route builder</button>
+      <button class="hv-hvtab" id="hbtn-schedule" onclick="hvShowTab('schedule',this)">⏰ Schedule</button>
+      <button class="hv-hvtab" id="hbtn-records" onclick="hvShowTab('records',this)">📊 Records</button>
+      <button class="hv-hvtab new" onclick="hvNewRoute()">+ New route</button>
     </div>
   </div>
   <!-- STEP GUIDE -->
@@ -1191,7 +1191,7 @@ let hvSelectedSuggest='';
 /* TAB SWITCHING */
 function hvShowTab(tab,btn){
   hvActiveTab=tab;
-  document.querySelectorAll('#panel-harvest .hvtab').forEach(b=>b.classList.remove('on'));
+  document.querySelectorAll('#panel-harvest .hv-hvtab').forEach(b=>b.classList.remove('on'));
   if(btn)btn.classList.add('on');
   const show=tab==='route';
   const els={
@@ -1617,14 +1617,7 @@ async function hvLoadVendos() {
   hvApplyFilter();
 }
 
-/* ── INIT ON HARVEST TAB OPEN ── */
-const _origShowP = window.showP;
-window.showP = function(id, btn) {
-  if (_origShowP) _origShowP(id, btn);
-  if (id === 'harvest') {
-    setTimeout(() => hvLoadVendos(), 200);
-  }
-};
+/* hvLoadVendos called from nav button onclick */
 </script>
 </div>
 
