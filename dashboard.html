@@ -437,12 +437,12 @@ tr:hover td{background:#f8f9ff;cursor:pointer}
 
 <!-- ══ HARVEST STYLES ══ -->
 <style>
-.hv-wrap{display:grid;grid-template-columns:1fr 264px;height:calc(100vh - 130px);min-height:500px;background:var(--bg);gap:0;}
+.hv-wrap{display:grid;grid-template-columns:1fr 264px;height:calc(100vh - 118px);min-height:500px;background:var(--bg);gap:0;}
 .hv-left{display:flex;flex-direction:column;overflow:hidden;background:#fff;border-right:1px solid var(--bd);}
 .hv-right{display:flex;flex-direction:column;overflow:hidden;background:#fff;}
 
 /* stats */
-.hv-stats{display:grid;grid-template-columns:repeat(7,1fr);gap:4px;padding:5px 8px;background:var(--bg);border-bottom:1px solid var(--bd);flex-shrink:0;}
+.hv-stats{display:grid;grid-template-columns:repeat(7,1fr);gap:4px;padding:4px 8px;background:var(--bg);border-bottom:1px solid var(--bd);flex-shrink:0;}
 .hv-stat{background:#fff;border-radius:6px;padding:4px 6px;border-bottom:3px solid #e8eeff;cursor:pointer;}
 .hv-stat:hover{box-shadow:0 2px 8px rgba(0,0,0,.07);}
 .hv-stat .sl{font-size:7px;color:var(--mu);text-transform:uppercase;letter-spacing:.05em;margin-bottom:1px;}
@@ -454,7 +454,7 @@ tr:hover td{background:#f8f9ff;cursor:pointer}
 .sv-green{color:#16a34a;} .sv-pur{color:#7c3aed;}
 
 /* header bar */
-.hv-hdr{background:#fff;border-bottom:1px solid var(--bd);padding:4px 8px;display:flex;align-items:center;gap:5px;flex-shrink:0;}
+.hv-hdr{background:#fff;border-bottom:1px solid var(--bd);padding:3px 8px;display:flex;align-items:center;gap:5px;flex-shrink:0;}
 .hv-title{font-size:12px;font-weight:700;color:#1565c0;}
 .hv-sub{font-size:10px;color:var(--mu);}
 .hv-hdr-btns{margin-left:auto;display:flex;gap:5px;}
@@ -464,7 +464,7 @@ tr:hover td{background:#f8f9ff;cursor:pointer}
 .hv-btn.red{color:var(--red);border-color:#fca5a5;}
 
 /* urgency filters */
-.hv-filters{padding:3px 8px;border-bottom:1px solid var(--bd);display:flex;align-items:center;gap:3px;flex-wrap:wrap;background:#fff;flex-shrink:0;}
+.hv-filters{padding:2px 8px;border-bottom:1px solid var(--bd);display:flex;align-items:center;gap:3px;flex-wrap:wrap;background:#fff;flex-shrink:0;}
 .hv-filters .flbl{font-size:8px;font-weight:700;color:var(--mu);text-transform:uppercase;letter-spacing:.04em;}
 .uf-btn{padding:2px 9px;border-radius:20px;border:1px solid var(--bd);background:var(--bg);font-size:10px;font-weight:600;cursor:pointer;font-family:inherit;color:var(--mu);}
 .uf-btn.active,.uf-btn:hover{background:#1565c0;color:#fff;border-color:#1565c0;}
@@ -482,14 +482,14 @@ tr:hover td{background:#f8f9ff;cursor:pointer}
 .hv-selcount{margin-left:auto;font-size:10px;color:var(--mu);}
 
 /* route top */
-.hv-route-top{padding:4px 8px;border-bottom:1px solid var(--bd);display:flex;align-items:center;gap:4px;flex-wrap:wrap;flex-shrink:0;background:#f8f9ff;}
+.hv-route-top{padding:3px 8px;border-bottom:1px solid var(--bd);display:flex;align-items:center;gap:4px;flex-wrap:wrap;flex-shrink:0;background:#f8f9ff;}
 .hv-route-top .rlbl{font-size:8px;font-weight:700;color:#1565c0;text-transform:uppercase;letter-spacing:.05em;}
 .hv-inp{padding:4px 7px;border:1px solid var(--bd);border-radius:5px;font-size:11px;font-family:inherit;outline:none;color:var(--t);background:#fff;}
 .hv-inp:focus{border-color:#1565c0;}
 .hv-route-count{margin-left:auto;font-size:10px;color:var(--mu);font-weight:600;}
 
 /* route vendo list */
-.hv-route-list{max-height:88px;overflow-y:auto;border-bottom:2px solid #e8eeff;flex-shrink:0;}
+.hv-route-list{max-height:70px;overflow-y:auto;border-bottom:1px solid #e8eeff;flex-shrink:0;}
 .hv-route-list .rvlbl{font-size:7px;font-weight:700;color:var(--mu);text-transform:uppercase;letter-spacing:.04em;padding:3px 10px;border-bottom:1px solid var(--bd);background:#fafbff;}
 .rv-row{display:grid;grid-template-columns:16px 1fr auto auto;align-items:center;gap:4px;padding:2px 8px;border-bottom:1px solid rgba(30,60,200,.04);}
 .rv-row:hover{background:#f8f9ff;}
@@ -505,20 +505,20 @@ tr:hover td{background:#f8f9ff;cursor:pointer}
 .hv-lists{flex:1;display:grid;grid-template-rows:1fr 1px 1fr;overflow:hidden;}
 .hv-list-half{display:grid;grid-template-columns:1fr 58px 64px;overflow:hidden;}
 .hv-list-main{display:flex;flex-direction:column;overflow:hidden;}
-.hv-list-hdr{background:var(--bg);border-bottom:1px solid var(--bd);padding:3px 6px;display:flex;align-items:center;gap:4px;flex-shrink:0;}
+.hv-list-hdr{background:var(--bg);border-bottom:1px solid var(--bd);padding:2px 6px;display:flex;align-items:center;gap:4px;flex-shrink:0;}
 .src-tag{font-size:8px;font-weight:700;text-transform:uppercase;letter-spacing:.05em;}
 .src-tag.sheet{color:#1565c0;} .src-tag.tg{color:#7c3aed;}
 .src-cnt{font-size:8px;color:var(--mu);}
 .hv-search{padding:2px 6px;border:1px solid var(--bd);border-radius:4px;font-size:10px;font-family:inherit;outline:none;width:90px;margin-left:auto;color:var(--t);}
 .hv-vsearch:focus{border-color:#1565c0;}
 .vscroll{flex:1;overflow-y:auto;}
-.vrow{display:grid;grid-template-columns:13px 1fr 36px;align-items:center;gap:3px;padding:2px 5px;border-bottom:1px solid rgba(30,60,200,.04);cursor:pointer;}
+.vrow{display:grid;grid-template-columns:13px 1fr 40px;align-items:center;gap:2px;padding:1px 5px;border-bottom:1px solid rgba(30,60,200,.04);cursor:pointer;}
 .vrow:hover{background:#f8f9ff;}
 .vrow.vsel{background:#eff6ff;}
 .vcb{width:11px;height:11px;accent-color:#1565c0;}
 .vdot-g{width:5px;height:5px;border-radius:50%;background:#16a34a;display:inline-block;margin-right:3px;flex-shrink:0;vertical-align:middle;}
 .vdot-a{width:5px;height:5px;border-radius:50%;background:#d97706;display:inline-block;margin-right:3px;flex-shrink:0;vertical-align:middle;}
-.vname{font-size:10px;font-weight:500;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;line-height:1.2;}
+.vname{font-size:10px;font-weight:500;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;line-height:1.1;}
 .vmeta{font-size:7px;color:var(--mu);display:flex;gap:3px;margin-top:0;flex-wrap:nowrap;}
 .vdays{font-size:9px;font-weight:700;text-align:right;}
 .vdays.vc{color:#dc2626;} .vdays.vh{color:#d97706;} .vdays.vm{color:#7c3aed;} .vdays.vl{color:#16a34a;}
@@ -815,11 +815,11 @@ tr:hover td{background:#f8f9ff;cursor:pointer}
       <div class="hv-pending" id="hv-pending-list">
         <div class="pi-card active">
           <div class="pi-top"><div class="pi-name">Valles <span class="hpill b">Both</span></div><span class="pi-income warm">₱3,762</span></div>
-          <div class="pi-meta"><span>SINDANGAN</span><span>·</span><span>Juan dela Cruz</span><span>·</span><span style="color:#d97706;">Last: Mar 17 · 32d ago</span></div>
+          <div class="pi-meta"><span>SINDANGAN</span><span>·</span><span>Juan dela Cruz</span><span>·</span><span style="color:#d97706;">Last: Mar 17 · 1mo 2d ago</span></div>
         </div>
         <div class="pi-card">
           <div class="pi-top"><div class="pi-name">Rayl <span class="hpill b">Both</span></div><span class="pi-income hot">₱4,458</span></div>
-          <div class="pi-meta"><span>SINDANGAN</span><span>·</span><span style="color:var(--red);">Last: Mar 6 · 43d ago</span></div>
+          <div class="pi-meta"><span>SINDANGAN</span><span>·</span><span style="color:var(--red);">Last: Mar 6 · 1mo 13d ago</span></div>
         </div>
         <div class="pi-card">
           <div class="pi-top"><div class="pi-name">sugabo <span class="hpill gray">TG only</span></div><span class="pi-income hot">₱5,209</span></div>
@@ -827,7 +827,7 @@ tr:hover td{background:#f8f9ff;cursor:pointer}
         </div>
         <div class="pi-card">
           <div class="pi-top"><div class="pi-name">Inday Zamora <span class="hpill b">Both</span></div><span class="pi-income warm">₱3,233</span></div>
-          <div class="pi-meta"><span>SINDANGAN</span><span>·</span><span style="color:#d97706;">Last: Mar 3 · 46d ago</span></div>
+          <div class="pi-meta"><span>SINDANGAN</span><span>·</span><span style="color:#d97706;">Last: Mar 3 · 1mo 16d ago</span></div>
         </div>
         <div class="pi-card">
           <div class="pi-top"><div class="pi-name">island <span class="hpill gray">TG only</span></div><span class="pi-income hot">₱4,900</span></div>
@@ -835,7 +835,7 @@ tr:hover td{background:#f8f9ff;cursor:pointer}
         </div>
         <div class="pi-card">
           <div class="pi-top"><div class="pi-name">Joan Sy / JSB <span class="hpill b">Both</span></div><span class="pi-income hot">₱5,358</span></div>
-          <div class="pi-meta"><span>SINDANGAN</span><span>·</span><span style="color:var(--red);">Last: Dec 2025 · 112d ago</span></div>
+          <div class="pi-meta"><span>SINDANGAN</span><span>·</span><span style="color:var(--red);">Last: Dec 2025 · 3mo 22d ago</span></div>
         </div>
         <div class="pi-card">
           <div class="pi-top"><div class="pi-name">cindy34 <span class="hpill gray">TG only</span></div><span class="pi-income hot">₱6,175</span></div>
@@ -2052,48 +2052,12 @@ function closeVendo() {
 // HARVEST
 // ══════════════════════════════════════════════════════════
 async function loadHarvests() {
-  const rows=await sbAll("harvests","select=*&order=harvest_datetime.desc");
-  harvestAll=rows;
-  const ts=rows.reduce((s,r)=>s+parseFloat(r.system_total||0),0);
-  const tc=rows.reduce((s,r)=>s+parseFloat(r.collector_amount||0),0);
-  const td=rows.reduce((s,r)=>s+parseFloat(r.discrepancy||0),0);
-  document.getElementById("harvest-stats").innerHTML=`
-    <div class="stat"><div class="sl">Total Harvests</div><div class="sv blue">${rows.length}</div></div>
-    <div class="stat"><div class="sl">System Total</div><div class="sv blue">${fmt(ts)}</div></div>
-    <div class="stat"><div class="sl">Total Collected</div><div class="sv green">${fmt(tc)}</div></div>
-    <div class="stat"><div class="sl">Discrepancy</div><div class="sv ${td>=0?"amber":"red"}">${fmt(Math.abs(td))}</div></div>
-  `;
-  filterHarvests();
+  // Harvest tab now uses the new route builder UI — no separate load needed
+  // Records sub-tab will load from new harvests table with correct columns
 }
-function filterHarvests(){
-  const q=(document.getElementById("h-search")?.value||"").toLowerCase();
-  const area=document.getElementById("h-area")?.value||"";
-  let filtered=harvestAll.filter(h=>(!q||(h.vendo||"").toLowerCase().includes(q))&&(!area||h.area===area));
-  hPage_n=1;renderHarvests(filtered);
-}
-function renderHarvests(rows){
-  const PG=50,start=(hPage_n-1)*PG,page=rows.slice(start,start+PG);
-  document.getElementById("hp-l").textContent=`Page ${hPage_n} of ${Math.ceil(rows.length/PG)||1}`;
-  document.getElementById("hp-p").disabled=hPage_n===1;
-  document.getElementById("hp-n").disabled=start+PG>=rows.length;
-  document.getElementById("h-tbody").innerHTML=page.map(h=>{
-    const disc=parseFloat(h.discrepancy||0);
-    const status=Math.abs(disc)<1?"MATCH":disc>0?"OVER":"SHORT";
-    const sc=status==="MATCH"?"var(--ok)":status==="OVER"?"var(--amber)":"var(--red)";
-    return `<tr>
-      <td style="font-weight:500">${h.vendo||"—"}</td><td>${h.area||"—"}</td>
-      <td>${h.harvest_date||"—"}</td><td style="color:var(--mu)">${h.harvest_time||"—"}</td>
-      <td style="font-weight:700">${fmt(h.system_total)}</td>
-      <td>${fmt(h.old_coins)}</td><td>${fmt(h.free_time_coins)}</td>
-      <td>${fmt(h.collectible_amount||h.system_total)}</td>
-      <td style="font-weight:700;color:var(--ok)">${fmt(h.collector_amount)}</td>
-      <td style="font-weight:700;color:${sc}">${fmt(Math.abs(disc))}</td>
-      <td><span style="color:${sc};font-weight:700;font-size:11px">${status}</span></td>
-      <td style="color:var(--mu)">${h.collector_name||"—"}</td>
-    </tr>`;
-  }).join("")||'<tr><td colspan="12" style="text-align:center;padding:20px;color:var(--mu)">No harvests found</td></tr>';
-}
-function hPage(d){hPage_n+=d;filterHarvests();}
+function filterHarvests(){ }
+function renderHarvests(rows){ }
+function hPage(d){ }
 
 // ══════════════════════════════════════════════════════════
 // HACKED — TODO LIST
