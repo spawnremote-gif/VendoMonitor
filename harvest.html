@@ -2,905 +2,722 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
-<meta name="mobile-web-app-capable" content="yes">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="theme-color" content="#1e3cb8">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<meta name="apple-mobile-web-app-title" content="Spawn Harvest">
-<meta name="theme-color" content="#1565c0">
 <title>Spawn Harvest</title>
+<link rel="manifest" href="manifest.json">
 <style>
-/* ══ RESET & BASE ══ */
 *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;}
 :root{
-  --blue:#1565c0;--blue2:#0d47a1;--bg:#f0f4ff;
-  --green:#16a34a;--greenbg:#dcfce7;
-  --amber:#d97706;--amberbg:#fef3c7;
-  --red:#dc2626;--redbg:#fee2e2;
-  --mu:#6b7394;--bd:rgba(30,60,200,.12);
-  --card:#fff;--t:#1a1d2e;
-  --safe-bottom:env(safe-area-inset-bottom,0px);
+  --blue:#1e3cb8;--blue-light:#eef2ff;--blue-mid:#c7d2fe;
+  --green:#16a34a;--green-light:#f0fdf4;
+  --red:#dc2626;--red-light:#fef2f2;
+  --amber:#d97706;--amber-light:#fffbeb;
+  --purple:#7c3aed;
+  --gray:#6b7280;--border:#e5e7eb;--bg:#f8fafc;
+  --text:#111827;--muted:#6b7280;
 }
-html,body{height:100%;overflow:hidden;}
-body{font-family:system-ui,-apple-system,sans-serif;background:var(--bg);color:var(--t);font-size:14px;}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:var(--bg);min-height:100vh;color:var(--text);}
 
-/* ══ SCREENS ══ */
-.screen{position:fixed;inset:0;display:none;flex-direction:column;background:var(--bg);overflow:hidden;}
-.screen.active{display:flex;}
+/* TOP BAR */
+.topbar{background:var(--blue);color:#fff;padding:12px 16px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:100;}
+.topbar-logo{font-size:16px;font-weight:700;letter-spacing:.01em;}
+.topbar-sub{font-size:10px;opacity:.75;margin-top:1px;}
+.sync-badge{font-size:9px;padding:3px 8px;border-radius:10px;background:rgba(255,255,255,.2);display:flex;align-items:center;gap:4px;}
+.sync-dot{width:6px;height:6px;border-radius:50%;background:#4ade80;}
+.sync-dot.off{background:#f87171;}
 
-/* ══ HEADER ══ */
-.hdr{background:var(--blue);color:#fff;padding:12px 16px;padding-top:max(12px,env(safe-area-inset-top));display:flex;align-items:center;justify-content:space-between;flex-shrink:0;}
-.hdr-title{font-size:15px;font-weight:700;letter-spacing:.02em;}
-.hdr-sub{font-size:11px;opacity:.8;margin-top:1px;}
-.hdr-badge{font-size:10px;padding:3px 9px;border-radius:12px;font-weight:600;}
-.badge-on{background:#4ade80;color:#14532d;}
-.badge-off{background:#fbbf24;color:#78350f;}
-.badge-pending{background:rgba(255,255,255,.2);color:#fff;}
+/* SCREENS */
+.screen{display:none;min-height:calc(100vh - 52px);padding:16px;}
+.screen.active{display:block;}
 
-/* ══ BODY SCROLL ══ */
-.body{flex:1;overflow-y:auto;padding:16px;-webkit-overflow-scrolling:touch;}
-.body.no-pad{padding:0;}
+/* ENTRY SCREEN */
+.entry-card{background:#fff;border-radius:12px;border:1px solid var(--border);padding:24px 20px;margin-top:20px;}
+.entry-title{font-size:18px;font-weight:700;color:var(--blue);margin-bottom:4px;}
+.entry-sub{font-size:12px;color:var(--muted);margin-bottom:20px;}
+.field{margin-bottom:14px;}
+.field label{display:block;font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.04em;margin-bottom:5px;}
+.field input{width:100%;padding:12px 14px;border:1.5px solid var(--border);border-radius:8px;font-size:15px;font-family:inherit;outline:none;color:var(--text);}
+.field input:focus{border-color:var(--blue);}
+.field input.code{text-transform:uppercase;letter-spacing:.1em;font-weight:700;font-size:18px;text-align:center;}
+.btn{width:100%;padding:14px;border-radius:10px;border:none;font-size:15px;font-weight:700;cursor:pointer;font-family:inherit;transition:.15s;}
+.btn-blue{background:var(--blue);color:#fff;}
+.btn-blue:active{background:#1630a0;}
+.btn-green{background:var(--green);color:#fff;}
+.btn-green:active{background:#15803d;}
+.btn-outline{background:#fff;color:var(--blue);border:1.5px solid var(--blue-mid);}
+.divider{display:flex;align-items:center;gap:10px;margin:16px 0;color:var(--muted);font-size:11px;}
+.divider::before,.divider::after{content:'';flex:1;height:1px;background:var(--border);}
 
-/* ══ CARDS ══ */
-.card{background:var(--card);border:1px solid var(--bd);border-radius:12px;padding:14px 16px;margin-bottom:12px;}
-.card-title{font-size:11px;font-weight:700;color:var(--mu);text-transform:uppercase;letter-spacing:.06em;margin-bottom:10px;}
-
-/* ══ BUTTONS ══ */
-.btn{width:100%;padding:13px;border-radius:8px;border:1px solid var(--bd);font-size:15px;font-family:inherit;font-weight:500;cursor:pointer;background:var(--card);color:var(--t);margin-bottom:8px;display:flex;align-items:center;justify-content:center;gap:8px;transition:opacity .15s;}
-.btn:active{opacity:.75;}
-.btn-blue{background:var(--blue);border-color:var(--blue);color:#fff;}
-.btn-green{background:var(--green);border-color:var(--green);color:#fff;}
-.btn-outline-red{color:var(--red);border-color:#fca5a5;}
-.btn-sm{width:auto;padding:6px 14px;font-size:13px;margin-bottom:0;border-radius:6px;}
-
-/* ══ INPUTS ══ */
-input[type=text],input[type=number],input[type=date],textarea,select{
-  width:100%;padding:11px 12px;border:1px solid var(--bd);border-radius:8px;
-  font-size:15px;font-family:inherit;background:var(--card);color:var(--t);
-  outline:none;margin-bottom:10px;
-}
-input:focus,textarea:focus,select:focus{border-color:var(--blue);box-shadow:0 0 0 2px rgba(21,101,192,.1);}
-textarea{resize:none;height:72px;}
-.field-label{font-size:12px;font-weight:600;color:var(--mu);margin-bottom:5px;display:block;}
-.input-row{display:flex;align-items:center;gap:6px;margin-bottom:10px;}
-.input-prefix{font-size:16px;font-weight:600;color:var(--mu);flex-shrink:0;}
-.input-row input{margin-bottom:0;flex:1;}
-
-/* ══ BOTTOM NAV ══ */
-.bottom-nav{background:var(--card);border-top:1px solid var(--bd);display:flex;padding-bottom:var(--safe-bottom);flex-shrink:0;}
-.bnav-btn{flex:1;padding:10px 4px;border:none;background:none;cursor:pointer;font-family:inherit;display:flex;flex-direction:column;align-items:center;gap:3px;color:var(--mu);font-size:9px;font-weight:600;text-transform:uppercase;letter-spacing:.04em;}
-.bnav-btn.active{color:var(--blue);}
-.bnav-icon{font-size:18px;line-height:1;}
-
-/* ══ HOME SCREEN ══ */
-.home-art{text-align:center;padding:20px 0 8px;}
-.home-art svg{filter:drop-shadow(0 4px 12px rgba(21,101,192,.15));}
-.home-status{text-align:center;font-size:13px;font-weight:600;color:var(--blue);margin-bottom:4px;}
-.home-sub{text-align:center;font-size:11px;color:var(--mu);}
-
-/* ══ ROUTE CARD ══ */
-.route-info{background:var(--blue);color:#fff;border-radius:12px;padding:14px 16px;margin-bottom:12px;}
-.route-collector{font-size:17px;font-weight:700;margin-bottom:2px;}
-.route-meta{font-size:12px;opacity:.8;}
+/* ROUTE SCREEN */
+.route-header{background:#fff;border-radius:12px;border:1px solid var(--border);padding:14px 16px;margin-bottom:12px;}
+.route-code{font-size:22px;font-weight:700;color:var(--blue);letter-spacing:.08em;}
+.route-meta{font-size:11px;color:var(--muted);margin-top:3px;}
 .route-progress{margin-top:10px;}
-.progress-bar{height:6px;background:rgba(255,255,255,.25);border-radius:3px;overflow:hidden;}
-.progress-fill{height:100%;background:#4ade80;border-radius:3px;transition:width .3s;}
-.progress-label{font-size:11px;opacity:.8;margin-top:4px;}
+.progress-bar{height:6px;background:var(--border);border-radius:3px;overflow:hidden;margin-top:4px;}
+.progress-fill{height:100%;background:var(--blue);border-radius:3px;transition:.3s;}
+.progress-labels{display:flex;justify-content:space-between;font-size:10px;color:var(--muted);margin-top:3px;}
 
-/* ══ VENDO LIST ══ */
-.vendo-item{background:var(--card);border:1px solid var(--bd);border-radius:10px;padding:12px 14px;margin-bottom:8px;cursor:pointer;display:flex;align-items:center;justify-content:space-between;gap:8px;}
-.vendo-item:active{background:var(--bg);}
-.vendo-item.done{opacity:.55;border-color:rgba(22,163,74,.3);border-left:3px solid var(--green);}
-.vendo-item.active-item{border-color:var(--blue);border-left:3px solid var(--blue);background:#f0f8ff;}
-.vi-left{}
-.vi-name{font-size:14px;font-weight:600;}
-.vi-meta{font-size:11px;color:var(--mu);margin-top:2px;display:flex;gap:6px;}
-.vi-right{flex-shrink:0;}
-.vi-status{font-size:11px;padding:3px 9px;border-radius:10px;font-weight:600;}
-.vi-status.done{background:var(--greenbg);color:var(--green);}
-.vi-status.pending{background:var(--bg);color:var(--mu);}
-.vi-status.current{background:#dbeafe;color:var(--blue);}
-.untraced-tag{font-size:9px;padding:1px 6px;border-radius:5px;background:var(--amberbg);color:var(--amber);font-weight:600;display:inline-block;margin-left:4px;}
+/* VENDO LIST */
+.vendo-item{background:#fff;border-radius:10px;border:1px solid var(--border);padding:12px 14px;margin-bottom:8px;display:flex;align-items:center;justify-content:space-between;cursor:pointer;}
+.vendo-item:active{background:var(--blue-light);}
+.vendo-item.done{border-color:#86efac;background:var(--green-light);}
+.vendo-item.pending-item{border-color:#fca5a5;background:var(--red-light);}
+.vi-left{flex:1;min-width:0;}
+.vi-name{font-size:14px;font-weight:700;color:var(--text);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+.vi-tg{font-size:10px;color:var(--muted);margin-top:1px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+.vi-area{font-size:10px;color:var(--blue);margin-top:1px;}
+.vi-status{flex-shrink:0;margin-left:10px;text-align:right;}
+.status-pill{font-size:9px;font-weight:700;padding:3px 8px;border-radius:8px;white-space:nowrap;}
+.status-pill.pending{background:#f3f4f6;color:var(--muted);}
+.status-pill.harvested{background:#dcfce7;color:#15803d;}
+.status-pill.skipped{background:#fef3c7;color:#92400e;}
+.vi-arrow{color:var(--muted);font-size:16px;margin-left:6px;}
 
-/* ══ HARVEST FORM ══ */
-.vendo-header{background:var(--blue);color:#fff;border-radius:12px;padding:12px 16px;margin-bottom:12px;}
-.vh-name{font-size:18px;font-weight:700;margin-bottom:2px;}
-.vh-meta{font-size:11px;opacity:.8;}
-.calc-preview{background:var(--bg);border-radius:8px;padding:10px 12px;margin-bottom:10px;display:grid;grid-template-columns:1fr 1fr;gap:8px;}
-.cp-item{}
-.cp-label{font-size:10px;color:var(--mu);margin-bottom:2px;}
-.cp-value{font-size:18px;font-weight:700;}
-.cp-value.green{color:var(--green);}
-.cp-value.red{color:var(--red);}
-.status-pill{display:inline-flex;align-items:center;gap:5px;padding:5px 12px;border-radius:20px;font-size:12px;font-weight:600;margin-bottom:10px;}
-.status-pill .dot{width:7px;height:7px;border-radius:50%;background:currentColor;}
-.pill-ok{background:var(--greenbg);color:var(--green);}
-.pill-warn{background:var(--amberbg);color:var(--amber);}
-.pill-bad{background:var(--redbg);color:var(--red);}
+/* HARVEST FORM SCREEN */
+.form-header{background:var(--blue);color:#fff;border-radius:12px;padding:14px 16px;margin-bottom:14px;}
+.form-vname{font-size:17px;font-weight:700;}
+.form-vmeta{font-size:10px;opacity:.75;margin-top:2px;}
+.form-card{background:#fff;border-radius:12px;border:1px solid var(--border);padding:16px;margin-bottom:12px;}
+.form-card-title{font-size:11px;font-weight:700;color:var(--blue);text-transform:uppercase;letter-spacing:.05em;margin-bottom:12px;}
+.coin-field{margin-bottom:12px;}
+.coin-label{font-size:12px;font-weight:600;color:var(--text);margin-bottom:4px;display:flex;justify-content:space-between;}
+.coin-label span{font-size:10px;color:var(--muted);font-weight:400;}
+.coin-input{width:100%;padding:12px 14px;border:1.5px solid var(--border);border-radius:8px;font-size:18px;font-weight:700;font-family:inherit;outline:none;color:var(--text);text-align:right;}
+.coin-input:focus{border-color:var(--blue);}
 
-/* ══ SEARCH ══ */
-.search-wrap{position:relative;margin-bottom:10px;}
-.search-wrap input{padding-left:36px;margin-bottom:0;}
-.search-icon{position:absolute;left:11px;top:50%;transform:translateY(-50%);color:var(--mu);font-size:16px;}
-.vendo-result{padding:12px 14px;border:1px solid var(--bd);border-radius:10px;cursor:pointer;margin-bottom:8px;background:var(--card);}
-.vendo-result:active{background:var(--bg);}
-.vr-name{font-size:14px;font-weight:600;}
-.vr-meta{font-size:11px;color:var(--mu);margin-top:3px;}
-.empty-state{text-align:center;padding:40px 20px;color:var(--mu);font-size:13px;}
+/* SUMMARY BOX */
+.summary{background:var(--blue-light);border:1.5px solid var(--blue-mid);border-radius:10px;padding:14px;}
+.summary-row{display:flex;justify-content:space-between;align-items:center;padding:4px 0;}
+.summary-row:not(:last-child){border-bottom:1px solid var(--blue-mid);}
+.summary-label{font-size:12px;color:var(--blue);}
+.summary-val{font-size:14px;font-weight:700;color:var(--blue);}
+.summary-row.net .summary-label{font-weight:700;font-size:13px;}
+.summary-row.net .summary-val{font-size:17px;color:var(--blue);}
+.summary-row.spawn{color:var(--green);}
+.summary-row.spawn .summary-label{font-size:12px;color:var(--green);}
+.summary-row.spawn .summary-val{color:var(--green);font-size:15px;}
+.summary-row.customer .summary-label{font-size:12px;color:var(--purple);}
+.summary-row.customer .summary-val{color:var(--purple);font-size:15px;}
 
-/* ══ QR OVERLAY ══ */
-.overlay{position:fixed;inset:0;background:rgba(0,0,0,.8);z-index:100;display:none;align-items:center;justify-content:center;}
-.overlay.show{display:flex;}
-.overlay-box{background:#fff;border-radius:16px;padding:24px;width:min(320px,90vw);}
-.overlay-title{font-size:16px;font-weight:700;color:var(--t);margin-bottom:6px;}
-.overlay-sub{font-size:13px;color:var(--mu);margin-bottom:14px;}
-.overlay-close{width:100%;padding:10px;border-radius:8px;border:1px solid var(--bd);background:var(--bg);font-size:14px;cursor:pointer;font-family:inherit;margin-top:6px;}
+/* PENDING FORM */
+.pending-form{background:var(--red-light);border:1.5px solid #fca5a5;border-radius:10px;padding:14px;margin-bottom:12px;}
+.pending-title{font-size:11px;font-weight:700;color:var(--red);text-transform:uppercase;letter-spacing:.05em;margin-bottom:8px;}
+textarea{width:100%;padding:10px;border:1.5px solid #fca5a5;border-radius:7px;font-size:13px;font-family:inherit;resize:none;outline:none;color:var(--text);background:#fff;}
+textarea:focus{border-color:var(--red);}
 
-/* ══ TOAST ══ */
-.toast{position:fixed;bottom:calc(70px + var(--safe-bottom));left:50%;transform:translateX(-50%) translateY(60px);background:#2c2c2a;color:#fff;padding:10px 20px;border-radius:20px;font-size:13px;z-index:200;transition:transform .25s ease;white-space:nowrap;pointer-events:none;}
-.toast.show{transform:translateX(-50%) translateY(0);}
+/* ACTION BUTTONS */
+.action-row{display:flex;gap:8px;margin-bottom:10px;}
+.action-row .btn{flex:1;}
 
-/* ══ BACK BTN ══ */
-.back-btn{display:flex;align-items:center;gap:5px;background:none;border:none;color:var(--mu);font-size:13px;cursor:pointer;padding:0 0 14px;font-family:inherit;}
-.back-btn:active{opacity:.6;}
+/* TOAST */
+.toast{position:fixed;bottom:20px;left:50%;transform:translateX(-50%);background:#1e3cb8;color:#fff;padding:10px 20px;border-radius:20px;font-size:13px;font-weight:600;z-index:999;opacity:0;transition:.3s;white-space:nowrap;pointer-events:none;}
+.toast.show{opacity:1;}
 
-/* ══ DIVIDER ══ */
-.divider{border:none;border-top:1px solid var(--bd);margin:12px 0;}
+/* RECEIPT SCREEN */
+.receipt-card{background:#fff;border-radius:12px;border:1px solid var(--border);padding:20px;margin-bottom:12px;text-align:center;}
+.receipt-icon{font-size:48px;margin-bottom:10px;}
+.receipt-title{font-size:18px;font-weight:700;color:var(--green);margin-bottom:4px;}
+.receipt-sub{font-size:12px;color:var(--muted);}
+.receipt-stats{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:16px;}
+.stat-box{background:var(--bg);border-radius:8px;padding:12px;text-align:center;}
+.stat-val{font-size:20px;font-weight:700;color:var(--blue);}
+.stat-lbl{font-size:10px;color:var(--muted);margin-top:2px;}
 
-/* ══ HISTORY ITEM ══ */
-.hist-item{background:var(--card);border:1px solid var(--bd);border-radius:10px;padding:11px 14px;margin-bottom:8px;}
-.hi-top{display:flex;justify-content:space-between;align-items:center;margin-bottom:4px;}
-.hi-name{font-size:13px;font-weight:600;}
-.hi-date{font-size:11px;color:var(--mu);}
-.hi-meta{font-size:11px;color:var(--mu);display:flex;gap:10px;}
-.hi-net{font-weight:600;color:var(--green);}
+/* LOADING */
+.loading{display:flex;flex-direction:column;align-items:center;justify-content:center;padding:40px;gap:12px;color:var(--muted);}
+.spinner{width:32px;height:32px;border:3px solid var(--border);border-top-color:var(--blue);border-radius:50%;animation:spin .8s linear infinite;}
+@keyframes spin{to{transform:rotate(360deg);}}
 
-/* ══ SECTION LABEL ══ */
-.sec-lbl{font-size:11px;font-weight:700;color:var(--mu);text-transform:uppercase;letter-spacing:.06em;margin-bottom:10px;}
+/* OFFLINE BANNER */
+.offline-banner{background:var(--amber);color:#fff;text-align:center;padding:6px;font-size:11px;font-weight:700;display:none;}
+.offline-banner.show{display:block;}
 </style>
 </head>
 <body>
 
-<!-- ══════════════════════════════════════
-     SCREEN 1: HOME
-══════════════════════════════════════ -->
-<div class="screen active" id="screen-home">
-  <div class="hdr">
-    <div>
-      <div class="hdr-title">Spawn Harvest</div>
-      <div class="hdr-sub" id="hdr-date">Loading...</div>
-    </div>
-    <span class="hdr-badge" id="online-badge">...</span>
+<!-- OFFLINE BANNER -->
+<div class="offline-banner" id="offline-banner">⚡ Offline mode — submissions will sync when connected</div>
+
+<!-- TOP BAR -->
+<div class="topbar">
+  <div>
+    <div class="topbar-logo">🌐 Spawn Harvest</div>
+    <div class="topbar-sub" id="topbar-sub">Collector PWA</div>
   </div>
-  <div class="body">
-
-    <!-- art -->
-    <div class="home-art">
-      <svg width="72" height="72" viewBox="0 0 72 72">
-        <circle cx="36" cy="36" r="34" fill="#dbeafe" stroke="#1565c0" stroke-width="2"/>
-        <circle cx="36" cy="36" r="24" fill="#fff" stroke="#93c5fd" stroke-width="1.5"/>
-        <circle cx="36" cy="36" r="13" fill="#f0f4ff" stroke="#bfdbfe" stroke-width="1"/>
-        <text x="36" y="41" text-anchor="middle" font-size="16" font-weight="700" fill="#1565c0" font-family="system-ui">₱</text>
-        <path d="M36 2 L38.5 9 L36 8 L33.5 9 Z" fill="#1565c0"/>
-        <path d="M70 36 L63 38.5 L64 36 L63 33.5 Z" fill="#1565c0"/>
-        <path d="M36 70 L33.5 63 L36 64 L38.5 63 Z" fill="#1565c0"/>
-        <path d="M2 36 L9 33.5 L8 36 L9 38.5 Z" fill="#1565c0"/>
-      </svg>
-    </div>
-    <div class="home-status" id="home-status">Ready to harvest</div>
-    <div class="home-sub" id="home-sub">Load a route or search for a vendo</div>
-
-    <!-- active route -->
-    <div id="active-route-card" style="display:none;" class="route-info">
-      <div class="route-collector" id="arc-collector">—</div>
-      <div class="route-meta" id="arc-meta">—</div>
-      <div class="route-progress">
-        <div class="progress-bar"><div class="progress-fill" id="arc-fill" style="width:0%"></div></div>
-        <div class="progress-label" id="arc-label">0 of 0 done</div>
-      </div>
-    </div>
-
-    <div style="height:8px;"></div>
-
-    <!-- load route -->
-    <div class="sec-lbl">Load route</div>
-    <button class="btn btn-blue" onclick="showQR()">
-      <svg width="18" height="18" viewBox="0 0 24 24" fill="none"><rect x="3" y="3" width="7" height="7" rx="1.5" stroke="#fff" stroke-width="2"/><rect x="14" y="3" width="7" height="7" rx="1.5" stroke="#fff" stroke-width="2"/><rect x="3" y="14" width="7" height="7" rx="1.5" stroke="#fff" stroke-width="2"/><rect x="14" y="14" width="3.5" height="3.5" fill="#fff"/><rect x="17.5" y="17.5" width="3.5" height="3.5" fill="#fff"/></svg>
-      Scan / enter route code
-    </button>
-    <button class="btn" onclick="showScreen('screen-search')">
-      <svg width="18" height="18" viewBox="0 0 24 24" fill="none"><circle cx="11" cy="11" r="7" stroke="#1565c0" stroke-width="2"/><path d="M16.5 16.5L21 21" stroke="#1565c0" stroke-width="2" stroke-linecap="round"/></svg>
-      Search vendo by name
-    </button>
-
-    <!-- quick actions -->
-    <div class="sec-lbl" style="margin-top:8px;">Quick actions</div>
-    <button class="btn" onclick="showScreen('screen-pending')">
-      <svg width="18" height="18" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="9" stroke="#1565c0" stroke-width="2"/><path d="M12 7v5l3 3" stroke="#1565c0" stroke-width="2" stroke-linecap="round"/></svg>
-      Pending syncs <span id="pending-badge-count" style="background:#fee2e2;color:#dc2626;font-size:11px;padding:1px 7px;border-radius:8px;font-weight:700;display:none;">0</span>
-    </button>
-    <button class="btn" onclick="showScreen('screen-history')">
-      <svg width="18" height="18" viewBox="0 0 24 24" fill="none"><rect x="3" y="4" width="18" height="16" rx="2" stroke="#1565c0" stroke-width="2"/><path d="M8 10h8M8 14h5" stroke="#1565c0" stroke-width="1.8" stroke-linecap="round"/></svg>
-      Harvest history
-    </button>
-
-    <div style="height:20px;"></div>
-  </div>
-  <div class="bottom-nav">
-    <button class="bnav-btn active" onclick="showScreen('screen-home')"><span class="bnav-icon">🏠</span>Home</button>
-    <button class="bnav-btn" onclick="showScreen('screen-route')"><span class="bnav-icon">📋</span>Route</button>
-    <button class="bnav-btn" onclick="showScreen('screen-search')"><span class="bnav-icon">🔍</span>Search</button>
-    <button class="bnav-btn" onclick="showScreen('screen-history')"><span class="bnav-icon">📜</span>History</button>
+  <div class="sync-badge">
+    <div class="sync-dot" id="sync-dot"></div>
+    <span id="sync-label">Online</span>
   </div>
 </div>
 
-<!-- ══════════════════════════════════════
-     SCREEN 2: ROUTE (vendo list)
-══════════════════════════════════════ -->
+<!-- SCREEN 1: ENTRY -->
+<div class="screen active" id="screen-entry">
+  <div class="entry-card">
+    <div class="entry-title">Start harvest</div>
+    <div class="entry-sub">Enter your route code or scan a QR code to begin</div>
+
+    <div class="field">
+      <label>Your name</label>
+      <input type="text" id="collector-name" placeholder="e.g. Juan dela Cruz" autocomplete="off">
+    </div>
+    <div class="field">
+      <label>Route code</label>
+      <input type="text" id="route-code-inp" class="code" placeholder="ABC123" maxlength="8" autocomplete="off"
+        oninput="this.value=this.value.toUpperCase()">
+    </div>
+    <button class="btn btn-blue" onclick="loadRoute()">Load route →</button>
+
+    <div class="divider">or scan QR</div>
+
+    <button class="btn btn-outline" onclick="startQR()">📷 Scan vendo QR code</button>
+  </div>
+</div>
+
+<!-- SCREEN 2: ROUTE LIST -->
 <div class="screen" id="screen-route">
-  <div class="hdr">
-    <div>
-      <div class="hdr-title" id="route-screen-title">Route</div>
-      <div class="hdr-sub" id="route-screen-sub">No route loaded</div>
-    </div>
-    <span class="hdr-badge" id="online-badge-2">...</span>
-  </div>
-  <div class="body no-pad" style="padding:12px;">
-    <div id="route-no-data" class="empty-state">
-      No route loaded.<br>Go to Home and enter a route code.
-    </div>
-    <div id="route-info-card" style="display:none;" class="route-info">
-      <div class="route-collector" id="rc-collector">—</div>
-      <div class="route-meta" id="rc-meta">—</div>
-      <div class="route-progress">
-        <div class="progress-bar"><div class="progress-fill" id="rc-fill" style="width:0%"></div></div>
-        <div class="progress-label" id="rc-label">0 of 0 done</div>
+  <div class="route-header">
+    <div class="route-code" id="rt-code">—</div>
+    <div class="route-meta" id="rt-meta">—</div>
+    <div class="route-progress">
+      <div class="progress-bar"><div class="progress-fill" id="rt-progress" style="width:0%"></div></div>
+      <div class="progress-labels">
+        <span id="rt-done-cnt">0 harvested</span>
+        <span id="rt-total-cnt">0 total</span>
       </div>
     </div>
-    <div id="route-vendo-list"></div>
-    <div style="height:20px;"></div>
   </div>
-  <div class="bottom-nav">
-    <button class="bnav-btn" onclick="showScreen('screen-home')"><span class="bnav-icon">🏠</span>Home</button>
-    <button class="bnav-btn active" onclick="showScreen('screen-route')"><span class="bnav-icon">📋</span>Route</button>
-    <button class="bnav-btn" onclick="showScreen('screen-search')"><span class="bnav-icon">🔍</span>Search</button>
-    <button class="bnav-btn" onclick="showScreen('screen-history')"><span class="bnav-icon">📜</span>History</button>
+  <div id="vendo-list"></div>
+  <div style="height:20px;"></div>
+  <button class="btn btn-green" id="finish-btn" onclick="showReceipt()" style="display:none;">✅ Finish & submit summary</button>
+</div>
+
+<!-- SCREEN 3: HARVEST FORM -->
+<div class="screen" id="screen-form">
+  <div class="form-header">
+    <div class="form-vname" id="form-vname">Vendo</div>
+    <div class="form-vmeta" id="form-vmeta">—</div>
+  </div>
+
+  <div class="form-card">
+    <div class="form-card-title">💰 Count coins</div>
+    <div class="coin-field">
+      <div class="coin-label">Total coins <span>All coins in the box</span></div>
+      <input type="number" class="coin-input" id="coin-total" placeholder="0" min="0" oninput="calcNet()">
+    </div>
+    <div class="coin-field">
+      <div class="coin-label">Free time coins <span>Given as free/promo</span></div>
+      <input type="number" class="coin-input" id="coin-free" placeholder="0" min="0" oninput="calcNet()">
+    </div>
+    <div class="coin-field">
+      <div class="coin-label">Old coins <span>Leftover from last harvest</span></div>
+      <input type="number" class="coin-input" id="coin-old" placeholder="0" min="0" oninput="calcNet()">
+    </div>
+  </div>
+
+  <div class="summary" id="summary-box">
+    <div class="summary-row net">
+      <span class="summary-label">Net collectible</span>
+      <span class="summary-val" id="sum-net">₱0</span>
+    </div>
+    <div class="summary-row spawn">
+      <span class="summary-label">Spawn share (75%)</span>
+      <span class="summary-val" id="sum-spawn">₱0</span>
+    </div>
+    <div class="summary-row customer">
+      <span class="summary-label">Owner share (25%)</span>
+      <span class="summary-val" id="sum-customer">₱0</span>
+    </div>
+  </div>
+
+  <div style="height:12px;"></div>
+
+  <div class="action-row">
+    <button class="btn btn-green" onclick="submitHarvest()">✅ Submit harvest</button>
+    <button class="btn btn-outline" onclick="showPendingForm()">⏳ Mark pending</button>
+  </div>
+  <button class="btn" style="background:#f3f4f6;color:var(--muted);margin-bottom:10px;" onclick="backToRoute()">← Back to list</button>
+
+  <!-- PENDING FORM (hidden by default) -->
+  <div class="pending-form" id="pending-form" style="display:none;">
+    <div class="pending-title">⏳ Mark as pending — reason</div>
+    <textarea id="pending-note" rows="3" placeholder="e.g. No one home, stall locked, coin slot broken..."></textarea>
+    <div style="height:8px;"></div>
+    <button class="btn btn-outline" style="border-color:#fca5a5;color:var(--red);" onclick="submitPending()">Save as pending</button>
   </div>
 </div>
 
-<!-- ══════════════════════════════════════
-     SCREEN 3: HARVEST FORM
-══════════════════════════════════════ -->
-<div class="screen" id="screen-harvest">
-  <div class="hdr">
-    <div>
-      <div class="hdr-title">Harvest</div>
-      <div class="hdr-sub" id="harvest-screen-sub">Enter coin counts</div>
+<!-- SCREEN 4: RECEIPT -->
+<div class="screen" id="screen-receipt">
+  <div class="receipt-card">
+    <div class="receipt-icon">🎉</div>
+    <div class="receipt-title">Route complete!</div>
+    <div class="receipt-sub" id="receipt-sub">—</div>
+    <div class="receipt-stats">
+      <div class="stat-box">
+        <div class="stat-val" id="rec-harvested">0</div>
+        <div class="stat-lbl">Harvested</div>
+      </div>
+      <div class="stat-box">
+        <div class="stat-val" id="rec-pending">0</div>
+        <div class="stat-lbl">Pending</div>
+      </div>
+      <div class="stat-box" style="grid-column:1/-1;background:var(--green-light);">
+        <div class="stat-val" style="color:var(--green);" id="rec-total">₱0</div>
+        <div class="stat-lbl">Total net collectible</div>
+      </div>
     </div>
-    <span class="hdr-badge" id="online-badge-3">...</span>
   </div>
-  <div class="body">
-    <button class="back-btn" id="harvest-back-btn" onclick="harvestGoBack()">← Back</button>
-
-    <!-- vendo info -->
-    <div class="vendo-header">
-      <div class="vh-name" id="hf-vendo-name">—</div>
-      <div class="vh-meta" id="hf-vendo-meta">—</div>
-    </div>
-
-    <!-- coin inputs -->
-    <div class="card">
-      <div class="card-title">Coin counts</div>
-      <label class="field-label">Total coins collected</label>
-      <div class="input-row"><span class="input-prefix">₱</span><input type="number" id="hf-total" placeholder="0" min="0" oninput="recalc()"></div>
-      <label class="field-label">Free time coins</label>
-      <div class="input-row"><span class="input-prefix">₱</span><input type="number" id="hf-free" placeholder="0" min="0" oninput="recalc()"></div>
-      <label class="field-label">Old coins (uncollected from before)</label>
-      <div class="input-row"><span class="input-prefix">₱</span><input type="number" id="hf-old" placeholder="0" min="0" oninput="recalc()"></div>
-    </div>
-
-    <!-- notes -->
-    <div class="card">
-      <div class="card-title">Notes / remarks</div>
-      <textarea id="hf-notes" placeholder="Coin slot condition, observations, issues..."></textarea>
-    </div>
-
-    <!-- submit -->
-    <button class="btn btn-green" onclick="submitHarvest()">
-      <svg width="18" height="18" viewBox="0 0 24 24" fill="none"><path d="M5 13l4 4L19 7" stroke="#fff" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
-      Submit harvest
-    </button>
-    <button class="btn btn-outline-red" onclick="harvestGoBack()">Cancel</button>
-    <div style="height:20px;"></div>
-  </div>
+  <button class="btn btn-blue" onclick="goHome()">← Back to home</button>
 </div>
 
-<!-- ══════════════════════════════════════
-     SCREEN 4: SEARCH
-══════════════════════════════════════ -->
-<div class="screen" id="screen-search">
-  <div class="hdr">
-    <div>
-      <div class="hdr-title">Search vendo</div>
-      <div class="hdr-sub">Find by name, area, or TG name</div>
-    </div>
-    <span class="hdr-badge" id="online-badge-4">...</span>
-  </div>
-  <div class="body">
-    <div class="search-wrap">
-      <span class="search-icon">🔍</span>
-      <input type="text" id="search-input" placeholder="Search vendo..." oninput="doSearch(this.value)">
-    </div>
-    <div id="search-results"><div class="empty-state">Type at least 2 characters to search</div></div>
-    <div style="height:20px;"></div>
-  </div>
-  <div class="bottom-nav">
-    <button class="bnav-btn" onclick="showScreen('screen-home')"><span class="bnav-icon">🏠</span>Home</button>
-    <button class="bnav-btn" onclick="showScreen('screen-route')"><span class="bnav-icon">📋</span>Route</button>
-    <button class="bnav-btn active"><span class="bnav-icon">🔍</span>Search</button>
-    <button class="bnav-btn" onclick="showScreen('screen-history')"><span class="bnav-icon">📜</span>History</button>
-  </div>
-</div>
-
-<!-- ══════════════════════════════════════
-     SCREEN 5: PENDING SYNCS
-══════════════════════════════════════ -->
-<div class="screen" id="screen-pending">
-  <div class="hdr">
-    <div>
-      <div class="hdr-title">Pending syncs</div>
-      <div class="hdr-sub">Records saved offline</div>
-    </div>
-  </div>
-  <div class="body">
-    <button class="back-btn" onclick="showScreen('screen-home')">← Back to home</button>
-    <div id="pending-list"></div>
-    <div style="height:20px;"></div>
-  </div>
-</div>
-
-<!-- ══════════════════════════════════════
-     SCREEN 6: HISTORY
-══════════════════════════════════════ -->
-<div class="screen" id="screen-history">
-  <div class="hdr">
-    <div>
-      <div class="hdr-title">Harvest history</div>
-      <div class="hdr-sub">Recent submissions</div>
-    </div>
-    <span class="hdr-badge" id="online-badge-5">...</span>
-  </div>
-  <div class="body">
-    <div id="history-list"><div class="empty-state">Loading history...</div></div>
-    <div style="height:20px;"></div>
-  </div>
-  <div class="bottom-nav">
-    <button class="bnav-btn" onclick="showScreen('screen-home')"><span class="bnav-icon">🏠</span>Home</button>
-    <button class="bnav-btn" onclick="showScreen('screen-route')"><span class="bnav-icon">📋</span>Route</button>
-    <button class="bnav-btn" onclick="showScreen('screen-search')"><span class="bnav-icon">🔍</span>Search</button>
-    <button class="bnav-btn active"><span class="bnav-icon">📜</span>History</button>
-  </div>
-</div>
-
-<!-- ══ QR/CODE OVERLAY ══ -->
-<div class="overlay" id="qr-overlay">
-  <div class="overlay-box">
-    <div class="overlay-title">Enter route code</div>
-    <div class="overlay-sub">Ask your admin for the 6-letter route code for today</div>
-    <input type="text" id="qr-input" placeholder="e.g. AB12CD" maxlength="6"
-      style="text-transform:uppercase;letter-spacing:.2em;font-size:20px;font-weight:700;text-align:center;"
-      oninput="this.value=this.value.toUpperCase()">
-    <button class="btn btn-blue" style="margin-bottom:6px;" onclick="loadRoute()">Load route</button>
-    <button class="overlay-close" onclick="closeQR()">Cancel</button>
-  </div>
-</div>
-
-<!-- ══ TOAST ══ -->
+<!-- TOAST -->
 <div class="toast" id="toast"></div>
 
 <script>
-// ══════════════════════════════════════
-// CONFIG
-// ══════════════════════════════════════
-const SUPABASE_URL = 'https://cviraqfhphhsonjmrtvu.supabase.co';
-const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImN2aXJhcWZocGhoc29uam1ydHZ1Iiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc3NTY5NjYxOSwiZXhwIjoyMDkxMjcyNjE5fQ.qLPX_TW2U6W51nbOiotRdjUoofXnoWHi3oNfcIDmsek';
+const SB  = 'https://cviraqfhphhsonjmrtvu.supabase.co';
+const KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImN2aXJhcWZocGhoc29uam1ydHZ1Iiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc3NTY5NjYxOSwiZXhwIjoyMDkxMjcyNjE5fQ.qLPX_TW2U6W51nbOiotRdjUoofXnoWHi3oNfcIDmsek';
+const HDR = { 'apikey': KEY, 'Authorization': 'Bearer ' + KEY, 'Content-Type': 'application/json' };
 
-// ══════════════════════════════════════
-// STATE
-// ══════════════════════════════════════
-let isOnline = navigator.onLine;
 let currentRoute = null;
 let currentVendo = null;
-let harvestBackDest = 'screen-route';
-let vendoList = [];
-let toastTimer = null;
+let currentItem  = null;
+let offlineQueue = JSON.parse(localStorage.getItem('harvest_queue') || '[]');
 
-// ══════════════════════════════════════
-// SUPABASE FETCH
-// ══════════════════════════════════════
-async function supaFetch(path, opts = {}) {
-  const res = await fetch(SUPABASE_URL + path, {
-    headers: {
-      apikey: SUPABASE_KEY,
-      Authorization: 'Bearer ' + SUPABASE_KEY,
-      'Content-Type': 'application/json',
-      Prefer: 'return=representation',
-      ...opts.headers
-    },
-    ...opts
-  });
-  if (!res.ok) throw new Error(await res.text());
-  const text = await res.text();
-  return text ? JSON.parse(text) : null;
+// ── SERVICE WORKER ──
+if ('serviceWorker' in navigator) {
+  navigator.serviceWorker.register('sw.js').catch(() => {});
 }
 
-// ══════════════════════════════════════
-// ONLINE STATUS
-// ══════════════════════════════════════
-function setOnline(v) {
-  isOnline = v;
-  const cls = v ? 'badge-on' : 'badge-off';
-  const txt = v ? 'Online' : 'Offline';
-  document.querySelectorAll('[id^="online-badge"]').forEach(el => {
-    el.className = 'hdr-badge ' + cls;
-    el.textContent = txt;
-  });
-  if (v) { syncAll(); }
+// ── ONLINE/OFFLINE ──
+function updateOnlineStatus() {
+  const online = navigator.onLine;
+  document.getElementById('sync-dot').className  = 'sync-dot' + (online ? '' : ' off');
+  document.getElementById('sync-label').textContent = online ? 'Online' : 'Offline';
+  document.getElementById('offline-banner').className = 'offline-banner' + (online ? '' : ' show');
+  if (online && offlineQueue.length) flushQueue();
 }
-setOnline(navigator.onLine);
-window.addEventListener('online',  () => setOnline(true));
-window.addEventListener('offline', () => setOnline(false));
+window.addEventListener('online',  updateOnlineStatus);
+window.addEventListener('offline', updateOnlineStatus);
+updateOnlineStatus();
 
-// ══════════════════════════════════════
-// SCREEN NAVIGATION
-// ══════════════════════════════════════
+// ── SCREENS ──
 function showScreen(id) {
   document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
   document.getElementById(id).classList.add('active');
-  if (id === 'screen-history') loadHistory();
-  if (id === 'screen-pending') renderPending();
-  if (id === 'screen-route') renderRoute();
+  window.scrollTo(0, 0);
 }
 
-// ══════════════════════════════════════
-// DATE
-// ══════════════════════════════════════
-function initDate() {
-  const d = new Date();
-  const opts = { weekday:'short', month:'short', day:'numeric', year:'numeric' };
-  document.getElementById('hdr-date').textContent = d.toLocaleDateString('en-PH', opts);
+// ── TOAST ──
+function toast(msg, dur=2500) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), dur);
 }
-initDate();
 
-// ══════════════════════════════════════
-// LOAD VENDOS (for search)
-// ══════════════════════════════════════
-async function loadVendos() {
-  try {
-    const data = await supaFetch('/rest/v1/vendos?select=id,sheet_name,server_name,tg_name,area,vlan&order=sheet_name');
-    if (Array.isArray(data)) vendoList = data;
-  } catch(e) { vendoList = []; }
-}
-loadVendos();
+// ── CHECK URL PARAMS ──
+window.addEventListener('DOMContentLoaded', () => {
+  const p = new URLSearchParams(location.search);
+  const code  = p.get('code');
+  const vendo = p.get('vendo');
+  if (code) {
+    document.getElementById('route-code-inp').value = code.toUpperCase();
+    loadRoute();
+  } else if (vendo) {
+    loadVendoByTG(vendo);
+  } else {
+    const lastCode = localStorage.getItem('last_route_code');
+    if (lastCode) {
+      document.getElementById('route-code-inp').value = lastCode;
+      const hint = document.createElement('div');
+      hint.style.cssText = 'font-size:10px;color:var(--blue);margin-top:6px;text-align:center;';
+      hint.textContent = 'Last route: ' + lastCode + ' — tap Load to continue';
+      document.getElementById('route-code-inp').parentNode.appendChild(hint);
+    }
+  }
+});
 
-// ══════════════════════════════════════
-// ROUTE LOADING
-// ══════════════════════════════════════
-function showQR() { document.getElementById('qr-overlay').classList.add('show'); document.getElementById('qr-input').focus(); }
-function closeQR() { document.getElementById('qr-overlay').classList.remove('show'); }
-
+// ── LOAD ROUTE ──
 async function loadRoute() {
-  const code = document.getElementById('qr-input').value.trim().toUpperCase();
-  if (code.length < 4) { showToast('Enter a valid route code'); return; }
-  closeQR();
-  showToast('Loading route...');
+  const code = document.getElementById('route-code-inp').value.trim().toUpperCase();
+  const name = document.getElementById('collector-name').value.trim();
+  if (!code) { toast('Enter a route code first'); return; }
+
+  showScreen('screen-route');
+  document.getElementById('vendo-list').innerHTML = '<div class="loading"><div class="spinner"></div><span>Loading route…</span></div>';
+
   try {
-    const routes = await supaFetch('/rest/v1/routes?route_code=eq.' + code + '&select=*');
-    if (!routes || !routes.length) { showToast('Route not found: ' + code); return; }
-    const route = routes[0];
-    const stops = await supaFetch('/rest/v1/route_vendos?route_id=eq.' + route.id + '&select=*&order=stop_order');
-    currentRoute = { ...route, stops: stops || [] };
-    saveRouteLocal();
-    renderRoute();
-    updateHomeRoute();
-    showScreen('screen-route');
-    showToast('Route loaded — ' + currentRoute.stops.length + ' vendos');
+    // Fetch route
+    const r = await fetch(`${SB}/rest/v1/routes?route_code=eq.${code}&limit=1`, { headers: HDR });
+    const routes = await r.json();
+    if (!routes.length) throw new Error('Route not found');
+    currentRoute = routes[0];
+    if (name) currentRoute.collectorName = name;
+
+    // Fetch route items
+    const r2 = await fetch(`${SB}/rest/v1/route_items?route_id=eq.${currentRoute.id}&order=id.asc`, { headers: HDR });
+    currentRoute.items = await r2.json();
+
+    document.getElementById('rt-code').textContent = currentRoute.route_code;
+    document.getElementById('rt-meta').textContent =
+      `${currentRoute.collector} · ${currentRoute.harvest_date} · ${currentRoute.area || 'all areas'}`;
+    document.getElementById('topbar-sub').textContent = `Route ${code}`;
+
+    // Save route to localStorage for offline use
+    localStorage.setItem('cached_route_' + code, JSON.stringify(currentRoute));
+    localStorage.setItem('last_route_code', code);
+
+    renderVendoList();
   } catch(e) {
-    showToast('Error loading route. Check connection.');
+    // Try loading from localStorage cache if offline
+    const cached = localStorage.getItem('cached_route_' + code);
+    if (cached) {
+      currentRoute = JSON.parse(cached);
+      if (name) currentRoute.collectorName = name;
+      document.getElementById('rt-code').textContent = currentRoute.route_code;
+      document.getElementById('rt-meta').textContent =
+        `${currentRoute.collector} · ${currentRoute.harvest_date} · ${currentRoute.area || 'all areas'} (offline)`;
+      document.getElementById('topbar-sub').textContent = `Route ${code} (offline)`;
+      toast('⚡ Loaded from offline cache', 3000);
+      renderVendoList();
+    } else {
+      document.getElementById('vendo-list').innerHTML =
+        `<div class="loading"><span style="color:var(--red);">❌ ${e.message}<br><small>No offline cache found for ${code}.<br>Load this route once with signal first.</small></span></div>`;
+    }
   }
 }
 
-function saveRouteLocal() {
-  try { localStorage.setItem('current_route', JSON.stringify(currentRoute)); } catch(e) {}
-}
+// ── RENDER VENDO LIST ──
+function renderVendoList() {
+  const items = currentRoute.items || [];
+  const done  = items.filter(i => i.status === 'harvested').length;
+  const pend  = items.filter(i => i.status === 'pending' && i.collector_note).length;
+  const total = items.length;
+  const pct   = total ? Math.round(done / total * 100) : 0;
 
-function loadRouteLocal() {
-  try {
-    const r = localStorage.getItem('current_route');
-    if (r) { currentRoute = JSON.parse(r); renderRoute(); updateHomeRoute(); }
-  } catch(e) {}
-}
+  document.getElementById('rt-progress').style.width = pct + '%';
+  document.getElementById('rt-done-cnt').textContent = done + ' harvested';
+  document.getElementById('rt-total-cnt').textContent = total + ' total';
 
-// ══════════════════════════════════════
-// RENDER ROUTE
-// ══════════════════════════════════════
-function renderRoute() {
-  const listEl = document.getElementById('route-vendo-list');
-  const noDataEl = document.getElementById('route-no-data');
-  const infoEl = document.getElementById('route-info-card');
+  const finBtn = document.getElementById('finish-btn');
+  if (done + pend === total && total > 0) finBtn.style.display = '';
+  else finBtn.style.display = 'none';
 
-  if (!currentRoute) {
-    noDataEl.style.display = '';
-    infoEl.style.display = 'none';
-    listEl.innerHTML = '';
+  if (!items.length) {
+    document.getElementById('vendo-list').innerHTML =
+      '<div class="loading"><span>No vendos in this route.</span></div>';
     return;
   }
 
-  noDataEl.style.display = 'none';
-  infoEl.style.display = '';
-
-  const done = currentRoute.stops.filter(s => s.status === 'done').length;
-  const total = currentRoute.stops.length;
-  const pct = total ? Math.round(done / total * 100) : 0;
-
-  document.getElementById('route-screen-title').textContent = 'Route — ' + (currentRoute.collector || '');
-  document.getElementById('route-screen-sub').textContent = formatDate(currentRoute.route_date) + ' · ' + (currentRoute.area || 'All areas');
-  document.getElementById('rc-collector').textContent = currentRoute.collector || '—';
-  document.getElementById('rc-meta').textContent = formatDate(currentRoute.route_date) + ' · ' + (currentRoute.area || '') + ' · Code: ' + currentRoute.route_code;
-  document.getElementById('rc-fill').style.width = pct + '%';
-  document.getElementById('rc-label').textContent = done + ' of ' + total + ' done (' + pct + '%)';
-
-  listEl.innerHTML = currentRoute.stops.map((stop, i) => {
-    const isDone = stop.status === 'done';
-    const isCurrent = !isDone && currentRoute.stops.slice(0, i).every(s => s.status === 'done');
-    const cls = isDone ? 'done' : isCurrent ? 'active-item' : '';
-    const statusTxt = isDone ? 'done' : isCurrent ? 'current' : 'pending';
-    const statusCls = isDone ? 'done' : isCurrent ? 'current' : 'pending';
-    const name = stop.sheet_name || stop.tg_name || 'Vendo #' + (i+1);
-    const untr = stop.tg_untraced ? '<span class="untraced-tag">TG untraced</span>' : '';
-    return `<div class="vendo-item ${cls}" onclick="openHarvest(${i})">
+  document.getElementById('vendo-list').innerHTML = items.map((item, i) => {
+    const cls = item.status === 'harvested' ? 'done' : item.collector_note ? 'pending-item' : '';
+    const pill = item.status === 'harvested'
+      ? '<span class="status-pill harvested">✅ Done</span>'
+      : item.collector_note
+        ? '<span class="status-pill skipped">⏳ Pending</span>'
+        : '<span class="status-pill pending">Tap to harvest</span>';
+    return `<div class="vendo-item ${cls}" onclick="openVendo(${i})">
       <div class="vi-left">
-        <div class="vi-name">${name}${untr}</div>
-        <div class="vi-meta">
-          <span>${stop.area || '—'}</span>
-          ${stop.vlan ? '<span>VLAN ' + stop.vlan + '</span>' : ''}
-          ${stop.tg_name && !stop.tg_untraced ? '<span>TG: ' + stop.tg_name + '</span>' : ''}
-        </div>
+        <div class="vi-name">${item.sheet_name || item.tg_name || 'Unknown'}</div>
+        <div class="vi-tg">${item.tg_name || '—'}</div>
+        <div class="vi-area">${item.area || '—'}</div>
       </div>
-      <div class="vi-right">
-        <span class="vi-status ${statusCls}">${statusTxt}</span>
-      </div>
+      <div class="vi-status">${pill}</div>
+      <div class="vi-arrow">›</div>
     </div>`;
   }).join('');
 }
 
-function updateHomeRoute() {
-  if (!currentRoute) return;
-  document.getElementById('active-route-card').style.display = '';
-  const done = currentRoute.stops.filter(s => s.status === 'done').length;
-  const total = currentRoute.stops.length;
-  const pct = total ? Math.round(done / total * 100) : 0;
-  document.getElementById('arc-collector').textContent = currentRoute.collector || '—';
-  document.getElementById('arc-meta').textContent = formatDate(currentRoute.route_date) + ' · Code: ' + currentRoute.route_code;
-  document.getElementById('arc-fill').style.width = pct + '%';
-  document.getElementById('arc-label').textContent = done + ' of ' + total + ' done';
-  document.getElementById('home-status').textContent = 'Active route loaded';
-  document.getElementById('home-sub').textContent = done + ' of ' + total + ' vendos harvested';
-}
+// ── OPEN VENDO HARVEST FORM ──
+function openVendo(idx) {
+  currentItem  = currentRoute.items[idx];
+  currentVendo = { idx };
+  const name = currentItem.sheet_name || currentItem.tg_name || 'Vendo';
 
-// ══════════════════════════════════════
-// HARVEST FORM
-// ══════════════════════════════════════
-function openHarvest(stopIndex) {
-  if (currentRoute) {
-    const stop = currentRoute.stops[stopIndex];
-    if (!stop) return;
-    currentVendo = { ...stop, stopIndex };
-    harvestBackDest = 'screen-route';
+  document.getElementById('form-vname').textContent = name;
+  document.getElementById('form-vmeta').textContent =
+    `${currentItem.area || '—'} · TG: ${currentItem.tg_name || '—'}`;
+
+  // Reset form
+  ['coin-total','coin-free','coin-old'].forEach(id => document.getElementById(id).value = '');
+  document.getElementById('pending-note').value = '';
+  document.getElementById('pending-form').style.display = 'none';
+  calcNet();
+
+  // Pre-fill if already harvested
+  if (currentItem.status === 'harvested') {
+    if (currentItem.total_coins) document.getElementById('coin-total').value = currentItem.total_coins;
+    if (currentItem.free_coins)  document.getElementById('coin-free').value  = currentItem.free_coins;
+    if (currentItem.old_coins)   document.getElementById('coin-old').value   = currentItem.old_coins;
+    calcNet();
+    toast('Already harvested — tap Submit to update');
   }
-  setupHarvestForm();
-  showScreen('screen-harvest');
+
+  showScreen('screen-form');
 }
 
-function openHarvestFromSearch(v) {
-  currentVendo = { ...v, stopIndex: -1 };
-  harvestBackDest = 'screen-search';
-  setupHarvestForm();
-  showScreen('screen-harvest');
+// ── LOAD VENDO BY TG NAME (QR scan) ──
+async function loadVendoByTG(tgName) {
+  showScreen('screen-form');
+  document.getElementById('form-vname').textContent = 'Loading…';
+  document.getElementById('form-vmeta').textContent = tgName;
+
+  try {
+    const r = await fetch(`${SB}/rest/v1/vendos?tg_name=eq.${encodeURIComponent(tgName)}&select=id,sheet_name,tg_name,area,vlan&limit=1`, { headers: HDR });
+    const data = await r.json();
+    if (!data.length) throw new Error('Vendo not found');
+    const v = data[0];
+    currentItem = {
+      id: null, route_id: null,
+      vendo_id: v.id, tg_name: v.tg_name,
+      sheet_name: v.sheet_name, area: v.area,
+      status: 'pending'
+    };
+    document.getElementById('form-vname').textContent = v.sheet_name || v.tg_name;
+    document.getElementById('form-vmeta').textContent = `${v.area || '—'} · VLAN ${v.vlan || '?'}`;
+  } catch(e) {
+    document.getElementById('form-vname').textContent = '❌ ' + e.message;
+  }
 }
 
-function setupHarvestForm() {
-  const name = currentVendo.sheet_name || currentVendo.tg_name || currentVendo.name || 'Unknown';
-  const meta = [
-    currentVendo.area || '',
-    currentVendo.vlan ? 'VLAN ' + currentVendo.vlan : '',
-    currentVendo.tg_name && !currentVendo.tg_untraced ? 'TG: ' + currentVendo.tg_name : '',
-    currentVendo.tg_untraced ? '⚠ TG untraced' : ''
-  ].filter(Boolean).join(' · ');
+// ── CALCULATE NET ──
+function calcNet() {
+  const total    = parseFloat(document.getElementById('coin-total').value) || 0;
+  const free     = parseFloat(document.getElementById('coin-free').value)  || 0;
+  const old      = parseFloat(document.getElementById('coin-old').value)   || 0;
+  const net      = Math.max(0, total - free - old);
+  const spawn    = net * 0.75;
+  const customer = net * 0.25;
 
-  document.getElementById('hf-vendo-name').textContent = name;
-  document.getElementById('hf-vendo-meta').textContent = meta;
-  document.getElementById('harvest-screen-sub').textContent = name;
-  document.getElementById('hf-total').value = '';
-  document.getElementById('hf-free').value = '';
-  document.getElementById('hf-old').value = '';
-  document.getElementById('hf-notes').value = '';
+  document.getElementById('sum-net').textContent      = '₱' + net.toLocaleString('en-PH', {minimumFractionDigits:2, maximumFractionDigits:2});
+  document.getElementById('sum-spawn').textContent    = '₱' + spawn.toLocaleString('en-PH', {minimumFractionDigits:2, maximumFractionDigits:2});
+  document.getElementById('sum-customer').textContent = '₱' + customer.toLocaleString('en-PH', {minimumFractionDigits:2, maximumFractionDigits:2});
 }
 
-function harvestGoBack() {
-  showScreen(harvestBackDest);
-  currentVendo = null;
-}
-
-function recalc() {
-  // Just validate numbers — collector doesn't see calculation
-  const t = parseFloat(document.getElementById('hf-total').value) || 0;
-  const f = parseFloat(document.getElementById('hf-free').value) || 0;
-  const o = parseFloat(document.getElementById('hf-old').value) || 0;
-  const net = Math.max(0, t - f - o);
-  // Store silently for submission
-  document._harvestNet = net;
-}
-
+// ── SUBMIT HARVEST ──
 async function submitHarvest() {
-  const total = parseFloat(document.getElementById('hf-total').value) || 0;
-  if (!currentVendo || total <= 0) {
-    showToast('Enter total coins first');
-    return;
-  }
-  const free = parseFloat(document.getElementById('hf-free').value) || 0;
-  const old = parseFloat(document.getElementById('hf-old').value) || 0;
-  const net = Math.max(0, total - free - old);
-  const notes = document.getElementById('hf-notes').value.trim();
-  const today = new Date().toISOString().split('T')[0];
+  const total    = parseFloat(document.getElementById('coin-total').value) || 0;
+  const free     = parseFloat(document.getElementById('coin-free').value)  || 0;
+  const old      = parseFloat(document.getElementById('coin-old').value)   || 0;
+  const net      = Math.max(0, total - free - old);
+  const spawn    = net * 0.75;
+  const customer = net * 0.25;
 
-  const record = {
-    vendo_id: currentVendo.vendo_id || currentVendo.id || null,
-    tg_name: currentVendo.tg_name || null,
-    sheet_name: currentVendo.sheet_name || null,
-    area: currentVendo.area || null,
-    harvest_date: today,
-    collector: currentRoute ? currentRoute.collector : 'manual',
-    coins_total: total,
-    coins_free: free,
-    coins_old: old,
-    source: 'pwa',
-    tg_untraced: currentVendo.tg_untraced || false,
-    notes: notes,
-    synced: false,
-    created_at: new Date().toISOString()
+  if (!total) { toast('Enter total coins first'); return; }
+
+  const now = new Date().toISOString();
+  const today = now.split('T')[0];
+  const collector = currentRoute?.collectorName || currentRoute?.collector || 'Collector';
+
+  const harvestRecord = {
+    harvest_date:    today,
+    vendo_name:      currentItem.sheet_name || currentItem.tg_name,
+    tg_name:         currentItem.tg_name,
+    area:            currentItem.area,
+    collector:       collector,
+    route_code:      currentRoute?.route_code || null,
+    total_coins:     total,
+    free_coins:      free,
+    old_coins:       old,
+    net_collectible: net,
+    spawn_share:     spawn,
+    customer_share:  customer,
+    status:          'harvested'
   };
 
-  // Save to local queue
-  enqueue(record);
+  try {
+    if (navigator.onLine) {
+      // Save to harvests table
+      const r1 = await fetch(`${SB}/rest/v1/harvests`, {
+        method: 'POST',
+        headers: { ...HDR, 'Prefer': 'return=minimal' },
+        body: JSON.stringify(harvestRecord)
+      });
+      if (!r1.ok) throw new Error('Save failed: ' + r1.status);
 
-  // Mark stop as done in route
-  if (currentRoute && currentVendo.stopIndex >= 0) {
-    currentRoute.stops[currentVendo.stopIndex].status = 'done';
-    saveRouteLocal();
-
-    // Update route_vendos in Supabase if online
-    if (isOnline) {
-      try {
-        await supaFetch('/rest/v1/route_vendos?id=eq.' + currentVendo.id, {
+      // Update route_item status
+      if (currentItem.id) {
+        await fetch(`${SB}/rest/v1/route_items?id=eq.${currentItem.id}`, {
           method: 'PATCH',
-          body: JSON.stringify({ status: 'done' })
+          headers: { ...HDR, 'Prefer': 'return=minimal' },
+          body: JSON.stringify({
+            status: 'harvested', harvested_at: now,
+            total_coins: total, free_coins: free, old_coins: old,
+            net_collectible: net, spawn_share: spawn, customer_share: customer
+          })
         });
-      } catch(e) { /* will reconcile later */ }
-    }
-  }
+      }
 
-  // Try to sync immediately if online
-  if (isOnline) {
-    await syncRecord(record);
-  } else {
-    showToast('Saved offline — will sync when connected');
-  }
-
-  harvestGoBack();
-}
-
-// ══════════════════════════════════════
-// OFFLINE QUEUE
-// ══════════════════════════════════════
-function getQueue() {
-  try { return JSON.parse(localStorage.getItem('harvest_queue') || '[]'); } catch(e) { return []; }
-}
-function saveQueue(q) {
-  try { localStorage.setItem('harvest_queue', JSON.stringify(q)); } catch(e) {}
-}
-function enqueue(record) {
-  const q = getQueue();
-  q.push(record);
-  saveQueue(q);
-  updatePendingBadge();
-}
-
-async function syncRecord(record) {
-  try {
-    await supaFetch('/rest/v1/harvests', {
-      method: 'POST',
-      headers: { Prefer: 'return=minimal' },
-      body: JSON.stringify({ ...record, synced: true })
-    });
-    // Remove from queue
-    const q = getQueue().filter(r => r.created_at !== record.created_at);
-    saveQueue(q);
-    updatePendingBadge();
-    showToast('Harvest submitted ✓');
-    return true;
-  } catch(e) {
-    showToast('Saved offline — sync pending');
-    return false;
-  }
-}
-
-async function syncAll() {
-  const q = getQueue();
-  for (const r of q) { await syncRecord(r); }
-}
-
-function updatePendingBadge() {
-  const n = getQueue().length;
-  const el = document.getElementById('pending-badge-count');
-  if (n > 0) {
-    el.style.display = 'inline';
-    el.textContent = n;
-  } else {
-    el.style.display = 'none';
-  }
-}
-
-function renderPending() {
-  const q = getQueue();
-  const el = document.getElementById('pending-list');
-  if (!q.length) {
-    el.innerHTML = '<div class="empty-state">No pending records — all synced ✓</div>';
-    return;
-  }
-  el.innerHTML = q.map((r, i) => `
-    <div class="hist-item">
-      <div class="hi-top">
-        <span class="hi-name">${r.sheet_name || r.tg_name || 'Unknown'}</span>
-        <span class="hi-date">${r.harvest_date}</span>
-      </div>
-      <div class="hi-meta">
-        <span>${r.area || '—'}</span>
-        <span>Coins: ₱${r.coins_total}</span>
-      </div>
-      <div style="display:flex;gap:6px;margin-top:8px;">
-        <button class="btn btn-blue btn-sm" style="flex:1;" onclick="retrySingle(${i})">Retry sync</button>
-        <button class="btn btn-outline-red btn-sm" style="flex:1;" onclick="removePending(${i})">Remove</button>
-      </div>
-    </div>
-  `).join('');
-}
-
-async function retrySingle(i) {
-  const q = getQueue();
-  if (q[i]) { await syncRecord(q[i]); renderPending(); }
-}
-
-function removePending(i) {
-  if (!confirm('Remove this record?')) return;
-  const q = getQueue();
-  q.splice(i, 1);
-  saveQueue(q);
-  updatePendingBadge();
-  renderPending();
-}
-
-// ══════════════════════════════════════
-// SEARCH
-// ══════════════════════════════════════
-function doSearch(q) {
-  const el = document.getElementById('search-results');
-  if (!q || q.length < 2) {
-    el.innerHTML = '<div class="empty-state">Type at least 2 characters to search</div>';
-    return;
-  }
-  const ql = q.toLowerCase();
-  const hits = vendoList.filter(v =>
-    (v.sheet_name || '').toLowerCase().includes(ql) ||
-    (v.tg_name || '').toLowerCase().includes(ql) ||
-    (v.server_name || '').toLowerCase().includes(ql) ||
-    (v.area || '').toLowerCase().includes(ql)
-  ).slice(0, 15);
-
-  if (!hits.length) {
-    el.innerHTML = '<div class="empty-state">No vendos found for "' + q + '"</div>';
-    return;
-  }
-  el.innerHTML = hits.map(v => `
-    <div class="vendo-result" onclick='openHarvestFromSearch(${JSON.stringify(v)})'>
-      <div class="vr-name">${v.sheet_name || v.tg_name || '—'}</div>
-      <div class="vr-meta">${v.area || '—'} · ${v.vlan ? 'VLAN ' + v.vlan : 'no VLAN'} · TG: ${v.tg_name || '?'}</div>
-    </div>
-  `).join('');
-}
-
-// ══════════════════════════════════════
-// HISTORY
-// ══════════════════════════════════════
-async function loadHistory() {
-  const el = document.getElementById('history-list');
-  el.innerHTML = '<div class="empty-state">Loading...</div>';
-  try {
-    const today = new Date();
-    const d30 = new Date(today);
-    d30.setDate(d30.getDate() - 30);
-    const data = await supaFetch(
-      '/rest/v1/harvests?select=*&order=created_at.desc&limit=50&harvest_date=gte.' + d30.toISOString().split('T')[0]
-    );
-    if (!data || !data.length) {
-      el.innerHTML = '<div class="empty-state">No harvest records in last 30 days</div>';
-      return;
-    }
-    el.innerHTML = data.map(r => `
-      <div class="hist-item">
-        <div class="hi-top">
-          <span class="hi-name">${r.sheet_name || r.tg_name || '—'}</span>
-          <span class="hi-date">${r.harvest_date}</span>
-        </div>
-        <div class="hi-meta">
-          <span>${r.area || '—'}</span>
-          <span>Collector: ${r.collector || '—'}</span>
-          <span class="hi-net">Net: ₱${Number(r.net_collectible || 0).toLocaleString()}</span>
-        </div>
-        ${r.notes ? '<div style="font-size:11px;color:var(--mu);margin-top:4px;font-style:italic;">' + r.notes + '</div>' : ''}
-      </div>
-    `).join('');
-  } catch(e) {
-    el.innerHTML = '<div class="empty-state">Could not load history — offline</div>';
-  }
-}
-
-// ══════════════════════════════════════
-// TOAST
-// ══════════════════════════════════════
-function showToast(msg) {
-  const t = document.getElementById('toast');
-  t.textContent = msg;
-  t.classList.add('show');
-  clearTimeout(toastTimer);
-  toastTimer = setTimeout(() => t.classList.remove('show'), 2800);
-}
-
-// ══════════════════════════════════════
-// UTILS
-// ══════════════════════════════════════
-function formatDate(d) {
-  if (!d) return '—';
-  const dt = new Date(d);
-  return dt.toLocaleDateString('en-PH', { month:'short', day:'numeric', year:'numeric' });
-}
-
-// ══════════════════════════════════════
-// SERVICE WORKER REGISTRATION
-// ══════════════════════════════════════
-if ('serviceWorker' in navigator) {
-  window.addEventListener('load', () => {
-    navigator.serviceWorker.register('/VendoMonitor/sw.js')
-      .then(reg => {
-        console.log('SW registered:', reg.scope);
-        // Listen for sync messages from SW
-        navigator.serviceWorker.addEventListener('message', e => {
-          if (e.data && e.data.type === 'SYNC_NOW') syncAll();
+      // Update vendos last_harvest_date
+      if (currentItem.vendo_id || currentItem.tg_name) {
+        const filter = currentItem.vendo_id
+          ? `id=eq.${currentItem.vendo_id}`
+          : `tg_name=eq.${encodeURIComponent(currentItem.tg_name)}`;
+        await fetch(`${SB}/rest/v1/vendos?${filter}`, {
+          method: 'PATCH',
+          headers: { ...HDR, 'Prefer': 'return=minimal' },
+          body: JSON.stringify({ last_harvest_date: today })
         });
-        // Register background sync if supported
-        if ('sync' in reg) {
-          reg.sync.register('harvest-sync').catch(() => {});
+      }
+    } else {
+      // Queue for later
+      offlineQueue.push({ type: 'harvest', data: harvestRecord, item: currentItem, timestamp: Date.now() });
+      localStorage.setItem('harvest_queue', JSON.stringify(offlineQueue));
+      toast('⚡ Saved offline — will sync when connected', 3000);
+    }
+
+    // Update local item status
+    if (currentItem) {
+      currentItem.status          = 'harvested';
+      currentItem.total_coins     = total;
+      currentItem.free_coins      = free;
+      currentItem.old_coins       = old;
+      currentItem.net_collectible = net;
+    }
+    // Save updated route to localStorage cache
+    if (currentRoute?.route_code) {
+      localStorage.setItem('cached_route_' + currentRoute.route_code, JSON.stringify(currentRoute));
+    }
+
+    toast('✅ Harvest saved!');
+    setTimeout(() => { backToRoute(); }, 1000);
+  } catch(e) {
+    toast('❌ ' + e.message, 4000);
+  }
+}
+
+// ── PENDING FORM ──
+function showPendingForm() {
+  const pf = document.getElementById('pending-form');
+  pf.style.display = pf.style.display === 'none' ? '' : 'none';
+  if (pf.style.display !== 'none') {
+    document.getElementById('pending-note').focus();
+  }
+}
+
+async function submitPending() {
+  const note = document.getElementById('pending-note').value.trim();
+  if (!note) { toast('Please enter a reason'); document.getElementById('pending-note').focus(); return; }
+
+  const pendingData = {
+    status: 'pending',
+    collector_note: note,
+    harvested_at: null
+  };
+
+  try {
+    if (navigator.onLine && currentItem.id) {
+      await fetch(`${SB}/rest/v1/route_items?id=eq.${currentItem.id}`, {
+        method: 'PATCH',
+        headers: { ...HDR, 'Prefer': 'return=minimal' },
+        body: JSON.stringify(pendingData)
+      });
+    } else {
+      offlineQueue.push({ type: 'pending', itemId: currentItem.id, data: pendingData, timestamp: Date.now() });
+      localStorage.setItem('harvest_queue', JSON.stringify(offlineQueue));
+    }
+
+    if (currentItem) {
+      currentItem.collector_note = note;
+      currentItem.status = 'pending';
+    }
+    // Save updated route to localStorage cache
+    if (currentRoute?.route_code) {
+      localStorage.setItem('cached_route_' + currentRoute.route_code, JSON.stringify(currentRoute));
+    }
+
+    toast('⏳ Marked as pending');
+    setTimeout(() => backToRoute(), 1000);
+  } catch(e) {
+    toast('❌ ' + e.message, 4000);
+  }
+}
+
+// ── BACK TO ROUTE ──
+function backToRoute() {
+  renderVendoList();
+  showScreen('screen-route');
+}
+
+// ── SHOW RECEIPT ──
+function showReceipt() {
+  const items    = currentRoute?.items || [];
+  const harvested = items.filter(i => i.status === 'harvested');
+  const pending   = items.filter(i => i.collector_note);
+  const totalNet  = harvested.reduce((s, i) => s + (parseFloat(i.net_collectible) || 0), 0);
+
+  document.getElementById('rec-harvested').textContent = harvested.length;
+  document.getElementById('rec-pending').textContent   = pending.length;
+  document.getElementById('rec-total').textContent     = '₱' + totalNet.toLocaleString('en-PH', {minimumFractionDigits:2});
+  document.getElementById('receipt-sub').textContent   =
+    `Route ${currentRoute.route_code} · ${currentRoute.collector} · ${currentRoute.harvest_date}`;
+
+  // Mark route as completed
+  if (navigator.onLine && currentRoute.id) {
+    fetch(`${SB}/rest/v1/routes?id=eq.${currentRoute.id}`, {
+      method: 'PATCH',
+      headers: { ...HDR, 'Prefer': 'return=minimal' },
+      body: JSON.stringify({ status: 'completed', completed_at: new Date().toISOString() })
+    }).catch(() => {});
+  }
+
+  showScreen('screen-receipt');
+}
+
+// ── GO HOME ──
+function goHome() {
+  currentRoute = null;
+  currentVendo = null;
+  currentItem  = null;
+  document.getElementById('route-code-inp').value = '';
+  document.getElementById('collector-name').value = '';
+  document.getElementById('topbar-sub').textContent = 'Collector PWA';
+  showScreen('screen-entry');
+}
+
+// ── QR SCAN (placeholder) ──
+function startQR() {
+  const tg = prompt('Enter vendo TG name (QR scanner coming soon):');
+  if (tg) loadVendoByTG(tg.trim());
+}
+
+// ── FLUSH OFFLINE QUEUE ──
+async function flushQueue() {
+  if (!offlineQueue.length) return;
+  const remaining = [];
+  for (const item of offlineQueue) {
+    try {
+      if (item.type === 'harvest') {
+        await fetch(`${SB}/rest/v1/harvests`, {
+          method: 'POST',
+          headers: { ...HDR, 'Prefer': 'return=minimal' },
+          body: JSON.stringify(item.data)
+        });
+        if (item.item?.id) {
+          await fetch(`${SB}/rest/v1/route_items?id=eq.${item.item.id}`, {
+            method: 'PATCH',
+            headers: { ...HDR, 'Prefer': 'return=minimal' },
+            body: JSON.stringify({ status: 'harvested' })
+          });
         }
-      })
-      .catch(err => console.log('SW failed:', err));
-  });
+      } else if (item.type === 'pending' && item.itemId) {
+        await fetch(`${SB}/rest/v1/route_items?id=eq.${item.itemId}`, {
+          method: 'PATCH',
+          headers: { ...HDR, 'Prefer': 'return=minimal' },
+          body: JSON.stringify(item.data)
+        });
+      }
+    } catch {
+      remaining.push(item);
+    }
+  }
+  offlineQueue = remaining;
+  localStorage.setItem('harvest_queue', JSON.stringify(offlineQueue));
+  if (!remaining.length) toast('✅ All offline submissions synced!', 3000);
 }
-
-// ══════════════════════════════════════
-// INIT
-// ══════════════════════════════════════
-updatePendingBadge();
-loadRouteLocal();
 </script>
 </body>
 </html>
