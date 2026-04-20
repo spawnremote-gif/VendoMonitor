@@ -345,6 +345,7 @@ async function loadRoute() {
   const code = document.getElementById('route-code-inp').value.trim().toUpperCase();
   const name = document.getElementById('collector-name').value.trim();
   if (!code) { toast('Enter a route code first'); return; }
+  if (!name) { toast('Enter your name first'); document.getElementById('collector-name').focus(); return; }
 
   showScreen('screen-route');
   document.getElementById('vendo-list').innerHTML = '<div class="loading"><div class="spinner"></div><span>Loading route…</span></div>';
@@ -353,9 +354,28 @@ async function loadRoute() {
     // Fetch route
     const r = await fetch(`${SB}/rest/v1/routes?route_code=eq.${code}&limit=1`, { headers: HDR });
     const routes = await r.json();
-    if (!routes.length) throw new Error('Route not found');
-    currentRoute = routes[0];
-    if (name) currentRoute.collectorName = name;
+    if (!routes.length) throw new Error('Invalid route code. Please check and try again.');
+
+    const route = routes[0];
+
+    // Validate route is still active
+    if (route.status === 'completed') throw new Error('This route has already been completed.');
+
+    // Validate route is not expired (older than 7 days)
+    const created = new Date(route.created_at);
+    const daysDiff = (new Date() - created) / (1000 * 60 * 60 * 24);
+    if (daysDiff > 7) throw new Error('This route code has expired. Ask admin for a new route.');
+
+    // Validate collector name matches (case-insensitive, partial match)
+    const routeCollector = (route.collector || '').toLowerCase().trim();
+    const enteredName    = name.toLowerCase().trim();
+    const nameMatch = routeCollector.includes(enteredName) || enteredName.includes(routeCollector);
+    if (!nameMatch) {
+      throw new Error('Your name does not match this route. This route is assigned to: ' + route.collector);
+    }
+
+    currentRoute = route;
+    currentRoute.collectorName = name;
 
     // Fetch route items
     const r2 = await fetch(`${SB}/rest/v1/route_items?route_id=eq.${currentRoute.id}&order=id.asc`, { headers: HDR });
@@ -419,14 +439,22 @@ function renderVendoList() {
       : item.collector_note
         ? '<span class="status-pill skipped">⏳ Pending</span>'
         : '<span class="status-pill pending">Tap to harvest</span>';
+    const qrUrl = 'https://api.qrserver.com/v1/create-qr-code/?size=120x120&data=' + encodeURIComponent('https://spawninternet.github.io/VendoMonitor/harvest.html?vendo=' + encodeURIComponent(item.tg_name||''));
     return `<div class="vendo-item ${cls}" onclick="openVendo(${i})">
       <div class="vi-left">
         <div class="vi-name">${item.sheet_name || item.tg_name || 'Unknown'}</div>
         <div class="vi-tg">${item.tg_name || '—'}</div>
         <div class="vi-area">${item.area || '—'}</div>
       </div>
-      <div class="vi-status">${pill}</div>
-      <div class="vi-arrow">›</div>
+      <div style="display:flex;align-items:center;gap:6px;">
+        <div class="vi-status">${pill}</div>
+        <button onclick="event.stopPropagation();showVendoQR(${i})" style="background:#eef2ff;border:1px solid #c7d2fe;border-radius:6px;padding:4px 6px;font-size:10px;cursor:pointer;white-space:nowrap;flex-shrink:0;">📱 QR</button>
+      </div>
+    </div>
+    <div id="vqr-${i}" style="display:none;background:#f8faff;border:1px solid #c7d2fe;border-radius:8px;padding:10px;text-align:center;margin-bottom:6px;">
+      <img src="${qrUrl}" style="border-radius:6px;">
+      <div style="font-size:9px;color:#6b7280;margin-top:4px;">${item.sheet_name||item.tg_name}</div>
+      <button onclick="document.getElementById('vqr-${i}').style.display='none'" style="margin-top:6px;padding:3px 10px;border:1px solid #e5e7eb;border-radius:4px;background:#fff;font-size:10px;cursor:pointer;">Close</button>
     </div>`;
   }).join('');
 }
@@ -634,6 +662,16 @@ async function submitPending() {
   } catch(e) {
     toast('❌ ' + e.message, 4000);
   }
+}
+
+// ── SHOW VENDO QR ──
+function showVendoQR(idx) {
+  const qrDiv = document.getElementById('vqr-' + idx);
+  if (!qrDiv) return;
+  const showing = qrDiv.style.display !== 'none';
+  // Hide all others first
+  document.querySelectorAll('[id^="vqr-"]').forEach(d => d.style.display = 'none');
+  qrDiv.style.display = showing ? 'none' : '';
 }
 
 // ── BACK TO ROUTE ──
