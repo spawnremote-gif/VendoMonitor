@@ -3931,43 +3931,46 @@ async function loadRoutes() {
 function renderRoutes(data) {
   const list = document.getElementById('routes-list');
   if (!list) return;
-  _routesData = data; // always update cache
-  const filtered = _routeFilter === 'all' ? data : data.filter(r => r.status === _routeFilter);
+  _routesData = data;
+  const filtered = _routeFilter === 'all' ? data : data.filter(function(r) { return r.status === _routeFilter; });
   if (!filtered.length) {
     list.innerHTML = '<div class="rt-empty">No ' + _routeFilter + ' routes.</div>';
     return;
   }
   const PWA = 'https://spawninternet.github.io/VendoMonitor/harvest.html';
-  list.innerHTML = filtered.map(rt => {
+  list.innerHTML = filtered.map(function(rt) {
     const link = PWA + '?code=' + rt.route_code;
     const vendoCount = rt.notes ? (function(){ try { return JSON.parse(rt.notes).length; } catch(e) { return '?'; }})() : '?';
     const badgeCls = rt.status === 'completed' ? 'completed' : 'active';
-    const qrUrl = 'https://api.qrserver.com/v1/create-qr-code/?size=140x140&data=' + encodeURIComponent(link);
-    return '<div class="rt-card">' +
-      '<div class="rt-header"><span class="rt-code">' + rt.route_code + '</span><span class="rt-badge ' + badgeCls + '">' + (rt.status||'active') + '</span></div>' +
-      '<div class="rt-meta">Collector: <b>' + rt.collector + '</b> &nbsp;|&nbsp; Date: ' + (rt.route_date||'—') + ' &nbsp;|&nbsp; Area: ' + (rt.area||'—') + '</div>' +
-      '<div class="rt-meta" style="color:#9ca3af;font-size:10px;">Created: ' + (rt.created_at ? new Date(rt.created_at).toLocaleString('en-PH',{month:'short',day:'numeric',year:'numeric',hour:'2-digit',minute:'2-digit',hour12:true}) : '—') + '</div>' +
-      '<div class="rt-vendos">Vendos: ' + vendoCount + '</div>' +
-      '<a class="rt-link" href="' + link + '" target="_blank">' + link + '</a>' +
-      '<div id="rtqr-' + rt.route_code + '" style="display:none;text-align:center;margin:8px 0;">' +
-        '<img src="' + qrUrl + '" style="border-radius:6px;border:1px solid #e5e7eb;">' +
-        '<div style="font-size:9px;color:#6b7280;margin-top:4px;">Scan to open Harvest PWA</div>' +
-      '</div>' +
-      '<div class="rt-actions">' +
-        '<button class="rt-btn" onclick="navigator.clipboard.writeText(\'' + link + '\').then(function(){alert(\'Link copied!\')})">📋 Copy link</button>' +
-        '<button class="rt-btn" onclick="navigator.clipboard.writeText('' + link + '').then(function(){alert('Link copied!')})">Copy link</button>' +
-        '<button class="rt-btn blue" onclick="addVendosToRoute(\'' + rt.route_code + '\')">' + '+ Add vendos</button>' +
-        '<button class="rt-btn" style="background:#f0fdf4;color:#16a34a;border-color:#86efac;" onclick="toggleRouteSummary(\'' + rt.route_code + '\',this)">📊 Summary</button>' +
-        '<button class="rt-btn red" onclick="markRouteComplete(\'' + rt.route_code + '\')">✅ Complete</button>' +
-      '</div>' +
-      '<div id="rtsum-' + rt.route_code + '" style="display:none;"></div>' +
-    '</div>';
+    const createdStr = rt.created_at ? new Date(rt.created_at).toLocaleString('en-PH',{month:'short',day:'numeric',year:'numeric',hour:'2-digit',minute:'2-digit',hour12:true}) : '—';
+    return [
+      '<div class="rt-card">',
+        '<div class="rt-header">',
+          '<span class="rt-code">' + rt.route_code + '</span>',
+          '<span class="rt-badge ' + badgeCls + '">' + (rt.status||'active') + '</span>',
+        '</div>',
+        '<div class="rt-meta">Collector: <b>' + rt.collector + '</b> | Date: ' + (rt.route_date||'—') + ' | Area: ' + (rt.area||'—') + '</div>',
+        '<div class="rt-meta" style="color:#9ca3af;font-size:10px;">Created: ' + createdStr + '</div>',
+        '<div class="rt-vendos">Vendos in route: ' + vendoCount + '</div>',
+        '<a class="rt-link" href="' + link + '" target="_blank">' + link + '</a>',
+        '<div class="rt-actions">',
+          '<button class="rt-btn" onclick="copyRouteLink(' + JSON.stringify(link) + ')">📋 Copy link</button>',
+          '<button class="rt-btn blue" onclick="addVendosToRoute(' + JSON.stringify(rt.route_code) + ')">+ Add vendos</button>',
+          '<button class="rt-btn" style="background:#f0fdf4;color:#16a34a;border-color:#86efac;" onclick="toggleRouteSummary(' + JSON.stringify(rt.route_code) + ',this)">📊 Summary</button>',
+          '<button class="rt-btn red" onclick="markRouteComplete(' + JSON.stringify(rt.route_code) + ')">✅ Complete</button>',
+        '</div>',
+        '<div id="rtsum-' + rt.route_code + '" style="display:none;"></div>',
+      '</div>'
+    ].join('');
   }).join('');
-  // Add summary toggle button
-  filtered.forEach(rt => {
-    const actDiv = document.querySelector('#rtsum-' + rt.route_code + '')?.previousElementSibling;
+}
+
+function copyRouteLink(link) {
+  navigator.clipboard.writeText(link).then(function() { alert('Link copied!'); }).catch(function() {
+    prompt('Copy this link:', link);
   });
 }
+
 
 function filterRoutes(f, btn) {
   _routeFilter = f;
