@@ -209,7 +209,7 @@ tr:hover td{background:#f8f9ff;cursor:pointer}
       <span class="nl">Vendos</span>
     </button>
     <!-- Harvest -->
-    <button onclick="showP('harvest',this);setTimeout(function(){if(typeof hvLoadVendos==='function')hvLoadVendos();var fab=document.getElementById('hv-refresh-fab');if(fab)fab.classList.add('visible');},300)">
+    <button onclick="showP('harvest',this);setTimeout(function(){if(typeof hvLoadVendos==='function')hvLoadVendos();setTimeout(()=>{if(typeof hvRefreshPendingRoutes==='function')hvRefreshPendingRoutes();},800);var fab=document.getElementById('hv-refresh-fab');if(fab)fab.classList.add('visible');},300)">
       <div class="ni" style="background:#d1fae5">
         <svg width="13" height="13" viewBox="0 0 24 24" fill="none"><path d="M12 3 C8 3 4 7 4 12 C4 16 8 20 12 20 C16 20 20 16 20 12" stroke="#16a34a" stroke-width="2" fill="none" stroke-linecap="round"/><path d="M12 3 C14 6 18 6 20 3" stroke="#16a34a" stroke-width="2" fill="none" stroke-linecap="round"/><path d="M12 8 L12 16 M9 13 L12 16 L15 13" stroke="#16a34a" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" fill="none"/></svg>
       </div>
@@ -1912,15 +1912,123 @@ function hvMarkDone(btn) {
 }
 
 /* ─── CONFIRM ROUTE ─── */
-function hvConfirmRoute() {
-  const col  = document.getElementById('hv-collector')?.value?.trim();
-  const dt   = document.getElementById('hv-date')?.value;
-  const n    = document.querySelectorAll('#hv-rv-scroll .hv-rv').length;
+async function hvConfirmRoute() {
+  const col = document.getElementById('hv-collector')?.value?.trim();
+  const dt  = document.getElementById('hv-date')?.value;
+  const rows = document.querySelectorAll('#hv-rv-scroll .hv-rv');
   if (!col) { alert('Please enter a collector name first.'); document.getElementById('hv-collector')?.focus(); return; }
   if (!dt)  { alert('Please select a harvest date.'); document.getElementById('hv-date')?.focus(); return; }
-  if (!n)   { alert('No vendos added to route yet. Click + add on vendos from the center list.'); return; }
-  const code = Math.random().toString(36).substring(2, 8).toUpperCase();
-  alert(`✅ Route confirmed!\n\nRoute code: ${code}\nCollector: ${col}\nDate: ${dt}\nVendos: ${n}\n\nShare this code with ${col}.`);
+  if (!rows.length) { alert('No vendos added to route yet.'); return; }
+
+  const code = Math.random().toString(36).substring(2,8).toUpperCase();
+  const areaEl = document.getElementById('hv-area-sel');
+  const area = areaEl ? areaEl.value : 'All areas';
+
+  // Collect vendo data from route panel rows
+  const vendos = [];
+  rows.forEach(r => {
+    vendos.push({
+      vid:   r.dataset.rvid || '',
+      sheet: r.querySelector('.hv-rv-sheet')?.textContent || '',
+      tg:    r.querySelector('.hv-rv-tg-ok, .hv-rv-tg-no')?.textContent?.replace('TG: ','').replace(' ✓','').replace(' ⚠','') || '',
+      area:  r.querySelector('.hv-rv-area')?.textContent || ''
+    });
+  });
+
+  const btn = document.querySelector('.hv-rc-bottom button');
+  if (btn) { btn.textContent = 'Saving…'; btn.disabled = true; }
+
+  try {
+    const headers = {
+      'apikey': _KEY, 'Authorization': 'Bearer ' + _KEY,
+      'Content-Type': 'application/json', 'Prefer': 'return=representation'
+    };
+
+    // Insert route
+    const r1 = await fetch(_SB + '/rest/v1/routes', {
+      method: 'POST', headers,
+      body: JSON.stringify({
+        route_code: code, collector: col,
+        harvest_date: dt, area: area,
+        vendos: vendos, status: 'active'
+      })
+    });
+    if (!r1.ok) throw new Error('Route save failed: ' + r1.status);
+    const routeData = await r1.json();
+    const routeId = routeData[0]?.id;
+
+    // Insert route_items
+    if (routeId) {
+      const items = vendos.map(v => ({
+        route_id: routeId, tg_name: v.tg,
+        sheet_name: v.sheet, area: v.area, status: 'pending'
+      }));
+      await fetch(_SB + '/rest/v1/route_items', {
+        method: 'POST', headers: {...headers, 'Prefer': 'return=minimal'},
+        body: JSON.stringify(items)
+      });
+    }
+
+    // Show success with route code
+    const toast = document.getElementById('hv-refresh-toast');
+    if (toast) {
+      toast.innerHTML = `✅ Route <b>${code}</b> saved — share with ${col}`;
+      toast.classList.add('show');
+      setTimeout(() => { toast.classList.remove('show'); toast.innerHTML = 'Vendos refreshed'; }, 6000);
+    }
+
+    // Show code in a popup
+    const pwa = 'https://spawninternet.github.io/VendoMonitor/harvest.html';
+    const msg = `✅ Route confirmed!
+
+Route code: ${code}
+Collector: ${col}
+Date: ${dt}
+Vendos: ${vendos.length}
+
+PWA link:
+${pwa}?code=${code}
+
+Share this with ${col}.`;
+    alert(msg);
+
+    // Update pending routes panel
+    hvRefreshPendingRoutes();
+    hvClearRoute();
+
+  } catch(e) {
+    alert('❌ Failed to save route: ' + e.message);
+  } finally {
+    if (btn) { btn.textContent = '✅ Confirm route →'; btn.disabled = false; }
+  }
+}
+
+async function hvRefreshPendingRoutes() {
+  const panel = document.getElementById('hv-pscr');
+  if (!panel) return;
+  try {
+    const r = await fetch(_SB + '/rest/v1/routes?status=eq.active&order=created_at.desc&limit=20', {
+      headers: { 'apikey': _KEY, 'Authorization': 'Bearer ' + _KEY }
+    });
+    const data = await r.json();
+    const cnt = document.querySelector('.hv-rp-cnt');
+    if (cnt) cnt.textContent = data.length || 0;
+    if (!data.length) {
+      panel.innerHTML = '<div style="padding:16px;font-size:10px;color:#9ca3af;text-align:center;">No active routes</div>';
+      return;
+    }
+    panel.innerHTML = data.map(rt => `
+      <div style="padding:7px 8px;border-bottom:1px solid #f0f0f0;cursor:pointer;" onclick="hvShowRouteDetail('${rt.route_code}')">
+        <div style="font-size:11px;font-weight:700;color:#1e3cb8;">${rt.route_code}</div>
+        <div style="font-size:9px;color:#6b7280;">${rt.collector} · ${rt.harvest_date}</div>
+        <div style="font-size:9px;color:#6b7280;">${Array.isArray(rt.vendos)?rt.vendos.length:0} vendos · ${rt.area||'all areas'}</div>
+        <span style="font-size:8px;padding:1px 5px;border-radius:6px;background:#fef9c3;color:#854d0e;font-weight:700;">${rt.status}</span>
+      </div>`).join('');
+  } catch(e) { console.error('Pending routes error:', e); }
+}
+
+function hvShowRouteDetail(code) {
+  alert('Route: ' + code + '\nOpen harvest.html?code=' + code + ' to view collector progress.');
 }
 
 function hvClearRoute() {
