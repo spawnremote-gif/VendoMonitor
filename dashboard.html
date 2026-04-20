@@ -1037,20 +1037,26 @@ tr:hover td{background:#f8f9ff;cursor:pointer}
 
 <!-- DETAIL POPUP -->
 <div class="hv-popbg" id="hv-detail-pop">
-<div style="width:440px;border-radius:12px;overflow:hidden;box-shadow:0 16px 48px rgba(0,0,0,.22);">
-  <div style="background:#1e3cb8;padding:14px 16px;display:flex;align-items:flex-start;justify-content:space-between;gap:10px;">
+<div style="width:460px;border-radius:12px;overflow:hidden;box-shadow:0 16px 48px rgba(0,0,0,.22);max-height:92vh;overflow-y:auto;">
+
+  <!-- Blue header -->
+  <div style="background:#1e3cb8;padding:14px 16px;display:flex;align-items:flex-start;justify-content:space-between;gap:10px;position:sticky;top:0;z-index:2;">
     <div style="min-width:0;">
       <div style="font-size:15px;font-weight:700;color:#fff;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;" id="hv-dp-title">Vendo details</div>
       <div style="font-size:10px;color:rgba(255,255,255,.7);margin-top:3px;" id="hv-dp-sub"></div>
     </div>
     <button onclick="document.getElementById('hv-detail-pop').classList.remove('show')" style="flex-shrink:0;width:28px;height:28px;border-radius:50%;border:1.5px solid rgba(255,255,255,.4);background:rgba(255,255,255,.15);color:#fff;font-size:16px;cursor:pointer;display:flex;align-items:center;justify-content:center;">×</button>
   </div>
+
   <div id="hv-dp-alert" style="display:none;background:#fef2f2;border-left:4px solid #dc2626;padding:8px 14px;font-size:11px;color:#991b1b;"></div>
+
   <div style="background:#fff;padding:14px 16px;display:flex;flex-direction:column;gap:10px;">
+
+    <!-- Info cards -->
     <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">
-      <div style="background:#eef2ff;border-radius:8px;padding:10px 12px;border-left:3px solid var(--blue);">
+      <div style="background:#eef2ff;border-radius:8px;padding:10px 12px;border-left:3px solid #1e3cb8;">
         <div style="font-size:8px;font-weight:700;color:#6366f1;text-transform:uppercase;letter-spacing:.05em;margin-bottom:4px;">Sheet name</div>
-        <div style="font-size:13px;font-weight:700;color:var(--blue);word-break:break-word;" id="hv-dp-sheet">—</div>
+        <div style="font-size:13px;font-weight:700;color:#1e3cb8;word-break:break-word;" id="hv-dp-sheet">—</div>
         <div style="font-size:9px;color:#818cf8;margin-top:2px;">Google Sheet record</div>
       </div>
       <div style="background:#f5f3ff;border-radius:8px;padding:10px 12px;border-left:3px solid #7c3aed;">
@@ -1067,6 +1073,60 @@ tr:hover td{background:#f8f9ff;cursor:pointer}
         <div style="font-size:13px;font-weight:700;color:#4338ca;" id="hv-dp-area">—</div>
       </div>
     </div>
+
+    <!-- ── EDIT SECTION ── -->
+    <div style="border:1.5px solid #e5e7eb;border-radius:10px;overflow:hidden;">
+
+      <!-- Edit header -->
+      <div style="background:#f8faff;padding:8px 12px;border-bottom:1px solid #e5e7eb;display:flex;align-items:center;gap:6px;">
+        <span style="font-size:10px;font-weight:700;color:#1e3cb8;text-transform:uppercase;letter-spacing:.05em;">✏️ Edit vendo info</span>
+      </div>
+
+      <div style="padding:10px 12px;display:flex;flex-direction:column;gap:10px;">
+
+        <!-- Area change -->
+        <div>
+          <div style="font-size:9px;font-weight:700;color:#6b7280;text-transform:uppercase;letter-spacing:.04em;margin-bottom:4px;">Change area</div>
+          <select id="hv-dp-area-sel" style="width:100%;padding:7px 10px;border:1.5px solid #c7d2fe;border-radius:7px;font-size:12px;font-weight:600;color:#1e3cb8;font-family:inherit;background:#fff;outline:none;cursor:pointer;">
+            <option value="">— select area —</option>
+            <option value="DAPITAN">DAPITAN</option>
+            <option value="DIPOLOG">DIPOLOG</option>
+            <option value="SINDANGAN">SINDANGAN</option>
+            <option value="ROXAS">ROXAS</option>
+            <option value="POLANCO">POLANCO</option>
+            <option value="SINAMAN">SINAMAN</option>
+            <option value="MINAOG">MINAOG</option>
+            <option value="MIX AREAS">MIX AREAS</option>
+          </select>
+        </div>
+
+        <!-- Sheet name search -->
+        <div style="position:relative;">
+          <div style="font-size:9px;font-weight:700;color:#6b7280;text-transform:uppercase;letter-spacing:.04em;margin-bottom:4px;">Search / change sheet name</div>
+          <input type="text" id="hv-dp-sheet-inp"
+            placeholder="Type name to search Excel records..."
+            oninput="hvSearchSheetName(this.value)"
+            style="width:100%;padding:8px 10px;border:1.5px solid #c7d2fe;border-radius:7px;font-size:12px;font-family:inherit;outline:none;color:#111827;box-sizing:border-box;">
+          <div id="hv-dp-sheet-results" style="display:none;position:absolute;top:100%;left:0;right:0;background:#fff;border:1.5px solid #c7d2fe;border-radius:0 0 8px 8px;max-height:160px;overflow-y:auto;z-index:10;box-shadow:0 4px 12px rgba(0,0,0,.12);"></div>
+        </div>
+
+        <!-- TG name search -->
+        <div style="position:relative;">
+          <div style="font-size:9px;font-weight:700;color:#6b7280;text-transform:uppercase;letter-spacing:.04em;margin-bottom:4px;">Search / change TG name</div>
+          <input type="text" id="hv-dp-tg-inp"
+            placeholder="Type to search TG names from Supabase..."
+            oninput="hvSearchTGName(this.value)"
+            style="width:100%;padding:8px 10px;border:1.5px solid #ddd6fe;border-radius:7px;font-size:12px;font-family:inherit;outline:none;color:#111827;box-sizing:border-box;">
+          <div id="hv-dp-tg-results" style="display:none;position:absolute;top:100%;left:0;right:0;background:#fff;border:1.5px solid #ddd6fe;border-radius:0 0 8px 8px;max-height:160px;overflow-y:auto;z-index:10;box-shadow:0 4px 12px rgba(0,0,0,.12);"></div>
+        </div>
+
+        <!-- Save changes button -->
+        <button onclick="hvSaveDetailEdits()" style="width:100%;padding:9px;background:#1e3cb8;color:#fff;border:none;border-radius:7px;font-size:12px;font-weight:700;cursor:pointer;font-family:inherit;">💾 Save changes</button>
+
+      </div>
+    </div>
+
+    <!-- Schedule -->
     <div style="background:#f0f4ff;border:1.5px solid #c7d2fe;border-radius:8px;padding:10px 12px;">
       <div style="font-size:9px;font-weight:700;color:#1e3cb8;text-transform:uppercase;letter-spacing:.05em;margin-bottom:8px;display:flex;align-items:center;">
         ⏰ Harvest schedule
@@ -1081,12 +1141,15 @@ tr:hover td{background:#f8f9ff;cursor:pointer}
       </div>
       <div style="font-size:9px;color:#818cf8;margin-top:5px;" id="hv-dp-next-due">Next harvest due: —</div>
     </div>
+
+    <!-- Action buttons -->
     <div style="display:flex;gap:7px;flex-wrap:wrap;">
       <button onclick="hvGenQRFromDetail()" id="hv-dp-qr-btn" style="flex:1;padding:9px;background:#eef2ff;color:#1e3cb8;border:1.5px solid #c7d2fe;border-radius:7px;font-size:11px;font-weight:700;cursor:pointer;font-family:inherit;">📱 QR</button>
       <button onclick="hvOpenMatchFromDetail()" style="flex:1;padding:9px;background:#f5f3ff;color:#7c3aed;border:1.5px solid #ddd6fe;border-radius:7px;font-size:11px;font-weight:700;cursor:pointer;font-family:inherit;">💡 Match</button>
       <button onclick="hvNoteFromDetail()" style="flex:1;padding:9px;background:#fffbeb;color:#d97706;border:1.5px solid #fcd34d;border-radius:7px;font-size:11px;font-weight:700;cursor:pointer;font-family:inherit;">📝 Note</button>
       <button onclick="hvAddFromDetail()" style="width:100%;padding:9px;background:#16a34a;color:#fff;border:none;border-radius:7px;font-size:11px;font-weight:700;cursor:pointer;font-family:inherit;">+ Add to route</button>
     </div>
+
   </div>
 </div>
 </div>
@@ -1135,6 +1198,10 @@ tr:hover td{background:#f8f9ff;cursor:pointer}
 
 
 <script>
+
+
+
+
 
 
 
@@ -1534,6 +1601,155 @@ async function hvLoadVendos() {
 }
 
 /* ─── DETAIL POPUP ─── */
+/* ─── DETAIL POPUP EDIT FUNCTIONS ─── */
+
+// Sheet names loaded from Supabase for search
+var _hvSheetNames = []; // { sheet_name, area, vlan }
+var _hvSelectedSheetName = '';
+var _hvSelectedTGName = '';
+
+async function hvLoadSheetNamesCache() {
+  if (_hvSheetNames.length) return;
+  try {
+    const r = await fetch(`${_SB}/rest/v1/vendos?select=sheet_name,area,vlan,tg_name&sheet_name=not.is.null&limit=2000`, {
+      headers: { 'apikey': _KEY, 'Authorization': 'Bearer ' + _KEY }
+    });
+    const data = await r.json();
+    _hvSheetNames = data || [];
+  } catch(e) { console.error('Sheet names cache error:', e); }
+}
+
+function hvSearchSheetName(q) {
+  const box = document.getElementById('hv-dp-sheet-results');
+  if (!box) return;
+  if (!q || q.length < 2) { box.style.display = 'none'; return; }
+  const ql = q.toLowerCase();
+  // Search in cache
+  const matches = _hvSheetNames
+    .filter(v => v.sheet_name && v.sheet_name.toLowerCase().includes(ql))
+    .slice(0, 15);
+  if (!matches.length) { box.innerHTML = '<div style="padding:8px 10px;font-size:11px;color:#9ca3af;">No matches found</div>'; box.style.display = ''; return; }
+  box.innerHTML = matches.map(v => `
+    <div onclick="hvSelectSheetName('${v.sheet_name.replace(/'/g,"\'")}','${v.area||''}')"
+      style="padding:8px 10px;cursor:pointer;border-bottom:1px solid #f0f0f0;font-size:11px;"
+      onmouseover="this.style.background='#eef2ff'" onmouseout="this.style.background=''">
+      <div style="font-weight:600;color:#1e3cb8;">${v.sheet_name}</div>
+      <div style="font-size:9px;color:#6b7280;">${v.area||'—'} · VLAN ${v.vlan||'?'}</div>
+    </div>`).join('');
+  box.style.display = '';
+}
+
+function hvSelectSheetName(name, area) {
+  _hvSelectedSheetName = name;
+  document.getElementById('hv-dp-sheet-inp').value = name;
+  document.getElementById('hv-dp-sheet-results').style.display = 'none';
+  // Auto-set area if currently empty
+  const areaSel = document.getElementById('hv-dp-area-sel');
+  if (areaSel && (!areaSel.value || areaSel.value === '') && area) {
+    areaSel.value = area;
+  }
+}
+
+async function hvSearchTGName(q) {
+  const box = document.getElementById('hv-dp-tg-results');
+  if (!box) return;
+  if (!q || q.length < 2) { box.style.display = 'none'; return; }
+  try {
+    const r = await fetch(`${_SB}/rest/v1/vendos?select=tg_name,area,vlan&tg_name=ilike.*${encodeURIComponent(q)}*&limit=15`, {
+      headers: { 'apikey': _KEY, 'Authorization': 'Bearer ' + _KEY }
+    });
+    const data = await r.json();
+    if (!data || !data.length) {
+      box.innerHTML = '<div style="padding:8px 10px;font-size:11px;color:#9ca3af;">No TG names found</div>';
+      box.style.display = '';
+      return;
+    }
+    box.innerHTML = data.map(v => `
+      <div onclick="hvSelectTGName('${(v.tg_name||'').replace(/'/g,"\'")}','${v.area||''}')"
+        style="padding:8px 10px;cursor:pointer;border-bottom:1px solid #f0f0f0;font-size:11px;"
+        onmouseover="this.style.background='#f5f3ff'" onmouseout="this.style.background=''">
+        <div style="font-weight:600;color:#7c3aed;">${v.tg_name}</div>
+        <div style="font-size:9px;color:#6b7280;">${v.area||'—'} · VLAN ${v.vlan||'?'}</div>
+      </div>`).join('');
+    box.style.display = '';
+  } catch(e) { console.error('TG search error:', e); }
+}
+
+function hvSelectTGName(name, area) {
+  _hvSelectedTGName = name;
+  document.getElementById('hv-dp-tg-inp').value = name;
+  document.getElementById('hv-dp-tg-results').style.display = 'none';
+}
+
+async function hvSaveDetailEdits() {
+  const vid     = hvCurrentDetail?.id;
+  const areaSel = document.getElementById('hv-dp-area-sel')?.value;
+  const sheetInp = document.getElementById('hv-dp-sheet-inp')?.value?.trim();
+  const tgInp   = document.getElementById('hv-dp-tg-inp')?.value?.trim();
+
+  if (!vid) return;
+  if (!areaSel && !sheetInp && !tgInp) {
+    const toast = document.getElementById('hv-refresh-toast');
+    if (toast) { toast.textContent = '⚠ No changes to save'; toast.classList.add('show'); setTimeout(()=>toast.classList.remove('show'),2000); }
+    return;
+  }
+
+  const updates = {};
+  if (areaSel)  updates.area       = areaSel;
+  if (sheetInp) updates.sheet_name = sheetInp;
+  if (tgInp)    updates.tg_name    = tgInp;
+
+  try {
+    const r = await fetch(`${_SB}/rest/v1/vendos?id=eq.${vid}`, {
+      method: 'PATCH',
+      headers: { 'apikey': _KEY, 'Authorization': 'Bearer ' + _KEY, 'Content-Type': 'application/json', 'Prefer': 'return=minimal' },
+      body: JSON.stringify(updates)
+    });
+    if (!r.ok) throw new Error('PATCH failed: ' + r.status);
+
+    // Update local row
+    const row = document.querySelector(`#vc-scroll .hv-vr[data-vid="${vid}"]`);
+    if (row) {
+      if (updates.area)       { row.dataset.area  = updates.area.toUpperCase(); }
+      if (updates.sheet_name) { row.dataset.sheet = updates.sheet_name; }
+      if (updates.tg_name)    { row.dataset.tg    = updates.tg_name; }
+    }
+
+    // Update detail popup display
+    if (updates.area)       document.getElementById('hv-dp-area').textContent  = updates.area + ' · ' + (hvCurrentDetail?.vlan || '—');
+    if (updates.sheet_name) document.getElementById('hv-dp-sheet').textContent = updates.sheet_name;
+    if (updates.tg_name)    document.getElementById('hv-dp-tg').textContent    = updates.tg_name;
+
+    // Clear inputs
+    document.getElementById('hv-dp-sheet-inp').value = '';
+    document.getElementById('hv-dp-tg-inp').value    = '';
+    document.getElementById('hv-dp-area-sel').value  = '';
+    _hvSelectedSheetName = '';
+    _hvSelectedTGName    = '';
+
+    const toast = document.getElementById('hv-refresh-toast');
+    if (toast) {
+      toast.textContent = '✅ Saved — refreshing list';
+      toast.classList.add('show');
+      setTimeout(() => toast.classList.remove('show'), 2500);
+    }
+    document.getElementById('hv-detail-pop').classList.remove('show');
+    await hvLoadVendos();
+  } catch(e) {
+    alert('❌ Save failed: ' + e.message);
+  }
+}
+
+// Close dropdowns when clicking outside
+document.addEventListener('click', function(e) {
+  if (!e.target.closest('#hv-detail-pop')) {
+    const sr = document.getElementById('hv-dp-sheet-results');
+    const tr = document.getElementById('hv-dp-tg-results');
+    if (sr) sr.style.display = 'none';
+    if (tr) tr.style.display = 'none';
+  }
+});
+
 function hvOpenDetailFromRow(row) {
   const d = row.dataset;
   hvCurrentDetail = {
@@ -1554,6 +1770,19 @@ function hvOpenDetailFromRow(row) {
   if (alertEl) alertEl.style.display = 'none';
   // Load schedule for this vendo
   hvLoadDetailSchedule(d.vid);
+  // Populate edit fields
+  const areaSel = document.getElementById('hv-dp-area-sel');
+  if (areaSel) areaSel.value = d.area || 'MIX AREAS';
+  const sheetInp = document.getElementById('hv-dp-sheet-inp');
+  if (sheetInp) sheetInp.value = d.sheet || '';
+  const tgInp = document.getElementById('hv-dp-tg-inp');
+  if (tgInp) tgInp.value = d.tg || '';
+  // Hide dropdowns
+  const sr = document.getElementById('hv-sheet-results');
+  const tr = document.getElementById('hv-tg-results');
+  if (sr) sr.style.display = 'none';
+  if (tr) tr.style.display = 'none';
+
   // QR only available if fully matched (both sheet + TG name confirmed)
   const qrBtn = document.getElementById('hv-dp-qr-btn');
   if (qrBtn) {
@@ -1561,6 +1790,14 @@ function hvOpenDetailFromRow(row) {
     qrBtn.style.display = isMatched ? '' : 'none';
     qrBtn.title = isMatched ? 'Generate QR — match confirmed ✅' : 'QR only available after match is confirmed';
   }
+  // Pre-set area dropdown and clear search inputs
+  const areaSel = document.getElementById('hv-dp-area-sel');
+  if (areaSel) areaSel.value = (d.area || '').toUpperCase();
+  const si = document.getElementById('hv-dp-sheet-inp'); if (si) si.value = '';
+  const ti = document.getElementById('hv-dp-tg-inp');   if (ti) ti.value = '';
+  const sr = document.getElementById('hv-dp-sheet-results'); if (sr) sr.style.display = 'none';
+  const tr = document.getElementById('hv-dp-tg-results');   if (tr) tr.style.display = 'none';
+  hvLoadSheetNamesCache();
   document.getElementById('hv-detail-pop').classList.add('show');
 }
 
@@ -2138,6 +2375,136 @@ function hvAddNote() {
   inp.value = '';
 }
 
+
+/* ─── EXCEL SHEET NAME LIST (for search) ─── */
+const _SHEET_NAMES = [{"n": "Aileen Ingles Piso wifi", "a": "DAPITAN", "v": 10}, {"n": "Adlawon Spawn Internet", "a": "DAPITAN", "v": 11}, {"n": "Binondo", "a": "DAPITAN", "v": 12}, {"n": "Tandoy", "a": "DAPITAN", "v": 13}, {"n": "Rocamora", "a": "DAPITAN", "v": 14}, {"n": "Magtuba", "a": "DAPITAN", "v": 15}, {"n": "Morgia", "a": "DAPITAN", "v": 16}, {"n": "Bibora/ Birano", "a": "DAPITAN", "v": 17}, {"n": "Obordo", "a": "DAPITAN", "v": 18}, {"n": "Bacayan", "a": "DAPITAN", "v": 19}, {"n": "Retada", "a": "DAPITAN", "v": 20}, {"n": "Cinco", "a": "DAPITAN", "v": 21}, {"n": "Binondo Fruit Stand/Lilibeth Binondo", "a": "DAPITAN", "v": 22}, {"n": "Padillo (Talisay)", "a": "DAPITAN", "v": 23}, {"n": "Quime-quime", "a": "DAPITAN", "v": 24}, {"n": "Onis Piso wifi", "a": "DAPITAN", "v": 25}, {"n": "Koracha /Labadlabad", "a": "DAPITAN", "v": 25}, {"n": "Padao", "a": "DAPITAN", "v": 26}, {"n": "BH Piso Wifi/Tacujan", "a": "DAPITAN", "v": 29}, {"n": "Pacaro (Chloe Store)", "a": "DAPITAN", "v": 29}, {"n": "Allan Navasca", "a": "DAPITAN", "v": 30}, {"n": "Montenegro Piso Wifi", "a": "DAPITAN", "v": 31}, {"n": "Alona Laput / Island", "a": "DAPITAN", "v": 32}, {"n": "Larry Laput", "a": "DAPITAN", "v": 33}, {"n": "Gajetila (Polo)", "a": "DAPITAN", "v": 34}, {"n": "Tumapon (Polo)", "a": "DAPITAN", "v": 35}, {"n": "Lede A. Recamara", "a": "DAPITAN", "v": 36}, {"n": "Baguio", "a": "DAPITAN", "v": 37}, {"n": "Dequito", "a": "DAPITAN", "v": 38}, {"n": "Albina", "a": "DAPITAN", "v": 40}, {"n": "Nonita Abila", "a": "DAPITAN", "v": 41}, {"n": "Montederamos", "a": "DAPITAN", "v": 42}, {"n": "Sagapsapan/ Wateree", "a": "DAPITAN", "v": 43}, {"n": "Vicada", "a": "DAPITAN", "v": 44}, {"n": "Alpheus Viadnes / Mark Van", "a": "DAPITAN", "v": 45}, {"n": "Sarita", "a": "DAPITAN", "v": 46}, {"n": "Emay/Ema Cagatan", "a": "DAPITAN", "v": 47}, {"n": "Acopiado", "a": "DAPITAN", "v": 48}, {"n": "Lorna Salon", "a": "DAPITAN", "v": 49}, {"n": "Nila Carreon", "a": "DAPITAN", "v": 50}, {"n": "Sagayan", "a": "DAPITAN", "v": 51}, {"n": "Cadano", "a": "DAPITAN", "v": 52}, {"n": "Rico Calaclan", "a": "DAPITAN", "v": 53}, {"n": "Bonocan (Polo)", "a": "DAPITAN", "v": 54}, {"n": "Alexander Batal", "a": "DAPITAN", "v": 55}, {"n": "Buenalyn Abila", "a": "DAPITAN", "v": 56}, {"n": "Cyril Cabilin", "a": "DAPITAN", "v": 57}, {"n": "Allan Gomisong", "a": "DAPITAN", "v": 58}, {"n": "Charita Sumampong", "a": "DAPITAN", "v": 59}, {"n": "Adriatico Lugo/Josephine", "a": "DAPITAN", "v": 60}, {"n": "CJ Balladares", "a": "DAPITAN", "v": 61}, {"n": "Aisha Igot Talisay", "a": "DAPITAN", "v": 62}, {"n": "Gardo Banggayan", "a": "DAPITAN", "v": 63}, {"n": "Ruiz", "a": "DAPITAN", "v": 64}, {"n": "Jenelyn Buluan", "a": "DAPITAN", "v": 65}, {"n": "Jofel Acevedo", "a": "DAPITAN", "v": 66}, {"n": "Ruben/Jocelyn  Sy", "a": "DAPITAN", "v": 67}, {"n": "Abegail Malolot", "a": "DAPITAN", "v": 68}, {"n": "Dr. Acaylar", "a": "DAPITAN", "v": 69}, {"n": "Erick Castro", "a": "DAPITAN", "v": 70}, {"n": "Danilo Jumuad", "a": "DAPITAN", "v": 71}, {"n": "Analyn Ferigura", "a": "DAPITAN", "v": 72}, {"n": "Peachy Pestañas", "a": "DAPITAN", "v": 73}, {"n": "Luyo Adasa Apartment, Dool Boulevard", "a": "DAPITAN", "v": 74}, {"n": "Agda (Polo)", "a": "DAPITAN", "v": 75}, {"n": "Rene Labe", "a": "DAPITAN", "v": 76}, {"n": "Rosa Gajetila", "a": "DAPITAN", "v": 77}, {"n": "Angelita Abitona", "a": "DAPITAN", "v": 78}, {"n": "Renalyn Abe", "a": "DAPITAN", "v": 80}, {"n": "Jan2x Bida Masaong Pat", "a": "DAPITAN", "v": 81}, {"n": "Adelaida Hilot", "a": "DAPITAN", "v": 82}, {"n": "Magaro", "a": "DAPITAN", "v": 83}, {"n": "Gretyl Bagsican", "a": "DAPITAN", "v": 84}, {"n": "Irene Lactuan", "a": "DAPITAN", "v": 85}, {"n": "Cherryl Elcamel", "a": "DAPITAN", "v": 86}, {"n": "John Ranlie Balagot", "a": "DAPITAN", "v": 87}, {"n": "Adong Jarmin", "a": "DAPITAN", "v": 89}, {"n": "Ignacio Adlawon", "a": "DAPITAN", "v": 90}, {"n": "Virginia Pakcial", "a": "DAPITAN", "v": 91}, {"n": "Lenith Ubanan", "a": "DAPITAN", "v": 92}, {"n": "Angelo Balladares", "a": "DAPITAN", "v": 93}, {"n": "Jerome Arcadio", "a": "DAPITAN", "v": 94}, {"n": "Tomcitsa Narvaez", "a": "DAPITAN", "v": 95}, {"n": "Joanne Bagatua", "a": "DAPITAN", "v": 96}, {"n": "Omar B. Sampang", "a": "DAPITAN", "v": 98}, {"n": "Wemher Acaylar", "a": "DAPITAN", "v": 99}, {"n": "Jovito Mahinay", "a": "DAPITAN", "v": 100}, {"n": "Amy Gumahad/Abad", "a": "DAPITAN", "v": 101}, {"n": "Almayo Tacbaya", "a": "DAPITAN", "v": 102}, {"n": "Emily Lopecillo", "a": "DAPITAN", "v": 103}, {"n": "Jeanette Nemeñio", "a": "DAPITAN", "v": 104}, {"n": "Elvie Cinco", "a": "DAPITAN", "v": 106}, {"n": "JRD boulevard/ Jrd Eatery", "a": "DAPITAN", "v": 107}, {"n": "JRD JRMSU", "a": "DAPITAN", "v": 108}, {"n": "Rosemarie Rudas", "a": "DAPITAN", "v": 109}, {"n": "Francisco Saguin/BH", "a": "DAPITAN", "v": 110}, {"n": "Big Boss SAguin", "a": "DAPITAN", "v": 111}, {"n": "Sarah A. Laput", "a": "DAPITAN", "v": 112}, {"n": "Lisa Recamara", "a": "DAPITAN", "v": 113}, {"n": "Bea / Calasang Piso wifi", "a": "DAPITAN", "v": 114}, {"n": "Dangzkey Piso wifi", "a": "DAPITAN", "v": 115}, {"n": "Manong Polo Piso Wifi", "a": "DAPITAN", "v": 116}, {"n": "Mabelen S. Abucay", "a": "DAPITAN", "v": 117}, {"n": "Eslit", "a": "DAPITAN", "v": 118}, {"n": "Florita Sales", "a": "DAPITAN", "v": 119}, {"n": "Anselma Acedo", "a": "DAPITAN", "v": 120}, {"n": "Mayalyn Tagyam", "a": "DAPITAN", "v": 121}, {"n": "Julie Adriano 1", "a": "DAPITAN", "v": 122}, {"n": "Luciana Piso wifi", "a": "DAPITAN", "v": 123}, {"n": "Mary Gold Pancho / Beverly Elardo", "a": "DAPITAN", "v": 124}, {"n": "Chandy Eguia", "a": "DAPITAN", "v": 125}, {"n": "Junelyn Dinsay", "a": "DAPITAN", "v": 126}, {"n": "Flor A. Cabilin", "a": "DAPITAN", "v": 127}, {"n": "Baberlyn N. Verano", "a": "DAPITAN", "v": 128}, {"n": "Jacinto Acbayan", "a": "DAPITAN", "v": 129}, {"n": "Rosali Albaracin", "a": "DAPITAN", "v": 130}, {"n": "Carreon Caryl Piso Wifi", "a": "DAPITAN", "v": 131}, {"n": "Elda Lagasca Gahisan", "a": "DAPITAN", "v": 132}, {"n": "Grace M. Vitualla / Bulak Saldon", "a": "DAPITAN", "v": 133}, {"n": "Jeza Mae Galleposo Franco", "a": "DAPITAN", "v": 134}, {"n": "Joy O. Undoran", "a": "DAPITAN", "v": 135}, {"n": "Marlyn Obenieta", "a": "DAPITAN", "v": 136}, {"n": "Ryan Vista", "a": "DAPITAN", "v": 137}, {"n": "Adalin Simplicia", "a": "DAPITAN", "v": 138}, {"n": "Bayani Quezo Delfin", "a": "DAPITAN", "v": 139}, {"n": "Tambutso Stainless/Welding Bao2x", "a": "DAPITAN", "v": 140}, {"n": "Jocelyn Magbojos", "a": "DAPITAN", "v": 141}, {"n": "Erico Yurong", "a": "DAPITAN", "v": 142}, {"n": "Jolly Flor Callo", "a": "DAPITAN", "v": 143}, {"n": "Adasa 1", "a": "DAPITAN", "v": 144}, {"n": "Adasa 2", "a": "DAPITAN", "v": 145}, {"n": "Janet Balanay", "a": "DAPITAN", "v": 146}, {"n": "Romil M. Lopez", "a": "DAPITAN", "v": 147}, {"n": "Pirot Madera", "a": "DAPITAN", "v": 148}, {"n": "Lady Frech", "a": "DAPITAN", "v": 147}, {"n": "Arnaldo Bayron", "a": "DAPITAN", "v": 149}, {"n": "Grace O. Eyas", "a": "DAPITAN", "v": 150}, {"n": "Rovelyn Gubatan", "a": "DAPITAN", "v": 151}, {"n": "Ernie C. Lactuan", "a": "DAPITAN", "v": 152}, {"n": "Emelyn B. Andilab", "a": "DAPITAN", "v": 153}, {"n": "Ma. Elona B. Daguinotas", "a": "DAPITAN", "v": 154}, {"n": "Arnold Cadano", "a": "DAPITAN", "v": 155}, {"n": "Merlinda Atad", "a": "DAPITAN", "v": 156}, {"n": "Julie Adriano 2", "a": "DAPITAN", "v": 157}, {"n": "Edgar Dasilag", "a": "DAPITAN", "v": 158}, {"n": "Nila Delos Santos", "a": "DAPITAN", "v": 159}, {"n": "Rotonda/ Dayna Piso Wifi", "a": "DAPITAN", "v": 160}, {"n": "Kirry Inn JRD/JRD L.H", "a": "DAPITAN", "v": 161}, {"n": "Taruc", "a": "DAPITAN", "v": 162}, {"n": "Rona Mae Anggay", "a": "DAPITAN", "v": 163}, {"n": "Jimmy Jalas", "a": "DAPITAN", "v": 164}, {"n": "Arturo Saguin", "a": "DAPITAN", "v": 165}, {"n": "JRD City Hall", "a": "DAPITAN", "v": 166}, {"n": "Helen Dinapo", "a": "DAPITAN", "v": 167}, {"n": "Merlyn Jokumsen", "a": "DAPITAN", "v": 168}, {"n": "Minute Burger / Nur Adriene Shene Muallil", "a": "DAPITAN", "v": 169}, {"n": "Jose Ignaco Pallalos/Marilene", "a": "DAPITAN", "v": 170}, {"n": "Bebe Dagpin/Rony Jaralbe", "a": "DAPITAN", "v": 171}, {"n": "Mando Piso Wifi", "a": "DAPITAN", "v": 172}, {"n": "Polo Net", "a": "DAPITAN", "v": null}, {"n": "Polo Wifi", "a": "DAPITAN", "v": null}, {"n": "Macalisang Piso Wifi", "a": "DAPITAN", "v": 173}, {"n": "Pat Piso Wifi", "a": "DAPITAN", "v": 174}, {"n": "Glypin Magtuba", "a": "DAPITAN", "v": 175}, {"n": "Aldren Natcher", "a": "DAPITAN", "v": 176}, {"n": "Jocelyn Abila Java", "a": "DAPITAN", "v": 177}, {"n": "Alota Elissan Tan", "a": "DAPITAN", "v": 178}, {"n": "Delia Acojedo", "a": "DAPITAN", "v": 179}, {"n": "Rene Cagatin Napigkit", "a": "DAPITAN", "v": 181}, {"n": "Gretchel Labadlabad", "a": "DAPITAN", "v": 182}, {"n": "Junior Amigo", "a": "DAPITAN", "v": 184}, {"n": "Maricel Melibo Nadela", "a": "DAPITAN", "v": 183}, {"n": "Melbert Laranjo", "a": "DAPITAN", "v": 185}, {"n": "Vilma C. Lobiano/Amancio", "a": "DAPITAN", "v": 186}, {"n": "Novie Elumbaring", "a": "DAPITAN", "v": 187}, {"n": "Fatima Balingit", "a": "DAPITAN", "v": 188}, {"n": "Mingcaros", "a": "DAPITAN", "v": 189}, {"n": "Bem2x Store/Vina Masayo", "a": "DAPITAN", "v": 180}, {"n": "Arthur Omorchuelos", "a": "DAPITAN", "v": 190}, {"n": "Neriza Honorica", "a": "DAPITAN", "v": 191}, {"n": "Arline Jaralve", "a": "DAPITAN", "v": 192}, {"n": "Genelyn Bajane Casing", "a": "DAPITAN", "v": 193}, {"n": "Norma Babasa", "a": "DAPITAN", "v": 194}, {"n": "Ronald Inderez", "a": "DAPITAN", "v": 195}, {"n": "Jean Rose Rendon", "a": "DAPITAN", "v": 196}, {"n": "Alice Monding", "a": "DAPITAN", "v": 197}, {"n": "Edwin Careño", "a": "DAPITAN", "v": 198}, {"n": "Jason Estrera", "a": "DAPITAN", "v": 199}, {"n": "Joel Jumilid Bisnar", "a": "DAPITAN", "v": 200}, {"n": "Genelyn Dionsay", "a": "DAPITAN", "v": 201}, {"n": "Reina Solo", "a": "DAPITAN", "v": 202}, {"n": "Leani Mary Cris F. Bagon", "a": "DAPITAN", "v": 203}, {"n": "Meriam Balladares", "a": "DAPITAN", "v": 204}, {"n": "Jocelyn Villahermosa", "a": "DAPITAN", "v": 205}, {"n": "Ma.Rose Forteza /Pipot Precolles", "a": "DAPITAN", "v": 206}, {"n": "Lilibeth Sanico", "a": "DAPITAN", "v": 207}, {"n": "Romeo Castañares", "a": "DAPITAN", "v": 208}, {"n": "Dhana J. Delos Reyes", "a": "DAPITAN", "v": 209}, {"n": "Marchielyn  Labanda/Jumao-as", "a": "DAPITAN", "v": 210}, {"n": "Ernie Nadela", "a": "DAPITAN", "v": 211}, {"n": "Malou Marie R. Magallanes", "a": "DAPITAN", "v": 212}, {"n": "Jessa Palionay", "a": "DAPITAN", "v": 213}, {"n": "Carmen Bantilan", "a": "DAPITAN", "v": 214}, {"n": "Winefredo C. Viadnes", "a": "DAPITAN", "v": 215}, {"n": "Adora Limbaga Acopiado", "a": "DAPITAN", "v": 216}, {"n": "ILYN J. Isanan", "a": "DAPITAN", "v": 217}, {"n": "Manuela C. Matan", "a": "DAPITAN", "v": 218}, {"n": "Aivy L. Omandam/Jon Royan", "a": "DAPITAN", "v": 219}, {"n": "Jocelyn Tomaquin", "a": "DAPITAN", "v": 220}, {"n": "Leonilo Nadela Jr.", "a": "DAPITAN", "v": 221}, {"n": "Lovely Betong", "a": "DAPITAN", "v": 222}, {"n": "Cristopher Lagpac", "a": "DAPITAN", "v": 223}, {"n": "Viadnes Piso Wifi", "a": "DAPITAN", "v": 224}, {"n": "Tabilon", "a": "DAPITAN", "v": 225}, {"n": "Erlinda Lactuan", "a": "DAPITAN", "v": 226}, {"n": "Princel Garitan", "a": "DAPITAN", "v": 227}, {"n": "Isabelita Ageas", "a": "DAPITAN", "v": 228}, {"n": "Jaymiel J. Jumuad", "a": "DAPITAN", "v": 229}, {"n": "Carenderia Gahisan", "a": "DAPITAN", "v": 230}, {"n": "Rodolfo Feratero", "a": "DAPITAN", "v": 231}, {"n": "Ivy Bete", "a": "DAPITAN", "v": 232}, {"n": "Jovanie S. Cardilin", "a": "DAPITAN", "v": 233}, {"n": "Gina Saldon Elumba", "a": "DAPITAN", "v": 234}, {"n": "Elizabeth Sunajo", "a": "DAPITAN", "v": 235}, {"n": "Jenalyn Sorela", "a": "DAPITAN", "v": 236}, {"n": "Chrys Donna Bulay-og", "a": "DAPITAN", "v": 237}, {"n": "Michelle Paglalunan", "a": "DAPITAN", "v": 238}, {"n": "Judy Ann Suan", "a": "DAPITAN", "v": 239}, {"n": "Nisson B. Pineda", "a": "DAPITAN", "v": 240}, {"n": "Angel V. Montes", "a": "DAPITAN", "v": 241}, {"n": "Rosario Talic", "a": "DAPITAN", "v": 242}, {"n": "Gelmar Saldon", "a": "DAPITAN", "v": 243}, {"n": "Michael Amistoso", "a": "DAPITAN", "v": 244}, {"n": "Gina Saldon Elumba", "a": "DAPITAN", "v": 245}, {"n": "Emma Dagpin", "a": "DAPITAN", "v": 246}, {"n": "Mary Annalyn C. Jacinto", "a": "DAPITAN", "v": 247}, {"n": "Frederick Agencia", "a": "DAPITAN", "v": 248}, {"n": "David Ubanan", "a": "DAPITAN", "v": 249}, {"n": "Rucel B. Galleposo", "a": "DAPITAN", "v": 250}, {"n": "Belen Blanco", "a": "DAPITAN", "v": 251}, {"n": "Maridel M. Elumba", "a": "DAPITAN", "v": 252}, {"n": "Rito Sagario", "a": "DAPITAN", "v": 253}, {"n": "Carreon Caryl Piso Wifi", "a": "DAPITAN", "v": 254}, {"n": "Elma Pon", "a": "DAPITAN", "v": 255}, {"n": "Leonila Maghinay/ Boboy", "a": "DAPITAN", "v": 256}, {"n": "Joel B. Atazan", "a": "DAPITAN", "v": 257}, {"n": "Jay Soria", "a": "DAPITAN", "v": 258}, {"n": "Richard S. Jatico", "a": "DAPITAN", "v": 259}, {"n": "Jedaf Laguna", "a": "DAPITAN", "v": 260}, {"n": "Jhon Allester Jamito", "a": "DAPITAN", "v": 261}, {"n": "Evelyn Yorong", "a": "DAPITAN", "v": 262}, {"n": "Rolando J. Legarde", "a": "DAPITAN", "v": 263}, {"n": "Johniffer Ontulan Villalon", "a": "DAPITAN", "v": 264}, {"n": "Dapitan  Dairy Box", "a": "DAPITAN", "v": 265}, {"n": "Beverly Ganados Pepito", "a": "DAPITAN", "v": 266}, {"n": "Jenet Piso Wifi", "a": "DAPITAN", "v": 267}, {"n": "Elsie G. Arbaiz", "a": "DAPITAN", "v": 268}, {"n": "Aiza Dumam-ag", "a": "DAPITAN", "v": 269}, {"n": "Asterio B. Acopio", "a": "DAPITAN", "v": 270}, {"n": "Karla Malana", "a": "DAPITAN", "v": 271}, {"n": "Luna Page Zulueta", "a": "DAPITAN", "v": 272}, {"n": "Roven John Elumbaring", "a": "DAPITAN", "v": 273}, {"n": "Jolly Mae B. Arellano", "a": "DAPITAN", "v": 274}, {"n": "Rizalyn S. Gallemit", "a": "DAPITAN", "v": 275}, {"n": "Analyn C. Tamayo", "a": "DAPITAN", "v": 276}, {"n": "Glenn L. Oguis", "a": "DAPITAN", "v": 277}, {"n": "Narcisa Llandres", "a": "DAPITAN", "v": 278}, {"n": "Jean Marc. Galleposo", "a": "DAPITAN", "v": 279}, {"n": "Isidra Calasang/Lola Sidra", "a": "DAPITAN", "v": 280}, {"n": "Betty Boy Hoyohoy", "a": "DAPITAN", "v": 282}, {"n": "Ana M. Acas", "a": "DAPITAN", "v": 283}, {"n": "Melody Letegio", "a": "DAPITAN", "v": 284}, {"n": "Sally Bayron", "a": "DAPITAN", "v": 285}, {"n": "Evelyn Saldasal", "a": "DAPITAN", "v": 286}, {"n": "Mylene Elumbaring", "a": "DAPITAN", "v": 287}, {"n": "Gary Quiros", "a": "DAPITAN", "v": 288}, {"n": "DAPITAN AREA NO VLAN", "a": "DAPITAN", "v": null}, {"n": "Bashang/ Ante Alma", "a": "DAPITAN", "v": null}, {"n": "Elumbaring Piso wifi", "a": "DAPITAN", "v": null}, {"n": "Lola Sidra Piso Wifi", "a": "DAPITAN", "v": null}, {"n": "JRMSU Piso Wifi", "a": "DAPITAN", "v": null}, {"n": "Recamara Piso Wifi", "a": "DAPITAN", "v": null}, {"n": "Maria Fe Lomingin", "a": "DAPITAN", "v": 54}, {"n": "Melchor Piso Wifi", "a": "DAPITAN", "v": null}, {"n": "KC Acaylar Piso Wifi", "a": "DAPITAN", "v": null}, {"n": "Cordova Piso Wifi", "a": "DAPITAN", "v": null}, {"n": "Lavil Icasama", "a": "DAPITAN", "v": null}, {"n": "Rebecca Carreon", "a": "DAPITAN", "v": null}, {"n": "Nivas", "a": "DAPITAN", "v": null}, {"n": "Ethan Piso Wifi", "a": "POLANCO", "v": 10}, {"n": "Loloy Cabahug Piso wifi", "a": "POLANCO", "v": 235}, {"n": "JRG Piso wifi", "a": "POLANCO", "v": null}, {"n": "Heracliano/Boboy Catubig", "a": "POLANCO", "v": 212}, {"n": "WN Piso wifi", "a": "POLANCO", "v": 13}, {"n": "Baes", "a": "POLANCO", "v": 14}, {"n": "Catana", "a": "POLANCO", "v": 15}, {"n": "Krizza Piso wifi", "a": "POLANCO", "v": 16}, {"n": "Argote Piso wifi", "a": "POLANCO", "v": 17}, {"n": "Covvee Piso wifi", "a": "POLANCO", "v": 18}, {"n": "Ramirez Piso wifi", "a": "POLANCO", "v": 236}, {"n": "Joan Agecia Piso wifi", "a": "POLANCO", "v": 119}, {"n": "Grace Arocha", "a": "POLANCO", "v": 21}, {"n": "Mikey Piso wifi", "a": "POLANCO", "v": null}, {"n": "Justine Piso wifi", "a": "POLANCO", "v": null}, {"n": "Pandan Piso wifi", "a": "POLANCO", "v": null}, {"n": "King Piso wifi", "a": "POLANCO", "v": null}, {"n": "JM Piso wifi", "a": "POLANCO", "v": null}, {"n": "Jogie Real", "a": "POLANCO", "v": 211}, {"n": "Ondo Piso wifi", "a": "POLANCO", "v": null}, {"n": "DRM Samorin", "a": "POLANCO", "v": 216}, {"n": "Mamay Piso wifi", "a": "POLANCO", "v": 26}, {"n": "Palado", "a": "POLANCO", "v": null}, {"n": "Alia (Guinles)", "a": "POLANCO", "v": null}, {"n": "King Gabriel (Guinles)", "a": "POLANCO", "v": null}, {"n": "Rosal Piso wifi", "a": "POLANCO", "v": 222}, {"n": "Rona Cagas", "a": "POLANCO", "v": 214}, {"n": "Ondoran", "a": "POLANCO", "v": 23}, {"n": "Kumudas/Jason Comodas", "a": "POLANCO", "v": 220}, {"n": "Comudas", "a": "POLANCO", "v": null}, {"n": "Sarense", "a": "POLANCO", "v": null}, {"n": "Ramos", "a": "POLANCO", "v": 33}, {"n": "Rudilyn/Ymbol", "a": "POLANCO", "v": 32}, {"n": "Tuting", "a": "POLANCO", "v": 55}, {"n": "Paterna Q. Eguia", "a": "POLANCO", "v": 35}, {"n": "Robert B. Silvano", "a": "POLANCO", "v": 36}, {"n": "Rosemarie/Jia C. Caidet", "a": "POLANCO", "v": 213}, {"n": "Marcial Proceso", "a": "POLANCO", "v": 38}, {"n": "Christina Joy Zaldivar", "a": "POLANCO", "v": 188}, {"n": "Toto Tano", "a": "POLANCO", "v": 189}, {"n": "Elvira C. Arienza", "a": "POLANCO", "v": 190}, {"n": "Divina A. Ratificar", "a": "POLANCO", "v": 194}, {"n": "Dodong's Eatery", "a": "POLANCO", "v": 195}, {"n": "Nissan Jean Bucol", "a": "POLANCO", "v": 215}, {"n": "Martin Aba", "a": "POLANCO", "v": 217}, {"n": "Cindy Grace Tangapa", "a": "POLANCO", "v": 226}, {"n": "Ronie Abrasaldo", "a": "POLANCO", "v": 39}, {"n": "Oscar B. Ocupe Jr.", "a": "POLANCO", "v": 227}, {"n": "Jazper B. Dagayloan", "a": "POLANCO", "v": 40}, {"n": "Rey Maylon", "a": "POLANCO", "v": 41}, {"n": "Renario Monton", "a": "POLANCO", "v": 250}, {"n": "Renz Viman Elfondo", "a": "POLANCO", "v": 251}, {"n": "Anna Limarie Caidet", "a": "POLANCO", "v": 252}, {"n": "Gladys Mae M. Uy", "a": "POLANCO", "v": 230}, {"n": "Prechie Palado", "a": "POLANCO", "v": 243}, {"n": "Rosalinda Malon", "a": "POLANCO", "v": 232}, {"n": "Antonette Vasquez", "a": "POLANCO", "v": 42}, {"n": "Niño", "a": "POLANCO", "v": 29}, {"n": "Fatima Piso wifi", "a": "POLANCO", "v": null}, {"n": "Enoy Piso wifi", "a": "POLANCO", "v": 12}, {"n": "Jaja Piso wifi", "a": "POLANCO", "v": null}, {"n": "Spawn Internet/Terry", "a": "POLANCO", "v": null}, {"n": "Rosita Enoy Piso Wifi", "a": "POLANCO", "v": 136}, {"n": "Magdalena Dioso", "a": "POLANCO", "v": 24}, {"n": "Violeta Muit", "a": "POLANCO", "v": 124}, {"n": "Analyn Saguin", "a": "POLANCO", "v": 111}, {"n": "Bioloza T. Danguin", "a": "POLANCO", "v": 113}, {"n": "Ciano Langan", "a": "POLANCO", "v": 125}, {"n": "Joy Odarbe", "a": "POLANCO", "v": 121}, {"n": "Jauculan", "a": "POLANCO", "v": 34}, {"n": "Muit Susan", "a": "POLANCO", "v": 35}, {"n": "Allosada", "a": "POLANCO", "v": 112}, {"n": "Loyd Sarense", "a": "POLANCO", "v": 126}, {"n": "D.Allosada/Jordan Ayawon/Ma.Devina", "a": "POLANCO", "v": 131}, {"n": "Arnel  Enoy/Konsehal", "a": "POLANCO", "v": 127}, {"n": "Myrna Suan", "a": "POLANCO", "v": 120}, {"n": "Edgar Guia", "a": "POLANCO", "v": 108}, {"n": "Marilou Penollera", "a": "POLANCO", "v": 129}, {"n": "Rolly Regencia Muit", "a": "POLANCO", "v": 128}, {"n": "Jocelyn S. Quisel", "a": "POLANCO", "v": 132}, {"n": "Jr B. Nayal", "a": "POLANCO", "v": 134}, {"n": "Lydia Jaculan/Jaculan Piso Wifi", "a": "POLANCO", "v": 135}, {"n": "Rubinian", "a": "POLANCO", "v": 49}, {"n": "Jenie A. Salazar", "a": "POLANCO", "v": 106}, {"n": "Daisy Abitona", "a": "POLANCO", "v": 139}, {"n": "Linas S. Guia", "a": "POLANCO", "v": 140}, {"n": "Ron Ron Salupan", "a": "POLANCO", "v": 141}, {"n": "Marjorie Quisel Pacatang", "a": "POLANCO", "v": 148}, {"n": "Sering Piso wifi", "a": "POLANCO", "v": null}, {"n": "Rendon Piso wifi", "a": "POLANCO", "v": null}, {"n": "Frenziel Piso wifi", "a": "POLANCO", "v": 12}, {"n": "Iluminada Adlawon", "a": "POLANCO", "v": 13}, {"n": "Edith Sarabia", "a": "POLANCO", "v": 14}, {"n": "Susana Paler", "a": "POLANCO", "v": 15}, {"n": "Arnold Piso wifi", "a": "POLANCO", "v": 16}, {"n": "Zamora", "a": "POLANCO", "v": 17}, {"n": "Maribeth Lañoso", "a": "POLANCO", "v": 18}, {"n": "Tecson", "a": "POLANCO", "v": 19}, {"n": "Halas Piso Wifi/ Margie A. Batalan", "a": "POLANCO", "v": 20}, {"n": "Delmo Piso wifi", "a": "POLANCO", "v": 21}, {"n": "Ferilyn  Cabalida", "a": "POLANCO", "v": 23}, {"n": "Balambao Piso wifi", "a": "POLANCO", "v": 24}, {"n": "Karadin Piso wifi", "a": "POLANCO", "v": 25}, {"n": "Canoy Piso wifi", "a": "POLANCO", "v": 26}, {"n": "Despe Olyssis", "a": "POLANCO", "v": 27}, {"n": "Aiza/ Alon", "a": "POLANCO", "v": 28}, {"n": "Magsayo", "a": "POLANCO", "v": 30}, {"n": "Dispi", "a": "POLANCO", "v": 31}, {"n": "Bularon", "a": "POLANCO", "v": 32}, {"n": "Nazareno/Neriza Piso wifi", "a": "POLANCO", "v": 33}, {"n": "Elsie Magsayo Pizon", "a": "POLANCO", "v": 39}, {"n": "Pizon", "a": "POLANCO", "v": null}, {"n": "Jic Lim", "a": "POLANCO", "v": 42}, {"n": "Matt Louie Piso wifi", "a": "POLANCO", "v": null}, {"n": "Toymats Piso wifi", "a": "POLANCO", "v": null}, {"n": "Retes Piso wifi", "a": "POLANCO", "v": null}, {"n": "Trece Piso wifi", "a": "POLANCO", "v": null}, {"n": "Bularon Piso wifi", "a": "POLANCO", "v": null}, {"n": "Sarah Piso wifi", "a": "POLANCO", "v": null}, {"n": "Piang Piso wifi", "a": "POLANCO", "v": null}, {"n": "Keancedric Piso wifi", "a": "POLANCO", "v": null}, {"n": "Marcelino Piso wifi", "a": "POLANCO", "v": null}, {"n": "Adlawon Piso wifi", "a": "POLANCO", "v": null}, {"n": "Meljie (Galocso,Roxas)", "a": "POLANCO", "v": null}, {"n": "Marijel Cabalida", "a": "POLANCO", "v": null}, {"n": "Jennefer", "a": "POLANCO", "v": null}, {"n": "Nazarino", "a": "POLANCO", "v": null}, {"n": "Michelle Store", "a": "POLANCO", "v": null}, {"n": "Cads Belagantol", "a": "POLANCO", "v": 44}, {"n": "Gonzales", "a": "POLANCO", "v": null}, {"n": "Shiela Bobotan Piso wifi/Tambo", "a": "POLANCO", "v": null}, {"n": "Zaldy Bubutan Piso wifi/Tambo", "a": "POLANCO", "v": null}, {"n": "Bobong Piso wifi/Taga", "a": "POLANCO", "v": null}, {"n": "Aryan Beach", "a": "POLANCO", "v": null}, {"n": "Taga Piso Wiifi", "a": "POLANCO", "v": null}, {"n": "Sangkol Piso wifi", "a": "POLANCO", "v": null}, {"n": "Quilicot Piso wifi", "a": "POLANCO", "v": 51}, {"n": "Hinrietta Sarucam", "a": "POLANCO", "v": 63}, {"n": "Sangkol Computer", "a": "POLANCO", "v": null}, {"n": "Vrislyn Sumanday Piso Wifi", "a": "POLANCO", "v": null}, {"n": "Regencia Piso wifi", "a": "POLANCO", "v": null}, {"n": "Rico Duran", "a": "POLANCO", "v": 11}, {"n": "Saragilla Piso Wifi", "a": "POLANCO", "v": 11}, {"n": "Joel Manabay", "a": "POLANCO", "v": 12}, {"n": "Rejel Carreon", "a": "POLANCO", "v": 48}, {"n": "Cecil Mirafuentes", "a": "POLANCO", "v": 52}, {"n": "Spawn Internet/Lactuan", "a": "POLANCO", "v": 53}, {"n": "Ruth Timanuno", "a": "POLANCO", "v": 54}, {"n": "Jovita Letegio", "a": "POLANCO", "v": 57}, {"n": "Georgia Cuenca", "a": "POLANCO", "v": 58}, {"n": "Loloy", "a": "POLANCO", "v": 67}, {"n": "Lucena Lumingit", "a": "POLANCO", "v": 70}, {"n": "Ones 1", "a": "SINAMAN", "v": 138}, {"n": "Rose Carenderia", "a": "SINAMAN", "v": 123}, {"n": "Galangpan", "a": "SINAMAN", "v": 94}, {"n": "Carmen Piso wifi", "a": "SINAMAN", "v": 88}, {"n": "Diosdado Bastillada", "a": "SINAMAN", "v": 15}, {"n": "Ones 2", "a": "SINAMAN", "v": null}, {"n": "Batocael Piso wifi", "a": "SINAMAN", "v": 89}, {"n": "Inotolan / Carmela Panama", "a": "SINAMAN", "v": 98}, {"n": "Susan Garcia/Ticon", "a": "SINAMAN", "v": 122}, {"n": "Carla Rebuyon Piso wifi", "a": "SINAMAN", "v": 96}, {"n": "Jeane Zamoras", "a": "SINAMAN", "v": 31}, {"n": "Solis  Bakeshop Piso wifi", "a": "SINAMAN", "v": 97}, {"n": "Jumil Acabado", "a": "SINAMAN", "v": 39}, {"n": "Sinaman Cross/ Patangan", "a": "SINAMAN", "v": 137}, {"n": "Oliveros", "a": "SINAMAN", "v": 41}, {"n": "Dangs Piso wifi", "a": "SINAMAN", "v": 45}, {"n": "Fely Muit", "a": "SINAMAN", "v": 103}, {"n": "Jordan Ayawon", "a": "SINAMAN", "v": 104}, {"n": "Christopher Tizon", "a": "SINAMAN", "v": 99}, {"n": "Charline Allosada", "a": "SINAMAN", "v": 95}, {"n": "Saren Piso wifi", "a": "SINAMAN", "v": 93}, {"n": "Francisco Sario", "a": "SINAMAN", "v": 56}, {"n": "Girly Almirol", "a": "SINAMAN", "v": 59}, {"n": "Mag-abo/Ronquillo", "a": "SINAMAN", "v": 60}, {"n": "Juanita Cuenca", "a": "SINAMAN", "v": 61}, {"n": "Mila B. Manot/Salha", "a": "SINAMAN", "v": 62}, {"n": "Caballero", "a": "SINAMAN", "v": 64}, {"n": "Gima Sularte", "a": "SINAMAN", "v": 72}, {"n": "Ambelle M. Sanoy", "a": "SINAMAN", "v": 73}, {"n": "Diosbens Piso wifi", "a": "SINAMAN", "v": 76}, {"n": "Rubelyn Enoy", "a": "SINAMAN", "v": 100}, {"n": "Luzbela McCormick/ E.Saren", "a": "SINAMAN", "v": 102}, {"n": "Jefferson R. Seno Jr.", "a": "SINAMAN", "v": 105}, {"n": "Ronnel A. Refugio", "a": "SINAMAN", "v": 109}, {"n": "Sinaman Piso wifi", "a": "SINAMAN", "v": null}, {"n": "Lanuzga Piso wifi", "a": "SINAMAN", "v": null}, {"n": "Dueñas /Elizabeth Duenas", "a": "SINAMAN", "v": null}, {"n": "Bryan Piso wifi", "a": "SINAMAN", "v": null}, {"n": "V. Buca", "a": "SINAMAN", "v": 107}, {"n": "Sinaman Court", "a": "SINAMAN", "v": null}, {"n": "Madelyn Sanoy", "a": "SINAMAN", "v": 91}, {"n": "Catipay Store", "a": "SINAMAN", "v": 92}, {"n": "Remelyn Sumalpong", "a": "SINAMAN", "v": 101}, {"n": "Romerico Oming Buca", "a": "SINAMAN", "v": 117}, {"n": "Mary Jean Soria", "a": "SINAMAN", "v": 130}, {"n": "Emilyn Regencia", "a": "SINAMAN", "v": 142}, {"n": "Gerald Batocael", "a": "SINAMAN", "v": 144}, {"n": "Julian Batocael", "a": "SINAMAN", "v": 145}, {"n": "Raul Juarez Rodrigo", "a": "SINAMAN", "v": 146}, {"n": "Nora Sulante Dalmacio", "a": "SINAMAN", "v": 147}, {"n": "Sheever", "a": "SINAMAN", "v": 10}, {"n": "MJ", "a": "SINAMAN", "v": 11}, {"n": "Spawn Internet/Laranjo", "a": "SINAMAN", "v": 12}, {"n": "Ruth 2 Piso wifi", "a": "SINAMAN", "v": 13}, {"n": "Taruc", "a": "SINAMAN", "v": 14}, {"n": "Danrel Pacina", "a": "SINAMAN", "v": 15}, {"n": "Morgia", "a": "SINAMAN", "v": 16}, {"n": "Aisha Piso wifi", "a": "SINAMAN", "v": 22}, {"n": "Papa Piso wifi", "a": "SINAMAN", "v": 23}, {"n": "Angel / Ramil Errie", "a": "SINAMAN", "v": 24}, {"n": "Marilyn Manugora", "a": "SINAMAN", "v": 25}, {"n": "Jeneline TRONO", "a": "SINAMAN", "v": 29}, {"n": "Chay2 / Erick Aba-a", "a": "SINAMAN", "v": 30}, {"n": "Trono Piso wifi", "a": "SINAMAN", "v": 31}, {"n": "Allan Paulino", "a": "SINAMAN", "v": 32}, {"n": "Marane Piso wifi", "a": "SINAMAN", "v": 33}, {"n": "Danny Boy G. Pagente/ NARSING", "a": "SINAMAN", "v": 34}, {"n": "Elbert Togut", "a": "SINAMAN", "v": 35}, {"n": "Elyn Piquero", "a": "SINAMAN", "v": 36}, {"n": "Meme /Dario Pescos", "a": "SINAMAN", "v": 37}, {"n": "Genelyn Tinaco", "a": "SINAMAN", "v": 38}, {"n": "Antiquina", "a": "SINAMAN", "v": 39}, {"n": "Rufino Mukod", "a": "SINAMAN", "v": 40}, {"n": "Sheryl Baligasa", "a": "SINAMAN", "v": 41}, {"n": "Minda Piso wiifi", "a": "SINAMAN", "v": 42}, {"n": "Denzil Piso wifi", "a": "SINAMAN", "v": 44}, {"n": "Ruth 1 Piso wifi", "a": "SINAMAN", "v": 45}, {"n": "Flor Piso wifi", "a": "SINAMAN", "v": 48}, {"n": "Marites Postillas", "a": "SINAMAN", "v": 50}, {"n": "Jay Russel Laurque/Laurente", "a": "SINAMAN", "v": 52}, {"n": "Pajantoy", "a": "SINAMAN", "v": 55}, {"n": "Jelai/ Ricaforte", "a": "SINAMAN", "v": 56}, {"n": "Lumawas", "a": "SINAMAN", "v": 57}, {"n": "Criscela Tinaco", "a": "SINAMAN", "v": 58}, {"n": "Lea May Tortal", "a": "SINAMAN", "v": 59}, {"n": "Rosemarie Pamore", "a": "SINAMAN", "v": 60}, {"n": "Tandjoy I. Ambakang", "a": "SINAMAN", "v": 61}, {"n": "Yaki Dael Piso wifi", "a": "SINAMAN", "v": 62}, {"n": "Janette Gooc Deloria", "a": "SINAMAN", "v": 63}, {"n": "Bobet Dagayloan", "a": "SINAMAN", "v": 68}, {"n": "Maria Amor Zorilla", "a": "SINAMAN", "v": 75}, {"n": "Samuel Duhaylongsod", "a": "SINAMAN", "v": 76}, {"n": "Janilyn Sagan", "a": "SINAMAN", "v": 78}, {"n": "Mary Lord Pagasian", "a": "SINAMAN", "v": 79}, {"n": "Braganza Piso wifi", "a": "SINAMAN", "v": 80}, {"n": "Florenda S. Donyo", "a": "SINAMAN", "v": 89}, {"n": "Pupay Piso wifi", "a": "SINAMAN", "v": 97}, {"n": "GT Maligro Hardware", "a": "SINAMAN", "v": 104}, {"n": "Lampasa Piso wifi", "a": "SINAMAN", "v": 105}, {"n": "Laanjaaz Piso wifi", "a": "SINAMAN", "v": 109}, {"n": "Honz Realiza Erat/John Michael", "a": "SINAMAN", "v": 121}, {"n": "Myrna Dagayloan Piso Wifi", "a": "SINAMAN", "v": 116}, {"n": "Topia", "a": "SINAMAN", "v": 117}, {"n": "Manlangit Jenefer", "a": "SINAMAN", "v": 128}, {"n": "Joel Omoc-oc", "a": "SINAMAN", "v": 129}, {"n": "Spawn Hotspot/Balay Dicayas", "a": "SINAMAN", "v": 134}, {"n": "Washingan", "a": "SINAMAN", "v": 137}, {"n": "Subido", "a": "SINAMAN", "v": 141}, {"n": "Susana Dinopol", "a": "SINAMAN", "v": 166}, {"n": "Richel D. Lampasa", "a": "SINAMAN", "v": 170}, {"n": "Pablito Aniñon Antiquina", "a": "SINAMAN", "v": 174}, {"n": "Roche E. Doren", "a": "SINAMAN", "v": 175}, {"n": "Rona O. Bantilan", "a": "SINAMAN", "v": 180}, {"n": "Vilma Tercio", "a": "SINAMAN", "v": 181}, {"n": "Jeremy Piso Wifi", "a": "SINAMAN", "v": 202}, {"n": "Gina Velasco", "a": "SINAMAN", "v": 295}, {"n": "Joemar T. Subrado", "a": "SINAMAN", "v": 204}, {"n": "Gina Rodrigo", "a": "SINAMAN", "v": 205}, {"n": "Thirdy Piso Wifi/Marializel Tumacmol/Buhisan", "a": "SINAMAN", "v": 208}, {"n": "Anna Marie Amorado", "a": "SINAMAN", "v": 221}, {"n": "Merly C. Fernandez", "a": "SINAMAN", "v": 225}, {"n": "Merlynda Tanso", "a": "SINAMAN", "v": 149}, {"n": "Michelle M. Dupol", "a": "SINAMAN", "v": 229}, {"n": "Cednie Canastra/Hiroki", "a": "SINAMAN", "v": 240}, {"n": "Roger Pontillas", "a": "SINAMAN", "v": 242}, {"n": "Mark Perlata", "a": "SINAMAN", "v": 244}, {"n": "Danny S. Emong", "a": "SINAMAN", "v": 248}, {"n": "Leonora Calizar", "a": "SINAMAN", "v": 249}, {"n": "Ruth Guerrero", "a": "SINAMAN", "v": 254}, {"n": "Lorraine Reyes", "a": "SINAMAN", "v": 255}, {"n": "John Piso Wifi/Cristy Pajantoy", "a": "SINAMAN", "v": 49}, {"n": "DICAYAS AREA NO VLAN", "a": "SINAMAN", "v": null}, {"n": "Jefser Piso wifi", "a": "SINAMAN", "v": null}, {"n": "Dorin", "a": "SINAMAN", "v": null}, {"n": "Talipapa Piso wifi", "a": "SINAMAN", "v": null}, {"n": "Palma", "a": "SINAMAN", "v": null}, {"n": "Rolly Piso wifi", "a": "SINAMAN", "v": null}, {"n": "Balagosa Piso wifi", "a": "SINAMAN", "v": null}, {"n": "Anicita Piso wifi", "a": "SINAMAN", "v": null}, {"n": "GT Maligro Store/ Grocery", "a": "SINAMAN", "v": null}, {"n": "Carlos Piso wifi", "a": "SINAMAN", "v": null}, {"n": "Guerrero Piso wifi", "a": "SINAMAN", "v": null}, {"n": "Jebone Piso wifi", "a": "SINAMAN", "v": null}, {"n": "Spawn Internet/ Berachah", "a": "SINAMAN", "v": null}, {"n": "Norie Pescos", "a": "SINAMAN", "v": null}, {"n": "Angel Banagua", "a": "SINAMAN", "v": null}, {"n": "Melody", "a": "SINAMAN", "v": null}, {"n": "Glina Flores", "a": "SINAMAN", "v": null}, {"n": "Paraguay", "a": "SINAMAN", "v": 132}, {"n": "Tanzo", "a": "SINAMAN", "v": null}, {"n": "Ricky", "a": "SINAMAN", "v": null}, {"n": "Julie Ann Ebron", "a": "MINAOG", "v": 18}, {"n": "Rowena Alapan", "a": "MINAOG", "v": 19}, {"n": "Nestor Daque", "a": "MINAOG", "v": 20}, {"n": "Raul Argabiyador", "a": "MINAOG", "v": 21}, {"n": "Ralph Pantalita", "a": "MINAOG", "v": 26}, {"n": "Rosalyn Salomon", "a": "MINAOG", "v": 27}, {"n": "Agapito Castillon", "a": "MINAOG", "v": 28}, {"n": "Jopay Piso Wifi", "a": "MINAOG", "v": 43}, {"n": "Marjorie Lihay-lihay", "a": "MINAOG", "v": 47}, {"n": "Criselda Rezuena Yunting", "a": "MINAOG", "v": 49}, {"n": "Normalah Cadaly/ Nasser Dimalna", "a": "MINAOG", "v": 51}, {"n": "Benezer Lepalam", "a": "MINAOG", "v": 53}, {"n": "Angilyn Gbrillas", "a": "MINAOG", "v": 54}, {"n": "Milcher Gandingan", "a": "MINAOG", "v": 67}, {"n": "Josephine D. Barredo", "a": "MINAOG", "v": 98}, {"n": "Bobong Baldamor", "a": "MINAOG", "v": 99}, {"n": "Analyn J. Jacinto", "a": "MINAOG", "v": 100}, {"n": "Insem", "a": "MINAOG", "v": 148}, {"n": "Aldrine Ogoc", "a": "MINAOG", "v": 110}, {"n": "Elenil Carreon Ogoc", "a": "MINAOG", "v": 103}, {"n": "Ronald Bayugay", "a": "MINAOG", "v": 107}, {"n": "Jane Alalong Saile", "a": "MINAOG", "v": 122}, {"n": "Joseph Dumagao Sumagop", "a": "MINAOG", "v": 123}, {"n": "Clayde Ocampo", "a": "MINAOG", "v": 125}, {"n": "Jolly", "a": "MINAOG", "v": 131}, {"n": "Embrado", "a": "MINAOG", "v": 138}, {"n": "Senerpida", "a": "MINAOG", "v": 146}, {"n": "Oxinio", "a": "MINAOG", "v": 152}, {"n": "Icao", "a": "MINAOG", "v": 153}, {"n": "Lovely", "a": "MINAOG", "v": 161}, {"n": "Robena Bael", "a": "MINAOG", "v": 167}, {"n": "Evelyn B. Cenas", "a": "MINAOG", "v": 168}, {"n": "Jelly Villarin 1", "a": "MINAOG", "v": 206}, {"n": "Jelly Villarin 2", "a": "MINAOG", "v": 169}, {"n": "Jenmart Tagat", "a": "MINAOG", "v": null}, {"n": "Cerlia Aranas Angel", "a": "MINAOG", "v": 177}, {"n": "Shirly Miras", "a": "MINAOG", "v": 178}, {"n": "Junie O. Coto", "a": "MINAOG", "v": 179}, {"n": "Katherine Baligasa Dimasuhid", "a": "MINAOG", "v": 197}, {"n": "Myrian Mie Piso Wifi", "a": "MINAOG", "v": 203}, {"n": "Milcher Gandingan", "a": "MINAOG", "v": 207}, {"n": "Mario Pata", "a": "MINAOG", "v": 210}, {"n": "Rodolfo M. Salmorin", "a": "MINAOG", "v": 218}, {"n": "Estrella L. Caloy", "a": "MINAOG", "v": 223}, {"n": "Emelyn Renascia", "a": "MINAOG", "v": 228}, {"n": "Remuel Macop", "a": "MINAOG", "v": 246}, {"n": "Nelbert Pilar", "a": "MINAOG", "v": 17}, {"n": "Edna Jumawan", "a": "MINAOG", "v": 198}, {"n": "Venus Dagayloan", "a": "MINAOG", "v": 256}, {"n": "BobongLomoljo", "a": "MINAOG", "v": 259}, {"n": "Laarnie Capondag", "a": "MINAOG", "v": 270}, {"n": "Santome/Pancitan", "a": "MINAOG", "v": 16}, {"n": "Lyn Piso wifi", "a": "MINAOG", "v": 18}, {"n": "Elai / Elay Piso wifi", "a": "MINAOG", "v": 19}, {"n": "ARCELITA ebarsabal / mama elai", "a": "MINAOG", "v": 21}, {"n": "Dapiton", "a": "MINAOG", "v": 36}, {"n": "Punta Piso wifi", "a": "MINAOG", "v": 44}, {"n": "Mario Dorimon", "a": "MINAOG", "v": 46}, {"n": "Tirso Ronquillo Piso wifi", "a": "MINAOG", "v": 60}, {"n": "Vangie Piso wifi", "a": "MINAOG", "v": 79}, {"n": "Richard Bañalan", "a": "MINAOG", "v": 81}, {"n": "Vivian Escabarte", "a": "MINAOG", "v": 85}, {"n": "Ioish Sargento", "a": "MINAOG", "v": 86}, {"n": "Eda A. Estela", "a": "MINAOG", "v": 90}, {"n": "Cresencia Edoc Villanueva", "a": "MINAOG", "v": 110}, {"n": "Lea Valdez Dangngay", "a": "MINAOG", "v": 114}, {"n": "Angela Ates Mainit", "a": "MINAOG", "v": 115}, {"n": "Jessel Edoc Villanueva", "a": "MINAOG", "v": 116}, {"n": "Vanessa Piso wifi", "a": "MINAOG", "v": null}, {"n": "Viking Piso wifi", "a": "MINAOG", "v": null}, {"n": "Ellenita Calasang Balwit", "a": "MINAOG", "v": 133}, {"n": "Punta Caren/ Eltoy's Eatery", "a": "MINAOG", "v": 66}, {"n": "Analyn Piso wifi-1 / Elisio Suminguit", "a": "MINAOG", "v": 1}, {"n": "Nilda Virtosio Pontanar", "a": "MINAOG", "v": 69}, {"n": "Wenwen Salomon", "a": "MINAOG", "v": 70}, {"n": "Edwardo Omaguing", "a": "MINAOG", "v": 82}, {"n": "Mariafe Culanculan", "a": "MINAOG", "v": 83}, {"n": "Claro Paring", "a": "MINAOG", "v": 84}, {"n": "Glessa B. Ausejo", "a": "MINAOG", "v": 85}, {"n": "Ralph Jan C. Padasig", "a": "MINAOG", "v": 86}, {"n": "Elizabeth Baluma", "a": "MINAOG", "v": 87}, {"n": "Elizabeth Baluma BH", "a": "MINAOG", "v": 88}, {"n": "Gong-gong Piso wifi", "a": "MINAOG", "v": 101}, {"n": "Magallon", "a": "MINAOG", "v": 111}, {"n": "Macapilit", "a": "MINAOG", "v": 112}, {"n": "Jed Sagario", "a": "MINAOG", "v": 113}, {"n": "Clifton Piso wifi", "a": "MINAOG", "v": 118}, {"n": "Mox Piso wifi", "a": "MINAOG", "v": null}, {"n": "Gloria Gasapo", "a": "MINAOG", "v": 119}, {"n": "Cabilin", "a": "MINAOG", "v": 146}, {"n": "Mary Rose Liman", "a": "MINAOG", "v": 151}, {"n": "Verix /Rejoice", "a": "MINAOG", "v": 156}, {"n": "El Cherry", "a": "MINAOG", "v": 158}, {"n": "Baje", "a": "MINAOG", "v": 162}, {"n": "Analyn Pigarido Suminguit", "a": "MINAOG", "v": 171}, {"n": "Virginia Bag-Ao", "a": "MINAOG", "v": 173}, {"n": "Crisologo J. Abello", "a": "MINAOG", "v": 182}, {"n": "Josephine D. Macasaol", "a": "MINAOG", "v": 133}, {"n": "Ethan-Igot Piso Wifi", "a": "MINAOG", "v": null}, {"n": "Bermoy Piso wifi", "a": "MINAOG", "v": null}, {"n": "Analyn Piso wifi-2", "a": "MINAOG", "v": null}, {"n": "Acopio", "a": "MINAOG", "v": 118}, {"n": "Bertosio", "a": "MINAOG", "v": 69}, {"n": "Javier", "a": "MINAOG", "v": null}, {"n": "Amado P. Tugot", "a": "MINAOG", "v": 183}, {"n": "Bryan Barrera", "a": "MINAOG", "v": 219}, {"n": "Puzon", "a": "MINAOG", "v": 150}, {"n": "Ayek", "a": "MINAOG", "v": null}, {"n": "Dr. Donnable Romero Taub", "a": "MINAOG", "v": 257}, {"n": "Elena Razo", "a": "MINAOG", "v": null}, {"n": "Elsie Mantang", "a": "MINAOG", "v": 184}, {"n": "Jovy Gairanan", "a": "MINAOG", "v": 192}, {"n": "Edilyn Saladaga", "a": "MINAOG", "v": 193}, {"n": "Conception Duranta", "a": "MINAOG", "v": 200}, {"n": "Elimira M. Sevilla", "a": "MINAOG", "v": 201}, {"n": "Gina Velasco", "a": "MINAOG", "v": 209}, {"n": "Cherry I. Cajocon", "a": "MINAOG", "v": 199}, {"n": "Sheena Mae Bation", "a": "MINAOG", "v": 106}, {"n": "Irie Insoy", "a": "MINAOG", "v": 135}, {"n": "Rinante Wongloy", "a": "MINAOG", "v": 224}, {"n": "Joan C.Jumalon", "a": "MINAOG", "v": 187}, {"n": "Mahlou Varquez", "a": "MINAOG", "v": 253}, {"n": "Mariett Perocho", "a": "MINAOG", "v": 241}, {"n": "Nelson Jr. Pata", "a": "MINAOG", "v": 247}, {"n": "Edelina Roa Lugatiman Acis", "a": "MINAOG", "v": 260}, {"n": "Manuel Ajero Piso wifi", "a": "MINAOG", "v": null}, {"n": "Yolly Buenafe", "a": "MINAOG", "v": null}, {"n": "Catherine Gador", "a": "MINAOG", "v": 72}, {"n": "Ronaldo Butalid", "a": "MINAOG", "v": 73}, {"n": "Benny Ceriales", "a": "MINAOG", "v": 74}, {"n": "Margareta Villahermosa", "a": "MINAOG", "v": 77}, {"n": "MJ B. Aninon", "a": "MINAOG", "v": 78}, {"n": "Marry Ann Agustin", "a": "MINAOG", "v": 81}, {"n": "Master Winds", "a": "MINAOG", "v": 92}, {"n": "Verandez", "a": "MINAOG", "v": 102}, {"n": "Romelyn Barbadillo", "a": "MINAOG", "v": 108}, {"n": "Niña Demitt", "a": "MINAOG", "v": 144}, {"n": "Pablo Gawayon", "a": "MINAOG", "v": 144}, {"n": "Gemma Maraguinot", "a": "MINAOG", "v": 147}, {"n": "Ate", "a": "MINAOG", "v": 159}, {"n": "Rosalia Jumawan", "a": "MINAOG", "v": 172}, {"n": "Gumalal", "a": "MINAOG", "v": 155}, {"n": "Fritsie Ronguillo Ciodad Laundry", "a": "MINAOG", "v": 237}, {"n": "Pagente", "a": "MINAOG", "v": 164}, {"n": "Nelie", "a": "MINAOG", "v": null}, {"n": "Hamilton", "a": "MINAOG", "v": 124}, {"n": "Vergie Culagbang", "a": "MINAOG", "v": 233}, {"n": "Libradilla", "a": "MINAOG", "v": null}, {"n": "BS Carwash", "a": "MINAOG", "v": null}, {"n": "Pañero Orsilito", "a": "MINAOG", "v": null}, {"n": "Amado P. Tugot", "a": "MINAOG", "v": 185}, {"n": "Bendong", "a": "MINAOG", "v": 186}, {"n": "Cleofe Kibrajosa", "a": "MINAOG", "v": 191}, {"n": "Anafe Abrenica Pacina", "a": "MINAOG", "v": 196}, {"n": "Ruben Gumanas Jr.", "a": "MINAOG", "v": 144}, {"n": "Miguel Y Calamba", "a": "MINAOG", "v": 245}, {"n": "Baro", "a": "MINAOG", "v": 93}, {"n": "Batocael", "a": "MINAOG", "v": 11}, {"n": "Andilab", "a": "MINAOG", "v": 91}, {"n": "Dolores Batocael", "a": "MINAOG", "v": 94}, {"n": "Manday", "a": "MINAOG", "v": 165}, {"n": "Jean Eatery (Tapad Lee Plaza)", "a": "MINAOG", "v": 108}, {"n": "Benjie", "a": "MINAOG", "v": 130}, {"n": "Stone Glass", "a": "MINAOG", "v": 140}, {"n": "SINDANGAN PISO WIFI", "a": "SINDANGAN", "v": null}, {"n": "Jin2", "a": "SINDANGAN", "v": 11}, {"n": "Dongbars", "a": "SINDANGAN", "v": 12}, {"n": "Sugabo", "a": "SINDANGAN", "v": 13}, {"n": "Lumawas", "a": "SINDANGAN", "v": 14}, {"n": "Anguit", "a": "SINDANGAN", "v": 15}, {"n": "Avi", "a": "SINDANGAN", "v": 16}, {"n": "Castillon", "a": "SINDANGAN", "v": 17}, {"n": "Neneng Apartment", "a": "SINDANGAN", "v": 18}, {"n": "Rayl", "a": "SINDANGAN", "v": 19}, {"n": "Nena Ochate", "a": "SINDANGAN", "v": 21}, {"n": "Nancy Abria / sORIANO", "a": "SINDANGAN", "v": 22}, {"n": "Ivan Calago", "a": "SINDANGAN", "v": 23}, {"n": "Andus", "a": "SINDANGAN", "v": 24}, {"n": "Damonsong", "a": "SINDANGAN", "v": 25}, {"n": "Del coro", "a": "SINDANGAN", "v": 26}, {"n": "Valles", "a": "SINDANGAN", "v": 27}, {"n": "Dumajel", "a": "SINDANGAN", "v": 28}, {"n": "Jhon Clifford Bunane", "a": "SINDANGAN", "v": 29}, {"n": "Inday Zamora", "a": "SINDANGAN", "v": 30}, {"n": "Jocelyn Sumalinog", "a": "SINDANGAN", "v": 31}, {"n": "Ledena Gune", "a": "SINDANGAN", "v": 32}, {"n": "Ganag-Ganag", "a": "SINDANGAN", "v": 33}, {"n": "Cindy mae Jungoy", "a": "SINDANGAN", "v": 34}, {"n": "Em2 Lombres", "a": "SINDANGAN", "v": 35}, {"n": "Manigos / Uno", "a": "SINDANGAN", "v": 36}, {"n": "Felly Bano", "a": "SINDANGAN", "v": 37}, {"n": "Shello Villagracia", "a": "SINDANGAN", "v": 38}, {"n": "Monte Mayor/Mandate 2", "a": "SINDANGAN", "v": 38}, {"n": "Amor espinas", "a": "SINDANGAN", "v": 40}, {"n": "Dumaog Tamhay", "a": "SINDANGAN", "v": 39}, {"n": "Zelmer", "a": "SINDANGAN", "v": 41}, {"n": "YOSORES", "a": "SINDANGAN", "v": 42}, {"n": "Christina Perges", "a": "SINDANGAN", "v": 43}, {"n": "Dela liña", "a": "SINDANGAN", "v": 44}, {"n": "Teresita Omoso", "a": "SINDANGAN", "v": 45}, {"n": "Joan Sy / JSB", "a": "SINDANGAN", "v": 46}, {"n": "Jercil Zozobrad", "a": "SINDANGAN", "v": 47}, {"n": "Tores/Lintason", "a": "SINDANGAN", "v": 48}, {"n": "Kyro Sy", "a": "SINDANGAN", "v": 53}, {"n": "Lea", "a": "SINDANGAN", "v": 49}, {"n": "Echan Noval", "a": "SINDANGAN", "v": 50}, {"n": "Mardie Tan/ Winstons  Tan", "a": "SINDANGAN", "v": 51}, {"n": "Vilma Almonte", "a": "SINDANGAN", "v": 52}, {"n": "Putong", "a": "SINDANGAN", "v": 53}, {"n": "Patrocenas", "a": "SINDANGAN", "v": 53}, {"n": "Anicita Sagaral", "a": "SINDANGAN", "v": 54}, {"n": "Warlyn Cataytay", "a": "SINDANGAN", "v": 55}, {"n": "Angel Necanor", "a": "SINDANGAN", "v": 56}, {"n": "Rosalie Lustica / Power Speed", "a": "SINDANGAN", "v": 57}, {"n": "JEB Barbershop", "a": "SINDANGAN", "v": 58}, {"n": "Vanessa Rada", "a": "SINDANGAN", "v": 59}, {"n": "Zephanie C. Arripal/Decierdo", "a": "SINDANGAN", "v": 60}, {"n": "Randes", "a": "SINDANGAN", "v": 62}, {"n": "Dodong Bayawak", "a": "SINDANGAN", "v": 61}, {"n": "Geraldine Patches", "a": "SINDANGAN", "v": 64}, {"n": "Miraflor Araneta", "a": "SINDANGAN", "v": 65}, {"n": "Reynald Estoconing", "a": "SINDANGAN", "v": 66}, {"n": "Matias Lañojan", "a": "SINDANGAN", "v": 67}, {"n": "Hazel Mae", "a": "SINDANGAN", "v": 67}, {"n": "Zenaida Rosite", "a": "SINDANGAN", "v": 68}, {"n": "Maricel Racaza", "a": "SINDANGAN", "v": 69}, {"n": "Rona Donato", "a": "SINDANGAN", "v": 70}, {"n": "Marife Dalam", "a": "SINDANGAN", "v": 71}, {"n": "Ambrey Triambulo", "a": "SINDANGAN", "v": 72}, {"n": "Jonie Bonocan", "a": "SINDANGAN", "v": 73}, {"n": "Jenefer/ Cataytay", "a": "SINDANGAN", "v": 74}, {"n": "Calunsag", "a": "SINDANGAN", "v": 75}, {"n": "Olvis", "a": "SINDANGAN", "v": 76}, {"n": "Lagarnia/Lalay", "a": "SINDANGAN", "v": 77}, {"n": "Samante/Somoso", "a": "SINDANGAN", "v": 78}, {"n": "Galledo", "a": "SINDANGAN", "v": 79}, {"n": "Tijano", "a": "SINDANGAN", "v": 80}, {"n": "Easter/Promon/ Gumandao/DPWH", "a": "SINDANGAN", "v": 81}, {"n": "Carla Torres", "a": "SINDANGAN", "v": 82}, {"n": "Amys/Am-is", "a": "SINDANGAN", "v": 83}, {"n": "Mandate", "a": "SINDANGAN", "v": 84}, {"n": "Labiano", "a": "SINDANGAN", "v": 85}, {"n": "Lety Ongus", "a": "SINDANGAN", "v": 86}, {"n": "Espesios", "a": "SINDANGAN", "v": null}, {"n": "Thata Ignacio", "a": "SINDANGAN", "v": null}, {"n": "Jocelyn Dela Peña", "a": "SINDANGAN", "v": null}, {"n": "Belice Promon", "a": "SINDANGAN", "v": 88}, {"n": "Neneng Pisowifi", "a": "SINDANGAN", "v": 90}, {"n": "Arzadon", "a": "SINDANGAN", "v": 91}, {"n": "Espeñas", "a": "SINDANGAN", "v": 92}, {"n": "Tabilon", "a": "SINDANGAN", "v": 93}, {"n": "Paratan", "a": "SINDANGAN", "v": 94}, {"n": "Soriano", "a": "SINDANGAN", "v": 95}, {"n": "Jessel Sarapudin", "a": "SINDANGAN", "v": 96}, {"n": "Tinifrancia", "a": "SINDANGAN", "v": 97}, {"n": "Arcaya", "a": "SINDANGAN", "v": 98}, {"n": "Maningo", "a": "SINDANGAN", "v": 100}, {"n": "Amad", "a": "SINDANGAN", "v": 101}, {"n": "Am-is", "a": "SINDANGAN", "v": 102}, {"n": "Promon", "a": "SINDANGAN", "v": 103}, {"n": "Caballero", "a": "SINDANGAN", "v": 104}, {"n": "Marina Española", "a": "SINDANGAN", "v": 105}, {"n": "Aliño", "a": "SINDANGAN", "v": 107}, {"n": "Gutana", "a": "SINDANGAN", "v": 109}, {"n": "Emelyn Ferenal", "a": "SINDANGAN", "v": 111}, {"n": "Dahuway/Pahuway", "a": "SINDANGAN", "v": 112}, {"n": "Mansueto", "a": "SINDANGAN", "v": 113}, {"n": "Marvin A. Ague", "a": "SINDANGAN", "v": 114}, {"n": "Mary Jane Rada", "a": "SINDANGAN", "v": 115}, {"n": "Ronald M. Napigkit", "a": "SINDANGAN", "v": 116}, {"n": "Michel Orbase", "a": "SINDANGAN", "v": 118}, {"n": "Tata Loloy Piso Wifi", "a": "SINDANGAN", "v": 117}, {"n": "Jimmy Bancuire", "a": "SINDANGAN", "v": 119}, {"n": "Claire M. Bagcat", "a": "SINDANGAN", "v": 120}, {"n": "Joseph Mediona/Maltawa", "a": "SINDANGAN", "v": 121}, {"n": "Atan C. Bandico", "a": "SINDANGAN", "v": 122}, {"n": "Desheryl Bation", "a": "SINDANGAN", "v": 123}, {"n": "Mary Jane Tejero", "a": "SINDANGAN", "v": 124}, {"n": "Lougie M. Acuna", "a": "SINDANGAN", "v": 125}, {"n": "Pablo Tamayo", "a": "SINDANGAN", "v": 126}, {"n": "Lorna M. Otap", "a": "SINDANGAN", "v": 127}, {"n": "Jane Barbusa", "a": "SINDANGAN", "v": 128}, {"n": "Ester Malon", "a": "SINDANGAN", "v": 129}, {"n": "Rosevilla Pacatang", "a": "SINDANGAN", "v": 130}, {"n": "Florencia Ballar", "a": "SINDANGAN", "v": 131}, {"n": "Henry Balabad", "a": "SINDANGAN", "v": 132}, {"n": "Jemmy G. Fundal /Megz", "a": "SINDANGAN", "v": 133}, {"n": "Leonora V. Yagonia", "a": "SINDANGAN", "v": 134}, {"n": "Hesos /LangingPanong", "a": "SINDANGAN", "v": 135}, {"n": "Catalina Landa", "a": "SINDANGAN", "v": 136}, {"n": "Rechel Mojelyo", "a": "SINDANGAN", "v": 137}, {"n": "Virgillo Simbulaan/Test", "a": "SINDANGAN", "v": 138}, {"n": "Tata Landa", "a": "SINDANGAN", "v": 139}, {"n": "Lorna Mantawa", "a": "SINDANGAN", "v": 140}, {"n": "Lezel Ziga Piao", "a": "SINDANGAN", "v": 141}, {"n": "Ruwena Arcocil", "a": "SINDANGAN", "v": 142}, {"n": "Janice Dracula", "a": "SINDANGAN", "v": 143}, {"n": "Leyte Ybañez", "a": "SINDANGAN", "v": 144}, {"n": "Ebo T. Badialan", "a": "SINDANGAN", "v": 145}, {"n": "Bobong Lacio", "a": "SINDANGAN", "v": 146}, {"n": "Jove Velando", "a": "SINDANGAN", "v": 147}, {"n": "Bemar Flores", "a": "SINDANGAN", "v": 148}, {"n": "Ebrahem Hasim", "a": "SINDANGAN", "v": 149}, {"n": "Gabotero Piso Wifi", "a": "SINDANGAN", "v": null}, {"n": "Romeo", "a": "SINDANGAN", "v": 106}, {"n": "Jessel Catacutan", "a": "SINDANGAN", "v": 99}, {"n": "Maningo", "a": "SINDANGAN", "v": 110}];
+
+/* ─── DETAIL POPUP: OPEN WITH EDIT FIELDS ─── */
+function hvOpenDetailEditFields(d) {
+  // Set area dropdown
+  const areaSel = document.getElementById('hv-dp-area-sel');
+  if (areaSel) areaSel.value = (d.area || 'MIX AREAS');
+  // Set sheet name input
+  const sheetInp = document.getElementById('hv-dp-sheet-inp');
+  if (sheetInp) sheetInp.value = d.sheet || '';
+  // Set TG name input
+  const tgInp = document.getElementById('hv-dp-tg-inp');
+  if (tgInp) tgInp.value = d.tg || '';
+  // Hide results dropdowns
+  const sr = document.getElementById('hv-sheet-results');
+  const tr = document.getElementById('hv-tg-results');
+  if (sr) sr.style.display = 'none';
+  if (tr) tr.style.display = 'none';
+}
+
+/* ─── SHEET NAME SEARCH ─── */
+function hvSearchSheetNames(q) {
+  const box = document.getElementById('hv-sheet-results');
+  if (!box) return;
+  if (!q || q.length < 2) { box.style.display = 'none'; return; }
+  const ql = q.toLowerCase();
+  const matches = _SHEET_NAMES.filter(r => r.n.toLowerCase().includes(ql)).slice(0, 15);
+  if (!matches.length) { box.style.display = 'none'; return; }
+  box.style.display = '';
+  box.innerHTML = matches.map(r =>
+    `<div style="padding:7px 10px;cursor:pointer;font-size:11px;border-bottom:1px solid #f0f4ff;"
+      onmousedown="hvPickSheetName('${r.n.replace(/'/g,"\\'")}',${JSON.stringify(r.a)})">
+      <div style="font-weight:600;color:#1e3cb8;">${r.n}</div>
+      <div style="font-size:9px;color:#6b7280;">${r.a}${r.v ? ' · VLAN '+r.v : ''}</div>
+    </div>`
+  ).join('');
+}
+
+function hvPickSheetName(name, area) {
+  const inp = document.getElementById('hv-dp-sheet-inp');
+  if (inp) inp.value = name;
+  // Also update area dropdown to match
+  const areaSel = document.getElementById('hv-dp-area-sel');
+  if (areaSel && area) areaSel.value = area;
+  const box = document.getElementById('hv-sheet-results');
+  if (box) box.style.display = 'none';
+}
+
+/* ─── TG NAME SEARCH (searches Supabase) ─── */
+let _tgSearchTimer = null;
+async function hvSearchTGNames(q) {
+  const box = document.getElementById('hv-tg-results');
+  if (!box) return;
+  if (!q || q.length < 2) { box.style.display = 'none'; return; }
+  clearTimeout(_tgSearchTimer);
+  _tgSearchTimer = setTimeout(async () => {
+    try {
+      const r = await fetch(
+        `${_SB}/rest/v1/vendos?tg_name=ilike.*${encodeURIComponent(q)}*&select=id,tg_name,area,vlan&limit=15`,
+        { headers: { 'apikey': _KEY, 'Authorization': 'Bearer ' + _KEY } }
+      );
+      const data = await r.json();
+      if (!data.length) { box.style.display = 'none'; return; }
+      box.style.display = '';
+      box.innerHTML = data.map(v =>
+        `<div style="padding:7px 10px;cursor:pointer;font-size:11px;border-bottom:1px solid #f5f3ff;"
+          onmousedown="hvPickTGName('${(v.tg_name||'').replace(/'/g,"\\'")}',${v.id})">
+          <div style="font-weight:600;color:#5b21b6;">${v.tg_name||'—'}</div>
+          <div style="font-size:9px;color:#6b7280;">${v.area||'—'}${v.vlan ? ' · VLAN '+v.vlan : ''}</div>
+        </div>`
+      ).join('');
+    } catch(e) { box.style.display = 'none'; }
+  }, 350);
+}
+
+function hvPickTGName(name) {
+  const inp = document.getElementById('hv-dp-tg-inp');
+  if (inp) inp.value = name;
+  const box = document.getElementById('hv-tg-results');
+  if (box) box.style.display = 'none';
+}
+
+/* ─── SAVE VENDO EDITS ─── */
+async async function hvSaveVendoEdits() {
+  const vid      = hvCurrentDetail?.id;
+  if (!vid) return;
+  const area     = document.getElementById('hv-dp-area-sel')?.value;
+  const sheet    = document.getElementById('hv-dp-sheet-inp')?.value?.trim();
+  const tg       = document.getElementById('hv-dp-tg-inp')?.value?.trim();
+  if (!area) return;
+
+  const payload = { area };
+  if (sheet) payload.sheet_name = sheet;
+  if (tg)    payload.tg_name    = tg;
+
+  try {
+    const r = await fetch(`${_SB}/rest/v1/vendos?id=eq.${vid}`, {
+      method: 'PATCH',
+      headers: { 'apikey': _KEY, 'Authorization': 'Bearer ' + _KEY, 'Content-Type': 'application/json', 'Prefer': 'return=minimal' },
+      body: JSON.stringify(payload)
+    });
+    if (!r.ok) throw new Error('Save failed: ' + r.status);
+
+    const toast = document.getElementById('hv-refresh-toast');
+    if (toast) {
+      toast.textContent = '✅ Vendo updated';
+      toast.classList.add('show');
+      setTimeout(() => toast.classList.remove('show'), 2500);
+    }
+    document.getElementById('hv-detail-pop').classList.remove('show');
+    await hvLoadVendos();
+  } catch(e) {
+    alert('❌ ' + e.message);
+  }
+}
+
+/* ─── CLOSE DROPDOWNS ON CLICK OUTSIDE ─── */
+document.addEventListener('click', function(e) {
+  if (!e.target.closest('#hv-dp-sheet-inp') && !e.target.closest('#hv-sheet-results')) {
+    const b = document.getElementById('hv-sheet-results');
+    if (b) b.style.display = 'none';
+  }
+  if (!e.target.closest('#hv-dp-tg-inp') && !e.target.closest('#hv-tg-results')) {
+    const b = document.getElementById('hv-tg-results');
+    if (b) b.style.display = 'none';
+  }
+});
+
 /* ─── VENDO SCHEDULE (per-detail popup) ─── */
 async function hvSaveSchedule() {
   const vid = hvCurrentDetail.id;
@@ -2367,6 +2734,10 @@ document.addEventListener('DOMContentLoaded', function() {
     });
   }
 });
+
+
+
+
 
 
 
