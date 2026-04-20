@@ -2185,15 +2185,22 @@ async function hvConfirmRoute() {
     };
 
     // Insert route
+    const routePayload = {
+      route_code: code,
+      collector: col,
+      route_date: dt,
+      area: area || 'All areas',
+      notes: JSON.stringify(vendos),
+      status: 'active'
+    };
     const r1 = await fetch(_SB + '/rest/v1/routes', {
       method: 'POST', headers,
-      body: JSON.stringify({
-        route_code: code, collector: col,
-        harvest_date: dt, area: area,
-        vendos: vendos, status: 'active'
-      })
+      body: JSON.stringify(routePayload)
     });
-    if (!r1.ok) throw new Error('Route save failed: ' + r1.status);
+    if (!r1.ok) {
+      const errText = await r1.text();
+      throw new Error('Route save failed: ' + r1.status + ' — ' + errText);
+    }
     const routeData = await r1.json();
     const routeId = routeData[0]?.id;
 
