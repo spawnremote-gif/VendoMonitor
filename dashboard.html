@@ -2769,44 +2769,43 @@ document.addEventListener('DOMContentLoaded', function() {
 <!-- ══ DEVICES ══ -->
 <div id="panel-devices" class="panel">
 <style>
-.rt-card{background:#fff;border:1px solid #e5e7eb;border-radius:10px;padding:14px 16px;margin-bottom:10px;}
-.rt-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;}
+.rt-card{background:#fff;border:1.5px solid #e5e7eb;border-radius:10px;padding:14px 16px;margin-bottom:10px;}
+.rt-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:6px;}
 .rt-code{font-size:18px;font-weight:700;color:#1e3cb8;letter-spacing:.08em;}
 .rt-badge{font-size:9px;font-weight:700;padding:3px 8px;border-radius:8px;}
 .rt-badge.active{background:#dcfce7;color:#15803d;}
 .rt-badge.completed{background:#dbeafe;color:#1e40af;}
-.rt-badge.pending{background:#fef3c7;color:#92400e;}
-.rt-meta{font-size:11px;color:#6b7280;margin-bottom:8px;}
+.rt-meta{font-size:11px;color:#6b7280;margin-bottom:4px;}
 .rt-vendos{font-size:11px;color:#374151;margin-bottom:8px;}
-.rt-link{font-size:10px;color:#1e3cb8;word-break:break-all;background:#eef2ff;padding:5px 8px;border-radius:5px;display:block;cursor:pointer;text-decoration:none;}
-.rt-link:hover{background:#c7d2fe;}
-.rt-actions{display:flex;gap:6px;margin-top:8px;}
-.rt-btn{padding:4px 10px;border-radius:5px;border:1px solid #e5e7eb;background:#fff;font-size:10px;cursor:pointer;font-family:inherit;}
+.rt-link{font-size:10px;color:#1e3cb8;word-break:break-all;background:#eef2ff;padding:5px 8px;border-radius:5px;display:block;margin-bottom:8px;}
+.rt-actions{display:flex;gap:6px;flex-wrap:wrap;margin-top:8px;}
+.rt-btn{padding:5px 10px;border-radius:5px;border:1px solid #e5e7eb;background:#fff;font-size:10px;font-weight:600;cursor:pointer;font-family:inherit;}
 .rt-btn.blue{background:#1e3cb8;color:#fff;border-color:#1e3cb8;}
 .rt-btn.red{color:#dc2626;border-color:#fca5a5;}
-.rt-empty{text-align:center;padding:40px;color:#9ca3af;font-size:12px;}
-.rt-qr-wrap{text-align:center;margin:8px 0;}
+.rt-empty{text-align:center;padding:40px;color:#9ca3af;font-size:12px;line-height:1.8;}
 </style>
 
 <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;">
   <div>
-    <div style="font-size:16px;font-weight:700;color:#1e3cb8;">📋 Routes & Collectors</div>
+    <div style="font-size:16px;font-weight:700;color:#1e3cb8;">📋 Routes &amp; Collectors</div>
     <div style="font-size:11px;color:#6b7280;margin-top:2px;">All harvest routes given to collectors</div>
   </div>
   <button onclick="loadRoutes()" style="padding:6px 14px;background:#1e3cb8;color:#fff;border:none;border-radius:7px;font-size:11px;font-weight:700;cursor:pointer;font-family:inherit;">⟳ Refresh</button>
 </div>
 
-<div style="display:flex;gap:8px;margin-bottom:12px;">
+<div style="display:flex;gap:8px;margin-bottom:14px;">
   <button onclick="filterRoutes('all',this)" class="rt-btn blue" id="rf-all">All</button>
   <button onclick="filterRoutes('active',this)" class="rt-btn" id="rf-active">Active</button>
   <button onclick="filterRoutes('completed',this)" class="rt-btn" id="rf-done">Completed</button>
 </div>
 
 <div id="routes-list">
-  <div class="rt-empty">Loading routes…</div>
-</div>
+  <div class="rt-empty">Click ⟳ Refresh to load routes</div>
 </div>
 
+</div>
+
+<!-- ══ ANALYTICS ══ -->
 <!-- ══ ANALYTICS ══ -->
 <div id="panel-analytics" class="panel">
   <div class="cs" style="margin-bottom:12px;">
