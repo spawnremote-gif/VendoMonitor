@@ -1749,7 +1749,7 @@ document.addEventListener('click', function(e) {
     if (sr) sr.style.display = 'none';
     if (tr) tr.style.display = 'none';
   }
-}););
+});
 
 function hvOpenDetailFromRow(row) {
   const d = row.dataset;
@@ -1765,42 +1765,32 @@ function hvOpenDetailFromRow(row) {
   const gcNames = {'DAPITAN':'Dapitan GC','DIPOLOG':'Dipolog GC','SINDANGAN':'Sindangan GC','ROXAS':'Roxas GC','POLANCO':'Polanco GC','SINAMAN':'Sinaman GC','MINAOG':'Minaog GC','MIX AREAS':'No GC'};
   const gcEl = document.getElementById('hv-dp-gc');
   if (gcEl) gcEl.textContent = gcNames[(d.area||'').toUpperCase()] || d.area || '—';
-  document.getElementById('hv-dp-last').textContent  = d.last  || '—';
-  document.getElementById('hv-dp-area').textContent  = d.area  + ' · ' + d.vlan;
+  document.getElementById('hv-dp-last').textContent = d.last || '—';
+  document.getElementById('hv-dp-area').textContent = d.area + ' · ' + d.vlan;
   const alertEl = document.getElementById('hv-dp-alert');
   if (alertEl) alertEl.style.display = 'none';
-  // Load schedule for this vendo
   hvLoadDetailSchedule(d.vid);
-  // Populate edit fields
-  const areaSel = document.getElementById('hv-dp-area-sel');
-  if (areaSel) areaSel.value = d.area || 'MIX AREAS';
-  const sheetInp = document.getElementById('hv-dp-sheet-inp');
-  if (sheetInp) sheetInp.value = d.sheet || '';
-  const tgInp = document.getElementById('hv-dp-tg-inp');
-  if (tgInp) tgInp.value = d.tg || '';
-  // Hide dropdowns
-  const sr = document.getElementById('hv-sheet-results');
-  const tr = document.getElementById('hv-tg-results');
-  if (sr) sr.style.display = 'none';
-  if (tr) tr.style.display = 'none';
-
-  // QR only available if fully matched (both sheet + TG name confirmed)
+  // QR visibility
   const qrBtn = document.getElementById('hv-dp-qr-btn');
   if (qrBtn) {
     const isMatched = !!(d.sheet && d.tg);
     qrBtn.style.display = isMatched ? '' : 'none';
-    qrBtn.title = isMatched ? 'Generate QR — match confirmed ✅' : 'QR only available after match is confirmed';
   }
-  // Pre-set area dropdown and clear search inputs
-  const areaSel = document.getElementById('hv-dp-area-sel');
-  if (areaSel) areaSel.value = (d.area || '').toUpperCase();
-  const si = document.getElementById('hv-dp-sheet-inp'); if (si) si.value = '';
-  const ti = document.getElementById('hv-dp-tg-inp');   if (ti) ti.value = '';
-  const sr = document.getElementById('hv-dp-sheet-results'); if (sr) sr.style.display = 'none';
-  const tr = document.getElementById('hv-dp-tg-results');   if (tr) tr.style.display = 'none';
+  // Pre-set edit fields
+  const dpAreaSel = document.getElementById('hv-dp-area-sel');
+  if (dpAreaSel) dpAreaSel.value = (d.area || '').toUpperCase();
+  const dpSheetInp = document.getElementById('hv-dp-sheet-inp');
+  if (dpSheetInp) dpSheetInp.value = '';
+  const dpTgInp = document.getElementById('hv-dp-tg-inp');
+  if (dpTgInp) dpTgInp.value = '';
+  const dpSr = document.getElementById('hv-dp-sheet-results');
+  if (dpSr) dpSr.style.display = 'none';
+  const dpTr = document.getElementById('hv-dp-tg-results');
+  if (dpTr) dpTr.style.display = 'none';
   hvLoadSheetNamesCache();
   document.getElementById('hv-detail-pop').classList.add('show');
 }
+
 
 async function hvLoadDetailSchedule(vid) {
   const inp = document.getElementById('hv-dp-interval');
@@ -2461,7 +2451,7 @@ function hvPickTGName(name) {
 }
 
 /* ─── SAVE VENDO EDITS ─── */
-async async function hvSaveVendoEdits() {
+async function hvSaveVendoEdits() {
   const vid      = hvCurrentDetail?.id;
   if (!vid) return;
   const area     = document.getElementById('hv-dp-area-sel')?.value;
