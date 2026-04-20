@@ -522,7 +522,10 @@ tr:hover td{background:#f8f9ff;cursor:pointer}
 /* Grid: cb | dot | sheet | tg+gc | area | last | note+add */
 .hv-vthead{display:grid;grid-template-columns:14px 8px minmax(0,1.4fr) minmax(0,1.6fr) 70px 74px 70px;align-items:center;padding:4px 8px;gap:4px;border-bottom:2px solid #c7d2fe;background:#eef2ff;}
 .hv-vth{font-size:9px;font-weight:700;color:#4f46e5;text-transform:uppercase;letter-spacing:.04em;}
-.hv-scroll{flex:1;overflow-y:auto;background:#fafbff;}
+.hv-scroll{flex:1;overflow-y:auto;background:#fafbff;position:relative;}
+.hv-back-top{position:fixed;bottom:24px;right:220px;width:36px;height:36px;border-radius:50%;background:var(--blue);color:#fff;border:none;cursor:pointer;display:none;align-items:center;justify-content:center;box-shadow:0 4px 14px rgba(30,60,200,.35);z-index:99;font-size:16px;transition:.2s;}
+.hv-back-top.vis{display:flex;}
+.hv-back-top:hover{background:#1a3fca;transform:scale(1.08);}
 .hv-vr{display:grid;grid-template-columns:14px 8px minmax(0,1.4fr) minmax(0,1.6fr) 70px 74px 70px;align-items:center;padding:4px 8px;gap:4px;border-bottom:1px solid rgba(30,60,200,.07);cursor:pointer;background:#fafbff;}
 .hv-vr:hover{background:#eef2ff;}
 .hv-vr.urg-c{border-left:3px solid #dc2626;background:#fef2f2;}
@@ -950,17 +953,30 @@ tr:hover td{background:#f8f9ff;cursor:pointer}
   </svg>
 </button>
 <div class="hv-refresh-toast" id="hv-refresh-toast">Vendos refreshed</div>
+<button class="hv-back-top" id="hv-back-top" onclick="document.getElementById('vc-scroll').scrollTo({top:0,behavior:'smooth'})" title="Back to top">↑</button>
 
 <!-- NOTE POPUP -->
 <div class="hv-popbg" id="hv-note-pop">
-  <div class="hv-pop" style="width:300px;">
-    <div class="hv-pop-t"><span id="hv-np-title">Note</span><button class="hv-pop-x" onclick="document.getElementById('hv-note-pop').classList.remove('show')">×</button></div>
-    <textarea class="hv-pop-ta" id="hv-np-ta" placeholder="Type a note for this vendo..."></textarea>
-    <div class="hv-pop-row">
-      <button class="hv-pop-sv" onclick="hvSaveNote()">Save note</button>
-      <button class="hv-pop-cl" onclick="document.getElementById('hv-np-ta').value=''">Clear</button>
+<div style="width:340px;border-radius:12px;overflow:hidden;box-shadow:0 16px 48px rgba(0,0,0,.22);">
+  <div style="background:#1e3cb8;padding:12px 14px;display:flex;align-items:center;justify-content:space-between;">
+    <div>
+      <div style="font-size:10px;font-weight:700;color:rgba(255,255,255,.7);text-transform:uppercase;letter-spacing:.05em;">📝 Vendo note</div>
+      <div style="font-size:13px;font-weight:700;color:#fff;margin-top:2px;" id="hv-np-title">Vendo</div>
+    </div>
+    <button onclick="document.getElementById('hv-note-pop').classList.remove('show')" style="width:26px;height:26px;border-radius:50%;border:1.5px solid rgba(255,255,255,.4);background:rgba(255,255,255,.15);color:#fff;font-size:14px;cursor:pointer;display:flex;align-items:center;justify-content:center;">×</button>
+  </div>
+  <div style="background:#fff;padding:12px;display:flex;flex-direction:column;gap:8px;">
+    <textarea id="hv-np-ta" placeholder="Type a note for this vendo..." style="width:100%;padding:9px;border:1.5px solid #c7d2fe;border-radius:7px;font-size:12px;font-family:inherit;resize:none;height:90px;outline:none;box-sizing:border-box;color:#111827;"></textarea>
+    <label style="display:flex;align-items:center;gap:7px;font-size:11px;color:#374151;cursor:pointer;">
+      <input type="checkbox" id="hv-np-board" checked style="accent-color:#1e3cb8;width:14px;height:14px;">
+      Also add to notes board (right panel)
+    </label>
+    <div style="display:flex;gap:7px;">
+      <button onclick="hvSaveNote()" style="flex:1;padding:8px;background:#1e3cb8;color:#fff;border:none;border-radius:6px;font-size:12px;font-weight:700;cursor:pointer;font-family:inherit;">Save note</button>
+      <button onclick="document.getElementById('hv-np-ta').value=''" style="padding:8px 12px;border:1px solid #e5e7eb;border-radius:6px;font-size:12px;color:#6b7280;background:#fff;cursor:pointer;font-family:inherit;">Clear</button>
     </div>
   </div>
+</div>
 </div>
 
 <!-- MATCH POPUP -->
@@ -979,76 +995,72 @@ tr:hover td{background:#f8f9ff;cursor:pointer}
       <button class="hv-match-confirm" id="hv-match-confirm-btn" onclick="hvConfirmMatch()" disabled>✅ Confirm match</button>
       <button class="hv-match-skip" onclick="document.getElementById('hv-match-pop').classList.remove('show')">Skip</button>
     </div>
+    <!-- Manual name entry -->
+    <div style="margin-top:10px;border-top:1px solid #e5e7eb;padding-top:10px;">
+      <div style="font-size:9px;font-weight:700;color:#6b7280;text-transform:uppercase;letter-spacing:.04em;margin-bottom:6px;">Or enter name manually</div>
+      <div style="display:flex;gap:6px;">
+        <input id="hv-match-manual" placeholder="Type sheet name or TG name..." style="flex:1;padding:7px 10px;border:1.5px solid #c7d2fe;border-radius:6px;font-size:12px;font-family:inherit;outline:none;color:#111827;">
+        <button onclick="hvConfirmManualName()" style="padding:7px 14px;background:#16a34a;color:#fff;border:none;border-radius:6px;font-size:11px;font-weight:700;cursor:pointer;font-family:inherit;">Save</button>
+      </div>
+      <div style="font-size:9px;color:#818cf8;margin-top:4px;">This saves the typed name directly to this vendo in Supabase.</div>
+    </div>
   </div>
 </div>
 
 <!-- DETAIL POPUP -->
 <div class="hv-popbg" id="hv-detail-pop">
-  <div style="background:#fff;border-radius:12px;width:440px;overflow:hidden;box-shadow:0 12px 40px rgba(0,0,0,.18);">
-
-    <!-- Blue header -->
-    <div style="background:var(--blue);color:#fff;padding:12px 16px;display:flex;align-items:flex-start;justify-content:space-between;">
-      <div>
-        <div style="font-size:15px;font-weight:700;letter-spacing:.01em;" id="hv-dp-title">Vendo details</div>
-        <div style="font-size:10px;opacity:.75;margin-top:2px;" id="hv-dp-sub"></div>
-      </div>
-      <button style="background:rgba(255,255,255,.15);border:none;color:#fff;font-size:16px;cursor:pointer;width:26px;height:26px;border-radius:50%;display:flex;align-items:center;justify-content:center;flex-shrink:0;" onclick="document.getElementById('hv-detail-pop').classList.remove('show')">×</button>
+<div style="width:440px;border-radius:12px;overflow:hidden;box-shadow:0 16px 48px rgba(0,0,0,.22);">
+  <div style="background:var(--blue);padding:14px 16px;display:flex;align-items:flex-start;justify-content:space-between;gap:10px;">
+    <div style="min-width:0;">
+      <div style="font-size:15px;font-weight:700;color:#fff;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;" id="hv-dp-title">Vendo details</div>
+      <div style="font-size:10px;color:rgba(255,255,255,.7);margin-top:3px;" id="hv-dp-sub"></div>
     </div>
-
-    <!-- Alert -->
-    <div class="hv-alert-note" id="hv-dp-alert" style="display:none;margin:0;border-radius:0;"></div>
-
-    <!-- Body -->
-    <div style="padding:14px 16px;display:flex;flex-direction:column;gap:12px;">
-
-      <!-- Info grid -->
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">
-        <div style="background:#eef2ff;border-radius:8px;padding:10px 12px;border-left:3px solid var(--blue);">
-          <div style="font-size:8px;font-weight:700;color:#6366f1;text-transform:uppercase;letter-spacing:.05em;margin-bottom:4px;">Sheet name</div>
-          <div style="font-size:13px;font-weight:700;color:var(--blue);" id="hv-dp-sheet">—</div>
-          <div style="font-size:9px;color:#818cf8;margin-top:2px;">Google Sheet record</div>
-        </div>
-        <div style="background:#f5f3ff;border-radius:8px;padding:10px 12px;border-left:3px solid #7c3aed;">
-          <div style="font-size:8px;font-weight:700;color:#7c3aed;text-transform:uppercase;letter-spacing:.05em;margin-bottom:4px;">TG name · Group</div>
-          <div style="font-size:12px;font-weight:700;color:#5b21b6;word-break:break-all;" id="hv-dp-tg">—</div>
-          <div style="font-size:9px;color:#8b5cf6;margin-top:2px;" id="hv-dp-gc">—</div>
-        </div>
-        <div style="background:#f0fdf4;border-radius:8px;padding:10px 12px;border-left:3px solid #16a34a;">
-          <div style="font-size:8px;font-weight:700;color:#16a34a;text-transform:uppercase;letter-spacing:.05em;margin-bottom:4px;">Last harvest</div>
-          <div style="font-size:13px;font-weight:700;color:#15803d;" id="hv-dp-last">—</div>
-        </div>
-        <div style="background:#fafbff;border-radius:8px;padding:10px 12px;border-left:3px solid #6366f1;">
-          <div style="font-size:8px;font-weight:700;color:#6366f1;text-transform:uppercase;letter-spacing:.05em;margin-bottom:4px;">Area / VLAN</div>
-          <div style="font-size:13px;font-weight:700;color:#4338ca;" id="hv-dp-area">—</div>
-        </div>
+    <button onclick="document.getElementById('hv-detail-pop').classList.remove('show')" style="flex-shrink:0;width:28px;height:28px;border-radius:50%;border:1.5px solid rgba(255,255,255,.4);background:rgba(255,255,255,.15);color:#fff;font-size:16px;cursor:pointer;display:flex;align-items:center;justify-content:center;">×</button>
+  </div>
+  <div id="hv-dp-alert" style="display:none;background:#fef2f2;border-left:4px solid #dc2626;padding:8px 14px;font-size:11px;color:#991b1b;"></div>
+  <div style="background:#fff;padding:14px 16px;display:flex;flex-direction:column;gap:10px;">
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">
+      <div style="background:#eef2ff;border-radius:8px;padding:10px 12px;border-left:3px solid var(--blue);">
+        <div style="font-size:8px;font-weight:700;color:#6366f1;text-transform:uppercase;letter-spacing:.05em;margin-bottom:4px;">Sheet name</div>
+        <div style="font-size:13px;font-weight:700;color:var(--blue);word-break:break-word;" id="hv-dp-sheet">—</div>
+        <div style="font-size:9px;color:#818cf8;margin-top:2px;">Google Sheet record</div>
       </div>
-
-      <!-- Schedule section -->
-      <div style="background:#f8faff;border:1.5px solid #c7d2fe;border-radius:8px;padding:10px 12px;">
-        <div style="font-size:9px;font-weight:700;color:var(--blue);text-transform:uppercase;letter-spacing:.05em;margin-bottom:8px;display:flex;align-items:center;gap:6px;">
-          ⏰ Harvest schedule
-          <span style="font-size:8px;font-weight:500;color:#818cf8;text-transform:none;letter-spacing:0;margin-left:auto;" id="hv-dp-sched-status">global default</span>
-        </div>
-        <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;">
-          <span style="font-size:10px;color:var(--mu);">Harvest every</span>
-          <input type="number" id="hv-dp-interval" min="7" max="365" value="30"
-            style="width:55px;padding:4px 6px;border:1.5px solid #c7d2fe;border-radius:5px;font-size:12px;font-weight:700;color:var(--blue);font-family:inherit;outline:none;text-align:center;">
-          <span style="font-size:10px;color:var(--mu);">days</span>
-          <button onclick="hvSaveSchedule()" style="padding:4px 12px;background:var(--blue);color:#fff;border:none;border-radius:5px;font-size:10px;font-weight:700;cursor:pointer;font-family:inherit;">Save</button>
-          <button onclick="hvClearSchedule()" style="padding:4px 8px;background:#fff;color:#dc2626;border:1px solid #fca5a5;border-radius:5px;font-size:9px;cursor:pointer;font-family:inherit;">Reset to global</button>
-        </div>
-        <div style="font-size:9px;color:#818cf8;margin-top:6px;" id="hv-dp-next-due">Next harvest due: —</div>
+      <div style="background:#f5f3ff;border-radius:8px;padding:10px 12px;border-left:3px solid #7c3aed;">
+        <div style="font-size:8px;font-weight:700;color:#7c3aed;text-transform:uppercase;letter-spacing:.05em;margin-bottom:4px;">TG name · Group</div>
+        <div style="font-size:11px;font-weight:700;color:#5b21b6;word-break:break-all;" id="hv-dp-tg">—</div>
+        <div style="font-size:9px;color:#8b5cf6;margin-top:2px;" id="hv-dp-gc">—</div>
       </div>
-
-      <!-- Action buttons -->
-      <div style="display:flex;gap:8px;">
-        <button onclick="hvGenQRFromDetail()" id="hv-dp-qr-btn" style="flex:1;padding:8px;background:#eef2ff;color:var(--blue);border:1.5px solid #c7d2fe;border-radius:7px;font-size:11px;font-weight:700;cursor:pointer;font-family:inherit;">📱 QR code</button>
-        <button onclick="hvOpenMatchFromDetail()" style="flex:1;padding:8px;background:#f5f3ff;color:#7c3aed;border:1.5px solid #ddd6fe;border-radius:7px;font-size:11px;font-weight:700;cursor:pointer;font-family:inherit;">💡 Match names</button>
-        <button onclick="hvAddFromDetail()" style="flex:1;padding:8px;background:#16a34a;color:#fff;border:none;border-radius:7px;font-size:11px;font-weight:700;cursor:pointer;font-family:inherit;">+ Add to route</button>
+      <div style="background:#f0fdf4;border-radius:8px;padding:10px 12px;border-left:3px solid #16a34a;">
+        <div style="font-size:8px;font-weight:700;color:#16a34a;text-transform:uppercase;letter-spacing:.05em;margin-bottom:4px;">Last harvest</div>
+        <div style="font-size:13px;font-weight:700;color:#15803d;" id="hv-dp-last">—</div>
       </div>
-
+      <div style="background:#fafbff;border-radius:8px;padding:10px 12px;border-left:3px solid #6366f1;">
+        <div style="font-size:8px;font-weight:700;color:#6366f1;text-transform:uppercase;letter-spacing:.05em;margin-bottom:4px;">Area / VLAN</div>
+        <div style="font-size:13px;font-weight:700;color:#4338ca;" id="hv-dp-area">—</div>
+      </div>
+    </div>
+    <div style="background:#f8faff;border:1.5px solid #c7d2fe;border-radius:8px;padding:10px 12px;">
+      <div style="font-size:9px;font-weight:700;color:var(--blue);text-transform:uppercase;letter-spacing:.05em;margin-bottom:8px;display:flex;align-items:center;">
+        ⏰ Harvest schedule
+        <span style="font-size:8px;font-weight:500;color:#818cf8;text-transform:none;letter-spacing:0;margin-left:auto;" id="hv-dp-sched-status">global default</span>
+      </div>
+      <div style="display:flex;align-items:center;gap:7px;flex-wrap:wrap;">
+        <span style="font-size:10px;color:#6b7280;">Every</span>
+        <input type="number" id="hv-dp-interval" min="7" max="365" value="30" style="width:52px;padding:4px 6px;border:1.5px solid #c7d2fe;border-radius:5px;font-size:13px;font-weight:700;color:var(--blue);font-family:inherit;outline:none;text-align:center;">
+        <span style="font-size:10px;color:#6b7280;">days</span>
+        <button onclick="hvSaveSchedule()" style="padding:4px 12px;background:var(--blue);color:#fff;border:none;border-radius:5px;font-size:10px;font-weight:700;cursor:pointer;font-family:inherit;">Save</button>
+        <button onclick="hvClearSchedule()" style="padding:4px 8px;background:#fff;color:#dc2626;border:1px solid #fca5a5;border-radius:5px;font-size:9px;cursor:pointer;font-family:inherit;">Reset</button>
+      </div>
+      <div style="font-size:9px;color:#818cf8;margin-top:5px;" id="hv-dp-next-due">Next harvest due: —</div>
+    </div>
+    <div style="display:flex;gap:7px;flex-wrap:wrap;">
+      <button onclick="hvGenQRFromDetail()" id="hv-dp-qr-btn" style="flex:1;padding:9px;background:#eef2ff;color:var(--blue);border:1.5px solid #c7d2fe;border-radius:7px;font-size:11px;font-weight:700;cursor:pointer;font-family:inherit;">📱 QR</button>
+      <button onclick="hvOpenMatchFromDetail()" style="flex:1;padding:9px;background:#f5f3ff;color:#7c3aed;border:1.5px solid #ddd6fe;border-radius:7px;font-size:11px;font-weight:700;cursor:pointer;font-family:inherit;">💡 Match</button>
+      <button onclick="hvNoteFromDetail()" style="flex:1;padding:9px;background:#fffbeb;color:#d97706;border:1.5px solid #fcd34d;border-radius:7px;font-size:11px;font-weight:700;cursor:pointer;font-family:inherit;">📝 Note</button>
+      <button onclick="hvAddFromDetail()" style="width:100%;padding:9px;background:#16a34a;color:#fff;border:none;border-radius:7px;font-size:11px;font-weight:700;cursor:pointer;font-family:inherit;">+ Add to route</button>
     </div>
   </div>
+</div>
 </div>
 
 <!-- QR POPUP -->
@@ -1095,6 +1107,7 @@ tr:hover td{background:#f8f9ff;cursor:pointer}
 
 
 <script>
+
 
 
 
@@ -1356,8 +1369,10 @@ document.addEventListener('click', function(e) {
 
 /* ─── LOAD VENDOS FROM SUPABASE ─── */
 async function hvLoadVendos() {
+  if (window._hvLoading) return;
+  window._hvLoading = true;
   const scroll = document.getElementById('vc-scroll');
-  if (!scroll) return;
+  if (!scroll) { window._hvLoading = false; return; }
   scroll.innerHTML = '<div style="padding:20px;text-align:center;color:var(--mu);font-size:12px;">Loading vendos…</div>';
 
   const headers = { 'apikey': _KEY, 'Authorization': 'Bearer ' + _KEY };
@@ -1402,6 +1417,7 @@ async function hvLoadVendos() {
     if (allEl) allEl.textContent = allData.length;
 
     hvApplyFilter();
+    window._hvLoading = false;
 
   } catch(e) {
     console.error('hvLoadVendos error:', e);
@@ -1409,6 +1425,8 @@ async function hvLoadVendos() {
       ⚠️ Could not load vendos: ${e.message}<br>
       <button onclick="hvLoadVendos()" style="margin-top:8px;padding:4px 12px;border-radius:5px;border:1px solid #dc2626;background:#fff;color:#dc2626;cursor:pointer;font-size:11px;">Retry</button>
     </div>`;
+  } finally {
+    window._hvLoading = false;
   }
 }
 
@@ -1472,6 +1490,11 @@ async function hvLoadDetailSchedule(vid) {
       }
     }
   } catch(e) { /* no harvest_interval col yet — silently ignore */ }
+}
+
+function hvNoteFromDetail() {
+  document.getElementById('hv-detail-pop').classList.remove('show');
+  hvOpenNote(hvCurrentDetail.id, hvCurrentDetail.sheet || hvCurrentDetail.tg, hvCurrentDetail.note);
 }
 
 function hvAddFromDetail() {
@@ -1584,6 +1607,37 @@ async function hvOpenMatch(vendoId, knownName, type) {
   } catch(e) {
     console.error('Match suggestions error:', e);
     if (suggList) suggList.innerHTML = '<div style="padding:8px;font-size:11px;color:#dc2626;">Error loading suggestions.</div>';
+  }
+}
+
+async function hvConfirmManualName() {
+  const inp = document.getElementById('hv-match-manual');
+  const name = inp?.value?.trim();
+  if (!name) { inp?.focus(); return; }
+  if (!hvMatchVendoId) return;
+
+  const isSheet = hvMatchType === 'sheet';
+  const field   = isSheet ? 'sheet_name' : 'tg_name';
+  const label   = isSheet ? 'Sheet name' : 'TG name';
+
+  try {
+    const r = await fetch(`${_SB}/rest/v1/vendos?id=eq.${hvMatchVendoId}`, {
+      method: 'PATCH',
+      headers: { 'apikey': _KEY, 'Authorization': 'Bearer ' + _KEY, 'Content-Type': 'application/json', 'Prefer': 'return=minimal' },
+      body: JSON.stringify({ [field]: name })
+    });
+    if (!r.ok) throw new Error('PATCH failed: ' + r.status);
+    document.getElementById('hv-match-pop').classList.remove('show');
+    inp.value = '';
+    const toast = document.getElementById('hv-refresh-toast');
+    if (toast) {
+      toast.textContent = `✅ ${label} saved: ${name}`;
+      toast.classList.add('show');
+      setTimeout(() => toast.classList.remove('show'), 2500);
+    }
+    await hvLoadVendos();
+  } catch(e) {
+    alert('❌ Save failed: ' + e.message);
   }
 }
 
@@ -1794,8 +1848,14 @@ function hvClearRoute() {
 function hvNewRoute() { hvShowTab('route', document.getElementById('hbtn-route')); }
 
 /* ─── NOTE POPUP ─── */
+function hvOpenNoteFromDetail() {
+  const d = hvCurrentDetail;
+  document.getElementById('hv-detail-pop').classList.remove('show');
+  hvOpenNote(d.id, d.sheet || d.tg, d.note);
+}
+
 function hvOpenNote(vid, name, note) {
-  document.getElementById('hv-np-title').textContent = 'Note — ' + (name || 'Vendo');
+  document.getElementById('hv-np-title').textContent = name || 'Vendo';
   document.getElementById('hv-np-ta').value = note || '';
   document.getElementById('hv-np-ta').dataset.nvid = vid || '';
   document.getElementById('hv-note-pop').classList.add('show');
@@ -1803,9 +1863,10 @@ function hvOpenNote(vid, name, note) {
 }
 
 async function hvSaveNote() {
-  const ta  = document.getElementById('hv-np-ta');
-  const txt = ta?.value?.trim() || '';
-  const vid = ta?.dataset?.nvid || '';
+  const ta   = document.getElementById('hv-np-ta');
+  const txt  = ta?.value?.trim() || '';
+  const vid  = ta?.dataset?.nvid || '';
+  const name = document.getElementById('hv-np-title')?.textContent || 'Vendo';
   if (vid) {
     try {
       await fetch(`${_SB}/rest/v1/vendos?id=eq.${vid}`, {
@@ -1813,7 +1874,7 @@ async function hvSaveNote() {
         headers: { 'apikey': _KEY, 'Authorization': 'Bearer ' + _KEY, 'Content-Type': 'application/json', 'Prefer': 'return=minimal' },
         body: JSON.stringify({ admin_notes: txt })
       });
-      // Update row dataset
+      // Update row dataset + note icon
       const row = document.querySelector(`#vc-scroll .hv-vr[data-vid="${vid}"]`);
       if (row) {
         row.dataset.note = txt;
@@ -1821,6 +1882,22 @@ async function hvSaveNote() {
         if (ni) ni.className = txt ? 'hv-ni has' : 'hv-ni';
       }
     } catch(e) { console.error('Note save error:', e); }
+  }
+  // Add to notes board if checkbox checked (or if no checkbox, default add)
+  const addToBoard = document.getElementById('hv-np-board')?.checked ?? true;
+  if (txt && addToBoard) {
+    const chips = document.getElementById('hv-nchips');
+    if (chips) {
+      // Remove existing chip for this vendo if any
+      chips.querySelectorAll('.hv-nc[data-nvid]').forEach(el => {
+        if (el.dataset.nvid === vid) el.remove();
+      });
+      const chip = document.createElement('div');
+      chip.className = 'hv-nc b';
+      chip.dataset.nvid = vid;
+      chip.innerHTML = `<span style="font-weight:700;display:block;margin-bottom:1px;">${name}</span>${txt}<button class="hv-nx" onclick="this.closest('.hv-nc').remove()">×</button>`;
+      chips.prepend(chip);
+    }
   }
   document.getElementById('hv-note-pop').classList.remove('show');
 }
@@ -2067,6 +2144,18 @@ d></tr>`;
 }
 
 /* hvLoadVendos called from nav button onclick */
+
+/* ─── BACK TO TOP BUTTON ─── */
+document.addEventListener('DOMContentLoaded', function() {
+  const scroll = document.getElementById('vc-scroll');
+  const btn    = document.getElementById('hv-back-top');
+  if (scroll && btn) {
+    scroll.addEventListener('scroll', function() {
+      btn.classList.toggle('vis', scroll.scrollTop > 300);
+    });
+  }
+});
+
 
 
 
