@@ -481,10 +481,10 @@ tr:hover td{background:#f8f9ff;cursor:pointer}
 .hv-search:focus{border-color:var(--blue);}
 
 /* 3-COL LAYOUT */
-.hv-page{display:grid!important;grid-template-columns:210px 1fr 195px;height:calc(100vh - 156px);min-height:400px;overflow:hidden;}
+.hv-page{display:grid;grid-template-columns:210px 1fr 195px;height:calc(100vh - 156px);min-height:400px;overflow:hidden;}
 
 /* COL 1 — ROUTE BUILDER */
-.hv-rc{display:flex!important;flex-direction:column;overflow:hidden;background:#fff;border-right:1px solid var(--bd);}
+.hv-rc{display:flex;flex-direction:column;overflow:hidden;background:#fff;border-right:1px solid var(--bd);}
 .hv-rc-hdr{background:var(--blue);color:#fff;padding:5px 10px;flex-shrink:0;}
 .hv-rc-title{font-size:11px;font-weight:700;}
 .hv-rc-sub{font-size:9px;opacity:.8;margin-top:1px;}
@@ -514,7 +514,7 @@ tr:hover td{background:#f8f9ff;cursor:pointer}
 .hv-warn{font-size:9px;color:#d97706;background:#fffbeb;border-radius:4px;padding:3px 6px;text-align:center;}
 
 /* COL 2 — VENDO LIST */
-.hv-vc{display:flex!important;flex-direction:column;overflow:hidden;background:#fff;border-right:1px solid var(--bd);}
+.hv-vc{display:flex;flex-direction:column;overflow:hidden;background:#fff;border-right:1px solid var(--bd);}
 .hv-vc-hdr{background:var(--bg);border-bottom:1px solid var(--bd);padding:3px 8px;display:flex;align-items:center;justify-content:space-between;gap:6px;}
 .hv-vc-title{font-size:9px;font-weight:700;color:var(--blue);text-transform:uppercase;letter-spacing:.05em;}
 .hv-legend{display:flex;align-items:center;gap:5px;font-size:9px;color:var(--mu);}
@@ -523,7 +523,7 @@ tr:hover td{background:#f8f9ff;cursor:pointer}
 .hv-vthead{display:grid;grid-template-columns:14px 8px minmax(0,1.4fr) minmax(0,1.6fr) 70px 74px 70px;align-items:center;padding:3px 8px;gap:5px;border-bottom:1px solid var(--bd);background:var(--bg);}
 .hv-vth{font-size:8px;font-weight:700;color:var(--mu);text-transform:uppercase;letter-spacing:.04em;}
 .hv-scroll{flex:1;overflow-y:auto;}
-.hv-vr{display:grid!important;grid-template-columns:14px 8px minmax(0,1.4fr) minmax(0,1.6fr) 70px 74px 70px;align-items:center;padding:3px 6px;gap:3px;border-bottom:1px solid rgba(30,60,200,.05);cursor:pointer;}
+.hv-vr{display:grid;grid-template-columns:14px 8px minmax(0,1.4fr) minmax(0,1.6fr) 70px 74px 70px;align-items:center;padding:3px 6px;gap:3px;border-bottom:1px solid rgba(30,60,200,.05);cursor:pointer;}
 .hv-vr:hover{background:#f8f9ff;}
 .hv-vr.urg-c{border-left:3px solid #dc2626;background:#fff8f8;}
 .hv-vr.urg-c:hover{background:#fee2e2;}
@@ -571,7 +571,7 @@ tr:hover td{background:#f8f9ff;cursor:pointer}
 .new-badge{font-size:8px;padding:0 3px;border-radius:2px;background:#ede9fe;color:#7c3aed;font-weight:600;}
 
 /* COL 3 — PENDING + NOTES */
-.hv-rp{display:flex!important;flex-direction:column;overflow:hidden;background:#fff;}
+.hv-rp{display:flex;flex-direction:column;overflow:hidden;background:#fff;}
 .hv-rp-hdr{background:var(--bg);border-bottom:1px solid var(--bd);padding:4px 8px;display:flex;align-items:center;justify-content:space-between;}
 .hv-rp-title{font-size:9px;font-weight:700;color:var(--blue);text-transform:uppercase;letter-spacing:.05em;}
 .hv-rp-cnt{font-size:9px;padding:1px 6px;border-radius:7px;background:var(--redbg);color:var(--red);font-weight:700;}
@@ -711,6 +711,8 @@ tr:hover td{background:#f8f9ff;cursor:pointer}
 @keyframes hv-spin{to{transform:rotate(360deg);}}
 .hv-refresh-toast{position:absolute;bottom:66px;right:222px;background:#1e3cb8;color:#fff;font-size:10px;padding:4px 10px;border-radius:14px;opacity:0;pointer-events:none;transition:.3s;z-index:101;white-space:nowrap;}
 .hv-refresh-toast.show{opacity:1;}
+
+.hv-hidden{display:none!important;}
 </style>
 
 <!-- ══ HARVEST HEAD ══ -->
@@ -1049,6 +1051,7 @@ tr:hover td{background:#f8f9ff;cursor:pointer}
 <script>
 
 
+
 /* ═══════════════════════════════════════
    HARVEST PANEL — COMPLETE JS v5 (fixed)
    ═══════════════════════════════════════ */
@@ -1099,12 +1102,31 @@ function hvShowTab(tab, btn) {
     sched: document.getElementById('hv-tab-schedule'),
     rec:   document.getElementById('hv-tab-records')
   };
-  if (guide)     guide.style.display     = isRoute ? ''      : 'none';
-  if (els.page)  els.page.style.display  = isRoute ? 'grid'  : 'none';
-  if (els.area)  els.area.style.display  = isRoute ? 'flex'  : 'none';
-  if (els.filt)  els.filt.style.display  = isRoute ? 'flex'  : 'none';
-  if (els.sched) els.sched.style.display = (tab === 'schedule') ? 'block' : 'none';
-  if (els.rec)   els.rec.style.display   = (tab === 'records')  ? 'block' : 'none';
+  // Use classList to force display:none (overcomes !important in CSS)
+  const hide = el => el && el.classList.add('hv-hidden');
+  const show = (el, disp) => { if (!el) return; el.classList.remove('hv-hidden'); el.style.display = disp; };
+  if (isRoute) {
+    show(guide,    '');
+    show(els.page, 'grid');
+    show(els.area, 'flex');
+    show(els.filt, 'flex');
+    hide(els.sched);
+    hide(els.rec);
+  } else if (tab === 'schedule') {
+    hide(guide);
+    hide(els.page);
+    hide(els.area);
+    hide(els.filt);
+    show(els.sched, 'block');
+    hide(els.rec);
+  } else if (tab === 'records') {
+    hide(guide);
+    hide(els.page);
+    hide(els.area);
+    hide(els.filt);
+    hide(els.sched);
+    show(els.rec, 'block');
+  }
   if (tab === 'records') hvLoadRecords();
   if (tab === 'schedule') hvLoadSchedule();
 }
@@ -1879,6 +1901,7 @@ d></tr>`;
 }
 
 /* hvLoadVendos called from nav button onclick */
+
 
 
 
