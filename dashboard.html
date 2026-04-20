@@ -516,43 +516,45 @@ tr:hover td{background:#f8f9ff;cursor:pointer}
 /* COL 2 — VENDO LIST */
 .hv-vc{display:flex;flex-direction:column;overflow:hidden;background:#fff;border-right:1px solid var(--bd);}
 .hv-vc-hdr{background:var(--bg);border-bottom:1px solid var(--bd);padding:3px 8px;display:flex;align-items:center;justify-content:space-between;gap:6px;}
-.hv-vc-title{font-size:9px;font-weight:700;color:var(--blue);text-transform:uppercase;letter-spacing:.05em;}
-.hv-legend{display:flex;align-items:center;gap:5px;font-size:9px;color:var(--mu);}
+.hv-vc-title{font-size:10px;font-weight:700;color:var(--blue);text-transform:uppercase;letter-spacing:.05em;}
+.hv-legend{display:flex;align-items:center;gap:5px;font-size:10px;color:var(--mu);}
 .hv-legend span{display:flex;align-items:center;gap:2px;}
 /* Grid: cb | dot | sheet | tg+gc | area | last | note+add */
-.hv-vthead{display:grid;grid-template-columns:14px 8px minmax(0,1.4fr) minmax(0,1.6fr) 70px 74px 70px;align-items:center;padding:3px 8px;gap:5px;border-bottom:1px solid var(--bd);background:var(--bg);}
-.hv-vth{font-size:8px;font-weight:700;color:var(--mu);text-transform:uppercase;letter-spacing:.04em;}
-.hv-scroll{flex:1;overflow-y:auto;}
-.hv-vr{display:grid;grid-template-columns:14px 8px minmax(0,1.4fr) minmax(0,1.6fr) 70px 74px 70px;align-items:center;padding:3px 6px;gap:3px;border-bottom:1px solid rgba(30,60,200,.05);cursor:pointer;}
-.hv-vr:hover{background:#f8f9ff;}
-.hv-vr.urg-c{border-left:3px solid #dc2626;background:#fff8f8;}
+.hv-vthead{display:grid;grid-template-columns:14px 8px minmax(0,1.4fr) minmax(0,1.6fr) 70px 74px 70px;align-items:center;padding:4px 8px;gap:4px;border-bottom:2px solid #c7d2fe;background:#eef2ff;}
+.hv-vth{font-size:9px;font-weight:700;color:#4f46e5;text-transform:uppercase;letter-spacing:.04em;}
+.hv-scroll{flex:1;overflow-y:auto;background:#fafbff;}
+.hv-vr{display:grid;grid-template-columns:14px 8px minmax(0,1.4fr) minmax(0,1.6fr) 70px 74px 70px;align-items:center;padding:4px 8px;gap:4px;border-bottom:1px solid rgba(30,60,200,.07);cursor:pointer;background:#fafbff;}
+.hv-vr:hover{background:#eef2ff;}
+.hv-vr.urg-c{border-left:3px solid #dc2626;background:#fef2f2;}
 .hv-vr.urg-c:hover{background:#fee2e2;}
-.hv-vr.urg-h{border-left:3px solid #d97706;background:#fffdf5;}
+.hv-vr.urg-h{border-left:3px solid #d97706;background:#fffbeb;}
 .hv-vr.urg-h:hover{background:#fef3c7;}
-.hv-vr.urg-m{border-left:3px solid #7c3aed;background:#fdfbff;}
+.hv-vr.urg-m{border-left:3px solid #7c3aed;background:#f5f3ff;}
 .hv-vr.urg-m:hover{background:#f5f3ff;}
-.hv-vr.urg-l{border-left:3px solid #16a34a;background:#f8fff9;}
+.hv-vr.urg-l{border-left:3px solid #16a34a;background:#f0fdf4;}
 .hv-vr.urg-l:hover{background:#dcfce7;}
-.hv-vr.urg-n{border-left:3px solid #9ca3af;}
+.hv-vr.urg-n{border-left:3px solid #d1d5db;background:#fafbff;}
 .hv-vcb{width:11px;height:11px;accent-color:var(--blue);flex-shrink:0;}
 /* Dots */
 .hv-dot-g{width:7px;height:7px;border-radius:50%;background:#16a34a;flex-shrink:0;}
 .hv-dot-a{width:7px;height:7px;border-radius:50%;background:#d97706;flex-shrink:0;}
 .hv-dot-p{width:7px;height:7px;border-radius:50%;background:#7c3aed;flex-shrink:0;}
 /* Sheet cell */
-.hv-vsname{font-size:11px;font-weight:600;color:var(--blue);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+.hv-vsname{font-size:12px;font-weight:700;color:var(--blue);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
 .hv-vslbl{display:none;}
-.hv-vtmatch{font-size:9px;color:#d97706;font-style:italic;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
-.hv-vmatch-btn{font-size:9px;color:var(--blue);background:none;border:none;cursor:pointer;text-decoration:underline;font-family:inherit;padding:0;white-space:nowrap;}
-.hv-vnew{font-size:9px;color:#7c3aed;font-weight:600;}
+.hv-vtmatch{font-size:10px;color:#d97706;font-style:italic;}
+.hv-vmatch-btn{font-size:10px;color:var(--blue);background:none;border:none;cursor:pointer;text-decoration:underline;font-family:inherit;padding:0;white-space:nowrap;}
+.hv-vnew{font-size:10px;color:#7c3aed;font-weight:600;}
+.hv-addname-btn{font-size:10px;color:#16a34a;background:none;border:1px dashed #86efac;border-radius:4px;cursor:pointer;padding:1px 6px;font-family:inherit;font-weight:600;margin-top:1px;display:inline-block;}
+.hv-addname-btn:hover{background:#f0fdf4;border-color:#16a34a;}
 /* TG cell */
-.hv-vtname{font-size:10px;color:var(--t);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;word-break:break-all;}
-.hv-vgc{font-size:8px;color:#6366f1;font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+.hv-vtname{font-size:11px;color:#374151;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+.hv-vgc{font-size:9px;color:#6366f1;font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
 /* Area cell */
-.hv-vaname{font-size:10px;color:var(--mu);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
-.hv-vavlan{font-size:8px;color:#9ca3af;}
+.hv-vaname{font-size:11px;color:#6b7280;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+.hv-vavlan{font-size:9px;color:#9ca3af;}
 /* Last harvest */
-.hv-vdate{font-size:10px;font-weight:600;white-space:nowrap;}
+.hv-vdate{font-size:11px;font-weight:600;white-space:nowrap;}
 .hv-vdate.c{color:#dc2626;}.hv-vdate.h{color:#d97706;}.hv-vdate.m{color:#7c3aed;}.hv-vdate.l{color:#16a34a;}.hv-vdate.na{color:#dc2626;font-weight:600;font-size:9px;}
 /* Actions cell */
 .hv-act{display:flex;align-items:center;gap:3px;}
@@ -1052,6 +1054,7 @@ tr:hover td{background:#f8f9ff;cursor:pointer}
 
 
 
+
 /* ═══════════════════════════════════════
    HARVEST PANEL — COMPLETE JS v5 (fixed)
    ═══════════════════════════════════════ */
@@ -1249,8 +1252,8 @@ function buildVendoRow(v, scroll) {
     addBtn  = `<button class="hv-ab reg" data-action="register">Register</button>`;
   } else {
     sheetCell = v.sheet_name
-      ? `<div><div class="hv-vsname">${v.sheet_name}</div><div class="hv-vslbl">sheet</div></div>`
-      : `<div><div class="hv-vtmatch">Sheet not found</div><button class="hv-vmatch-btn" data-action="match-sheet">💡 suggest match</button></div>`;
+      ? `<div><div class="hv-vsname">${v.sheet_name}</div></div>`
+      : `<div><button class="hv-addname-btn" data-action="add-sheet-name">+ add sheet name</button><button class="hv-vmatch-btn" data-action="match-sheet" style="margin-top:2px;">💡 suggest match</button></div>`;
     const badge = matched
       ? '<span class="matched-badge">✓ matched</span>'
       : '<span class="unmatched-badge">unmatched</span>';
@@ -1302,6 +1305,8 @@ document.addEventListener('click', function(e) {
     hvToggleAdd(btn, row);
   } else if (action === 'register') {
     hvOpenRegister(row.dataset.tg, row.dataset.area, row.dataset.vlan);
+  } else if (action === 'add-sheet-name') {
+    hvAddSheetName(row);
   }
 });
 
@@ -1761,6 +1766,43 @@ function hvAddNote() {
   inp.value = '';
 }
 
+/* ─── ADD SHEET NAME INLINE ─── */
+function hvAddSheetName(row) {
+  const tg = row.dataset.tg || '';
+  const vid = row.dataset.vid || '';
+  const existing = row.dataset.sheet || '';
+  const name = prompt(`Enter sheet name for TG: "${tg}"
+(This is the name in your Google Sheet)`, existing);
+  if (!name || !name.trim()) return;
+  const trimmed = name.trim();
+  // Save to Supabase
+  fetch(`${_SB}/rest/v1/vendos?id=eq.${vid}`, {
+    method: 'PATCH',
+    headers: { 'apikey': _KEY, 'Authorization': 'Bearer ' + _KEY, 'Content-Type': 'application/json', 'Prefer': 'return=minimal' },
+    body: JSON.stringify({ sheet_name: trimmed })
+  }).then(r => {
+    if (r.ok) {
+      row.dataset.sheet = trimmed;
+      row.dataset.matched = 'true';
+      row.dataset.status = 'matched';
+      // Update dot to green
+      const dot = row.querySelector('.hv-dot-a, .hv-dot-p');
+      if (dot) dot.className = 'hv-dot-g';
+      // Update sheet cell in the row
+      const sheetBtn = row.querySelector('[data-action="add-sheet-name"]');
+      if (sheetBtn) {
+        const sheetDiv = sheetBtn.closest('div');
+        if (sheetDiv) sheetDiv.innerHTML = `<div class="hv-vsname">${trimmed}</div>`;
+      }
+      // Update urgency class if needed
+      const toast = document.getElementById('hv-refresh-toast');
+      if (toast) { toast.textContent = `✅ Sheet name saved: ${trimmed}`; toast.classList.add('show'); setTimeout(()=>toast.classList.remove('show'),2500); }
+    } else {
+      alert('❌ Save failed. Check connection.');
+    }
+  }).catch(() => alert('❌ Save failed. Check connection.'));
+}
+
 /* ─── REGISTER NEW VENDO ─── */
 function hvOpenRegister(tg, area, vlan) {
   document.getElementById('hv-reg-tg').textContent   = tg   || '—';
@@ -1901,6 +1943,7 @@ d></tr>`;
 }
 
 /* hvLoadVendos called from nav button onclick */
+
 
 
 
