@@ -609,8 +609,7 @@ async function submitHarvest() {
           headers: { ...HDR, 'Prefer': 'return=minimal' },
           body: JSON.stringify({
             status: 'harvested', harvested_at: now,
-            coins_total: total, coins_free: free, coins_old: old,
-            // correct column names
+            total_coins: total, free_coins: free, old_coins: old,
             net_collectible: net, spawn_share: spawn, customer_share: customer
           })
         });
