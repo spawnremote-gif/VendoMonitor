@@ -470,6 +470,8 @@ tr:hover td{background:#f8f9ff;cursor:pointer}
 #hbtn-schedule.on{background:#7c3aed;border-color:#7c3aed;}
 #hbtn-records.on{background:#0369a1;border-color:#0369a1;}
 #hbtn-route.on{background:#1e3cb8;border-color:#1e3cb8;}
+#hbtn-vnames.on{background:#0f766e;border-color:#0f766e;}
+.vn-hist{display:none;}.vn-hist.vn-open{display:block!important;}
 
 /* STEP GUIDE - compact single line */
 .hv-guide{background:#f0f7ff;border-bottom:1px solid #dbeafe;padding:3px 10px;display:flex;align-items:center;gap:5px;font-size:10px;color:var(--mu);}
@@ -757,6 +759,7 @@ tr:hover td{background:#f8f9ff;cursor:pointer}
       <button class="hv-hvtab" id="hbtn-schedule" onclick="hvShowTab('schedule',this)">⏰ Schedule</button>
       <button class="hv-hvtab" id="hbtn-records" onclick="hvShowTab('records',this)">📊 Records</button>
       <button class="hv-hvtab" id="hbtn-recon" onclick="hvShowTab('recon',this)">⚖️ Reconciliation</button>
+      <button class="hv-hvtab" id="hbtn-vnames" onclick="hvShowTab('vnames',this)">🔗 Vendo Names</button>
     </div>
   </div>
   <!-- Step guide — compact single line -->
@@ -1286,12 +1289,13 @@ function hvShowTab(tab, btn) {
   if (fab) fab.classList.toggle('visible', isRoute);
   const guide = document.getElementById('hv-guide-bar');
   const els = {
-    page:  document.getElementById('hv-route-page'),
-    area:  document.getElementById('hv-area-tabs'),
-    filt:  document.getElementById('hv-filters'),
-    sched: document.getElementById('hv-tab-schedule'),
-    rec:   document.getElementById('hv-tab-records'),
-    recon: document.getElementById('hv-tab-recon')
+    page:   document.getElementById('hv-route-page'),
+    area:   document.getElementById('hv-area-tabs'),
+    filt:   document.getElementById('hv-filters'),
+    sched:  document.getElementById('hv-tab-schedule'),
+    rec:    document.getElementById('hv-tab-records'),
+    recon:  document.getElementById('hv-tab-recon'),
+    vnames: document.getElementById('hv-tab-vnames')
   };
   // Use classList to force display:none (overcomes !important in CSS)
   const hide = el => el && el.classList.add('hv-hidden');
@@ -1327,8 +1331,18 @@ function hvShowTab(tab, btn) {
     hide(els.filt);
     hide(els.sched);
     hide(els.rec);
+    hide(els.vnames);
     show(els.recon, 'block');
     els.recon && (els.recon.style.cssText += ';display:block!important');
+  } else if (tab === 'vnames') {
+    hide(guide);
+    hide(els.page);
+    hide(els.area);
+    hide(els.filt);
+    hide(els.sched);
+    hide(els.rec);
+    hide(els.recon);
+    show(els.vnames, 'block');
   }
   if (tab === 'records') hvLoadRecordDates();
   if (tab === 'schedule') hvLoadSchedule();
@@ -1338,6 +1352,7 @@ function hvShowTab(tab, btn) {
     if (di && !di.value) di.value = today;
     hvLoadRecon();
   }
+  if (tab === 'vnames') vnLoad();
 }
 
 /* ─── AREA / STATUS / SEARCH FILTERS ─── */
@@ -2982,6 +2997,163 @@ async function hvShowHarvestHistory() {
               <div style="font-size:12px;font-weight:700;color:#374151;">${h.harvest_date}</div>
               <div style="font-size:10px;color:#9ca3af;">${h.collector||'—'} · Route: ${h.route_code||'—'}</div>
             </div>
+            <div style="font-size:14px;font-weight:700;color:#16a34a;">₱${net.toLocaleString('en-PH',{minimumFractionDigits:2})}</div>
+          </div>
+          <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:4px;font-size:10px;">
+            <div style="background:#f9fafb;border-radius:4px;padding:4px 6px;"><div style="color:#9ca3af;">Total coins</div><div style="font-weight:600;">₱${coins.toLocaleString()}</div></div>
+            <div style="background:#f0fdf4;border-radius:4px;padding:4px 6px;"><div style="color:#16a34a;">Spawn 75%</div><div style="font-weight:600;">₱${spawn.toLocaleString()}</div></div>
+            <div style="background:#fef9ee;border-radius:4px;padding:4px 6px;"><div style="color:#d97706;">Owner 25%</div><div style="font-weight:600;">₱${owner.toLocaleString()}</div></div>
+          </div>
+        </div>`;
+      }).join('')}`;
+  } catch(e) {
+    content.innerHTML = `<div style="padding:20px;text-align:center;color:#dc2626;font-size:12px;">Error: ${e.message}</div>`;
+  }
+}
+
+
+/* ─── VENDO NAMES & HARVEST HISTORY ─── */
+let _vnAll = [], _vnHarvests = {};
+
+async function vnLoad() {
+  const list = document.getElementById('vn-list');
+  const stats = document.getElementById('vn-stats');
+  if (!list) return;
+  list.innerHTML = '<div style="padding:20px;text-align:center;color:#9ca3af;font-size:12px;">Loading...</div>';
+  try {
+    const rv = await fetch(`${_SB}/rest/v1/vendos?select=id,tg_name,sheet_name,area,vlan,last_harvest_date&order=area.asc,sheet_name.asc,tg_name.asc&limit=2000`, {
+      headers: { 'apikey': _KEY, 'Authorization': 'Bearer ' + _KEY }
+    });
+    _vnAll = await rv.json();
+
+    const rh = await fetch(`${_SB}/rest/v1/harvests?select=tg_name,sheet_name,harvest_date,coins_total,net_collectible,spawn_share,collector,route_code&order=harvest_date.desc&limit=3000`, {
+      headers: { 'apikey': _KEY, 'Authorization': 'Bearer ' + _KEY }
+    });
+    const harvRows = await rh.json();
+    _vnHarvests = {};
+    harvRows.forEach(h => {
+      const key = h.tg_name || h.sheet_name || '';
+      if (!key) return;
+      if (!_vnHarvests[key]) _vnHarvests[key] = [];
+      if (_vnHarvests[key].length < 3) _vnHarvests[key].push(h);
+    });
+
+    const matched  = _vnAll.filter(v => v.tg_name && v.sheet_name).length;
+    const tgOnly   = _vnAll.filter(v => v.tg_name && !v.sheet_name).length;
+    const withDate = _vnAll.filter(v => v.last_harvest_date).length;
+    stats.innerHTML = [
+      ['Total vendos', _vnAll.length, '#1e3cb8'],
+      ['Matched', matched, '#16a34a'],
+      ['TG only', tgOnly, '#d97706'],
+      ['With harvest date', withDate, '#7c3aed']
+    ].map(([lbl,val,clr]) => `<div style="background:#f8faff;border-radius:8px;padding:10px 12px;border-left:3px solid ${clr};"><div style="font-size:9px;color:#6b7280;text-transform:uppercase;font-weight:700;">${lbl}</div><div style="font-size:20px;font-weight:700;color:${clr};">${val}</div></div>`).join('');
+    vnApplyFilter();
+  } catch(e) {
+    list.innerHTML = `<div style="padding:20px;text-align:center;color:#dc2626;font-size:12px;">Error: ${e.message}</div>`;
+  }
+}
+
+function vnApplyFilter() {
+  const q      = (document.getElementById('vn-search')?.value || '').toLowerCase();
+  const area   = document.getElementById('vn-area')?.value || '';
+  const filter = document.getElementById('vn-filter')?.value || 'all';
+  const today  = new Date().toISOString().split('T')[0];
+  const DEFAULT_START = '2026-03-01';
+
+  let rows = _vnAll.filter(v => {
+    if (area && v.area !== area) return false;
+    const name = (v.sheet_name||'') + ' ' + (v.tg_name||'');
+    if (q && !name.toLowerCase().includes(q)) return false;
+    if (filter === 'matched')    return v.tg_name && v.sheet_name;
+    if (filter === 'unmatched')  return !v.tg_name || !v.sheet_name;
+    if (filter === 'no-harvest') return !v.last_harvest_date;
+    return true;
+  });
+
+  const list = document.getElementById('vn-list');
+  if (!list) return;
+  if (!rows.length) { list.innerHTML = '<div style="padding:20px;text-align:center;color:#9ca3af;font-size:12px;">No vendos found</div>'; return; }
+
+  list.innerHTML = rows.map(v => {
+    const matched  = v.tg_name && v.sheet_name;
+    const dotClr   = matched ? '#16a34a' : v.tg_name ? '#d97706' : '#9ca3af';
+    const startDate = v.last_harvest_date || DEFAULT_START;
+    const daysSince = Math.floor((new Date(today) - new Date(startDate)) / 86400000);
+    const windowLbl = v.last_harvest_date ? `Since ${v.last_harvest_date} (${daysSince}d)` : `Since ${DEFAULT_START} — default start`;
+    const harvs = _vnHarvests[v.tg_name] || _vnHarvests[v.sheet_name] || [];
+    const histRows = harvs.length ? harvs.map(h =>
+      `<div style="display:flex;justify-content:space-between;align-items:center;padding:4px 0;border-bottom:0.5px solid #f0f0f0;font-size:11px;">
+        <div><span style="color:#374151;">${h.harvest_date}</span><span style="color:#9ca3af;margin-left:6px;">${h.collector||'—'} · ${h.route_code||'—'}</span></div>
+        <div><span style="font-weight:700;color:#16a34a;">₱${parseFloat(h.net_collectible||0).toLocaleString('en-PH',{minimumFractionDigits:2})}</span></div>
+      </div>`).join('') : '<div style="font-size:11px;color:#9ca3af;padding:6px 0;">No PWA harvests recorded yet</div>';
+
+    const safeSheet = (v.sheet_name||'').replace(/'/g,"\'");
+    const safeTg    = (v.tg_name||'').replace(/'/g,"\'");
+    const matchType = v.tg_name ? 'sheet' : 'tg';
+
+    return `<div style="background:#fff;border:1.5px solid #e5e7eb;border-radius:10px;overflow:hidden;">
+      <div style="padding:10px 14px;display:flex;align-items:center;gap:10px;cursor:pointer;" onclick="this.nextElementSibling.classList.toggle('vn-open')">
+        <div style="width:8px;height:8px;border-radius:50%;background:${dotClr};flex-shrink:0;"></div>
+        <div style="flex:1;min-width:0;">
+          <div style="display:flex;gap:8px;align-items:baseline;flex-wrap:wrap;">
+            <span style="font-size:13px;font-weight:700;color:#1e3cb8;">${v.sheet_name||'<span style="color:#9ca3af;font-style:italic;">no sheet name</span>'}</span>
+            <span style="font-size:10px;color:#9ca3af;">↔</span>
+            <span style="font-size:11px;color:#374151;">${v.tg_name||'<span style="color:#d97706;font-style:italic;">no TG name</span>'}</span>
+          </div>
+          <div style="font-size:10px;color:#9ca3af;margin-top:2px;">${v.area||'—'} · VLAN ${v.vlan||'—'} · ${windowLbl}</div>
+        </div>
+        <div style="text-align:right;flex-shrink:0;">
+          <div style="font-size:10px;color:#6b7280;">Last harvest</div>
+          <div style="font-size:12px;font-weight:700;color:${v.last_harvest_date?'#15803d':'#9ca3af'};">${v.last_harvest_date||'—'}</div>
+        </div>
+        <div style="color:#9ca3af;font-size:12px;">▾</div>
+      </div>
+      <div class="vn-hist" style="padding:0 14px 10px;border-top:1px solid #f0f0f0;">
+        <div style="font-size:9px;font-weight:700;color:#6b7280;text-transform:uppercase;letter-spacing:.05em;margin-bottom:6px;padding-top:8px;">PWA Harvest history (last 3)</div>
+        ${histRows}
+        ${!matched ? `<div style="margin-top:8px;"><button onclick="event.stopPropagation();hvOpenMatch(${v.id},'${safeSheet||safeTg}','${matchType}')" style="padding:4px 10px;background:#eef2ff;border:1px solid #c7d2fe;border-radius:6px;font-size:11px;color:#1e3cb8;cursor:pointer;font-family:inherit;">🔗 Match names</button></div>` : ''}
+      </div>
+    </div>`;
+  }).join('');
+}
+
+/* ─── HARVEST HISTORY POPUP (from detail popup button) ─── */
+async function hvShowHarvestHistory() {
+  if (!hvCurrentDetail) return;
+  const tgName    = hvCurrentDetail.tg;
+  const sheetName = hvCurrentDetail.sheet;
+  const name      = sheetName || tgName || 'Vendo';
+  const pop       = document.getElementById('hv-hist-pop');
+  const content   = document.getElementById('hv-hist-content');
+  const sub       = document.getElementById('hv-hist-sub');
+  if (sub) sub.textContent = name;
+  content.innerHTML = '<div style="padding:20px;text-align:center;color:#9ca3af;font-size:12px;">Loading...</div>';
+  pop.classList.add('show');
+  try {
+    const url = tgName
+      ? `${_SB}/rest/v1/harvests?tg_name=eq.${encodeURIComponent(tgName)}&order=harvest_date.desc&limit=50`
+      : `${_SB}/rest/v1/harvests?sheet_name=eq.${encodeURIComponent(sheetName)}&order=harvest_date.desc&limit=50`;
+    const r = await fetch(url, { headers: { 'apikey': _KEY, 'Authorization': 'Bearer ' + _KEY } });
+    const rows = await r.json();
+    if (!rows.length) {
+      const lastDate = hvCurrentDetail.lastHarvest || '2026-03-01';
+      const days = Math.floor((new Date() - new Date(lastDate)) / 86400000);
+      content.innerHTML = `<div style="text-align:center;padding:20px 10px;"><div style="font-size:28px;margin-bottom:8px;">📭</div><div style="font-size:13px;font-weight:600;color:#374151;margin-bottom:4px;">No PWA harvest records yet</div><div style="font-size:11px;color:#9ca3af;">TG counting started from: <b>${lastDate}</b></div><div style="font-size:11px;color:#9ca3af;">${days} days since last harvest date</div></div>`;
+      return;
+    }
+    const totalNet   = rows.reduce((s,h) => s+(parseFloat(h.net_collectible)||0), 0);
+    const totalSpawn = rows.reduce((s,h) => s+(parseFloat(h.spawn_share)||0), 0);
+    content.innerHTML = `
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:12px;">
+        <div style="background:#f0fdf4;border-radius:8px;padding:10px 12px;border-left:3px solid #16a34a;"><div style="font-size:9px;color:#16a34a;text-transform:uppercase;font-weight:700;">Total net collected</div><div style="font-size:18px;font-weight:700;color:#15803d;">₱${totalNet.toLocaleString('en-PH',{minimumFractionDigits:2})}</div></div>
+        <div style="background:#eef2ff;border-radius:8px;padding:10px 12px;border-left:3px solid #1e3cb8;"><div style="font-size:9px;color:#1e3cb8;text-transform:uppercase;font-weight:700;">Spawn share (75%)</div><div style="font-size:18px;font-weight:700;color:#1e3cb8;">₱${totalSpawn.toLocaleString('en-PH',{minimumFractionDigits:2})}</div></div>
+      </div>
+      <div style="font-size:9px;font-weight:700;color:#6b7280;text-transform:uppercase;letter-spacing:.05em;margin-bottom:8px;">${rows.length} harvest record${rows.length>1?'s':''}</div>
+      ${rows.map(h => {
+        const net=parseFloat(h.net_collectible||0), spawn=parseFloat(h.spawn_share||0), owner=parseFloat(h.customer_share||0), coins=parseFloat(h.coins_total||0);
+        return `<div style="border:1px solid #e5e7eb;border-radius:8px;padding:10px 12px;margin-bottom:6px;">
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;">
+            <div><div style="font-size:12px;font-weight:700;color:#374151;">${h.harvest_date}</div><div style="font-size:10px;color:#9ca3af;">${h.collector||'—'} · Route: ${h.route_code||'—'}</div></div>
             <div style="font-size:14px;font-weight:700;color:#16a34a;">₱${net.toLocaleString('en-PH',{minimumFractionDigits:2})}</div>
           </div>
           <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:4px;font-size:10px;">
@@ -5493,6 +5665,57 @@ async function fullBackup() {
     <div id="hv-hist-content">
       <div style="padding:20px;text-align:center;color:#9ca3af;font-size:12px;">Loading harvest records...</div>
     </div>
+  </div>
+</div>
+</div>
+
+
+<!-- VENDO NAMES PANEL -->
+<div id="hv-tab-vnames" class="hv-hidden" style="padding:14px 16px;">
+  <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;flex-wrap:wrap;gap:8px;">
+    <div>
+      <div style="font-size:14px;font-weight:700;color:#0f766e;">🔗 Vendo Names &amp; Harvest History</div>
+      <div style="font-size:11px;color:#6b7280;margin-top:2px;">Match sheet names to TG names · view harvest history per vendo</div>
+    </div>
+    <div style="display:flex;gap:6px;align-items:center;flex-wrap:wrap;">
+      <input id="vn-search" placeholder="Search vendo..." style="padding:5px 10px;border:1.5px solid #c7d2fe;border-radius:7px;font-size:11px;font-family:inherit;outline:none;width:180px;" oninput="vnApplyFilter()"/>
+      <select id="vn-area" style="padding:5px 8px;border:1.5px solid #c7d2fe;border-radius:7px;font-size:11px;font-family:inherit;outline:none;" onchange="vnApplyFilter()">
+        <option value="">All areas</option>
+        <option value="DAPITAN">Dapitan</option>
+        <option value="DIPOLOG">Dipolog</option>
+        <option value="SINDANGAN">Sindangan</option>
+        <option value="ROXAS">Roxas</option>
+        <option value="POLANCO">Polanco</option>
+        <option value="SINAMAN">Sinaman</option>
+        <option value="MINAOG">Minaog</option>
+      </select>
+      <select id="vn-filter" style="padding:5px 8px;border:1.5px solid #c7d2fe;border-radius:7px;font-size:11px;font-family:inherit;outline:none;" onchange="vnApplyFilter()">
+        <option value="all">All vendos</option>
+        <option value="matched">Matched only</option>
+        <option value="unmatched">Unmatched only</option>
+        <option value="no-harvest">No harvest date</option>
+      </select>
+      <button onclick="vnLoad()" style="padding:5px 12px;background:#0f766e;color:#fff;border:none;border-radius:7px;font-size:11px;font-weight:700;cursor:pointer;font-family:inherit;">⟳ Refresh</button>
+    </div>
+  </div>
+  <div id="vn-stats" style="display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:12px;"></div>
+  <div id="vn-list" style="display:flex;flex-direction:column;gap:6px;">
+    <div style="padding:20px;text-align:center;color:#9ca3af;font-size:12px;">Click Refresh to load vendos</div>
+  </div>
+</div>
+
+<!-- HARVEST HISTORY POPUP -->
+<div class="hv-popbg" id="hv-hist-pop">
+<div style="width:500px;border-radius:12px;overflow:hidden;box-shadow:0 16px 48px rgba(0,0,0,.22);max-height:90vh;display:flex;flex-direction:column;">
+  <div style="background:#15803d;padding:14px 16px;display:flex;align-items:flex-start;justify-content:space-between;gap:10px;flex-shrink:0;">
+    <div>
+      <div style="font-size:15px;font-weight:700;color:#fff;">📋 Harvest records</div>
+      <div style="font-size:10px;color:rgba(255,255,255,.7);margin-top:3px;" id="hv-hist-sub">Loading...</div>
+    </div>
+    <button onclick="document.getElementById('hv-hist-pop').classList.remove('show')" style="flex-shrink:0;width:28px;height:28px;border-radius:50%;border:1.5px solid rgba(255,255,255,.4);background:rgba(255,255,255,.15);color:#fff;font-size:16px;cursor:pointer;display:flex;align-items:center;justify-content:center;">×</button>
+  </div>
+  <div style="background:#fff;padding:14px 16px;overflow-y:auto;flex:1;">
+    <div id="hv-hist-content"><div style="padding:20px;text-align:center;color:#9ca3af;font-size:12px;">Loading...</div></div>
   </div>
 </div>
 </div>
