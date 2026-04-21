@@ -3027,6 +3027,8 @@ async function hvLoadRecon() {
     // This avoids using vendos.last_harvest_date which is already updated to today
     const DEFAULT_START = '2026-03-01';
     const tgNames = [...new Set(harvests.map(h => h.tg_name).filter(Boolean))];
+    // Also track vendo_name from harvests for cross-reference
+    const vendoNames = [...new Set(harvests.map(h => h.vendo_name).filter(Boolean))];
     const windowStartMap = {}; // tg_name → window start date
 
     if (tgNames.length) {
@@ -3081,13 +3083,23 @@ async function hvLoadRecon() {
     const txData = await rt.json();
 
     // Build TG income map — per vendo, only count txs AFTER that vendo's own window start
+    // windowStartMap keys are tg_name values; tx.vendo IS the tg_name (same field)
+    // Build a case-insensitive lookup for safety
+    const windowStartLower = {};
+    Object.entries(windowStartMap).forEach(([k,v]) => { windowStartLower[k.toLowerCase().trim()] = v; });
+
     const tgMap = {};
     txData.forEach(tx => {
-      const vendoStart = windowStartMap[tx.vendo] || DEFAULT_START;
+      const key = (tx.vendo||'').toLowerCase().trim();
+      const vendoStart = windowStartLower[key] || DEFAULT_START;
       if (tx.date >= vendoStart) {
         tgMap[tx.vendo] = (tgMap[tx.vendo]||0) + (parseFloat(tx.amount)||0);
       }
     });
+
+    // Build case-insensitive tgMap lookup
+    const tgMapLower = {};
+    Object.entries(tgMap).forEach(([k,v]) => { tgMapLower[k.toLowerCase().trim()] = v; });
 
     // Group harvests by route
     const byRoute = {};
@@ -3099,13 +3111,13 @@ async function hvLoadRecon() {
 
     content.innerHTML = Object.entries(byRoute).map(([rc, items]) => {
       const coinNet = items.reduce((s,h) => s+(parseFloat(h.net_collectible)||0), 0);
-      const tgTotal = items.reduce((s,h) => s+(tgMap[h.tg_name]||0), 0);
+      const tgTotal = items.reduce((s,h) => s+(tgMap[h.tg_name] || tgMapLower[(h.tg_name||'').toLowerCase().trim()] || 0), 0);
       const diff    = coinNet - tgTotal;
       const diffCls = Math.abs(diff)<100 ? 'color:#16a34a' : diff>0 ? 'color:#d97706' : 'color:#dc2626';
       const diffTxt = Math.abs(diff)<100 ? '✅ Match' : diff>0 ? '⚠ Coins +₱'+Math.abs(diff).toLocaleString() : '🔴 TG +₱'+Math.abs(diff).toLocaleString();
 
       const rows = items.map(h => {
-        const tgAmt = tgMap[h.tg_name] || 0;
+        const tgAmt = tgMap[h.tg_name] || tgMapLower[(h.tg_name||'').toLowerCase().trim()] || 0;
         const gap   = (parseFloat(h.net_collectible)||0) - tgAmt;
         const rowCls = Math.abs(gap)<50 ? '' : gap>0 ? 'background:#fffbeb' : 'background:#fef2f2';
         return `<tr style="${rowCls}">
