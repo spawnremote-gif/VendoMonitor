@@ -2282,20 +2282,17 @@ async function hvConfirmRoute() {
       setTimeout(() => { toast.classList.remove('show'); toast.innerHTML = 'Vendos refreshed'; }, 6000);
     }
 
-    // Show code in a popup
+    // Show route confirm popup
     const pwa = 'https://spawninternet.github.io/VendoMonitor/harvest.html';
-    const msg = `✅ Route confirmed!
-
-Route code: ${code}
-Collector: ${col}
-Date: ${dt}
-Vendos: ${vendos.length}
-
-PWA link:
-${pwa}?code=${code}
-
-Share this with ${col}.`;
-    alert(msg);
+    const link = pwa + '?code=' + code;
+    document.getElementById('rc-pop-code').textContent      = code;
+    document.getElementById('rc-pop-collector').textContent = col;
+    document.getElementById('rc-pop-date').textContent      = dt;
+    document.getElementById('rc-pop-count').textContent     = vendos.length + ' vendos';
+    document.getElementById('rc-pop-link').textContent      = link;
+    document.getElementById('rc-pop-sub').textContent       = 'Share this with ' + col;
+    document.getElementById('rc-copy-btn').textContent      = '📋 Copy link';
+    document.getElementById('hv-route-confirm-pop').classList.add('show');
 
     // Update pending routes panel
     hvRefreshPendingRoutes();
@@ -2333,7 +2330,16 @@ async function hvRefreshPendingRoutes() {
 }
 
 function hvShowRouteDetail(code) {
-  alert('Route: ' + code + '\nOpen harvest.html?code=' + code + ' to view collector progress.');
+  // Show the confirm popup reusing same popup with route details
+  document.getElementById('rc-pop-code').textContent      = code;
+  document.getElementById('rc-pop-collector').textContent = '—';
+  document.getElementById('rc-pop-date').textContent      = '—';
+  document.getElementById('rc-pop-count').textContent     = '—';
+  const pwaLink = 'https://spawninternet.github.io/VendoMonitor/harvest.html?code=' + code;
+  document.getElementById('rc-pop-link').textContent      = pwaLink;
+  document.getElementById('rc-pop-sub').textContent       = 'Collector PWA link';
+  document.getElementById('rc-copy-btn').textContent      = '📋 Copy link';
+  document.getElementById('hv-route-confirm-pop').classList.add('show');
 }
 
 function hvClearRoute() {
@@ -2761,6 +2767,18 @@ async function hvLoadRecordsByDate(date, btn) {
   } catch(e) {
     content.innerHTML = `<div class="hv-rec-empty" style="color:#dc2626;">Error: ${e.message}</div>`;
   }
+}
+
+function rcCopyLink() {
+  const link = document.getElementById('rc-pop-link')?.textContent || '';
+  if (!link) return;
+  navigator.clipboard.writeText(link).then(() => {
+    const btn = document.getElementById('rc-copy-btn');
+    if (btn) { btn.textContent = '✅ Copied!'; setTimeout(() => { btn.textContent = '📋 Copy link'; }, 2000); }
+  }).catch(() => {
+    const btn = document.getElementById('rc-copy-btn');
+    if (btn) btn.textContent = '❌ Copy failed';
+  });
 }
 
 function hvAddToRoute(routeCode) {
@@ -5395,5 +5413,46 @@ async function fullBackup() {
   }
 }
 </script>
+
+<!-- ── ROUTE CONFIRM POPUP ── -->
+<div class="hv-popbg" id="hv-route-confirm-pop">
+<div style="width:460px;border-radius:12px;overflow:hidden;box-shadow:0 16px 48px rgba(0,0,0,.22);">
+  <div style="background:#1e3cb8;padding:14px 16px;display:flex;align-items:flex-start;justify-content:space-between;gap:10px;">
+    <div>
+      <div style="font-size:15px;font-weight:700;color:#fff;">✅ Route confirmed!</div>
+      <div style="font-size:10px;color:rgba(255,255,255,.7);margin-top:3px;" id="rc-pop-sub">Share this with your collector</div>
+    </div>
+    <button onclick="document.getElementById('hv-route-confirm-pop').classList.remove('show')" style="flex-shrink:0;width:28px;height:28px;border-radius:50%;border:1.5px solid rgba(255,255,255,.4);background:rgba(255,255,255,.15);color:#fff;font-size:16px;cursor:pointer;display:flex;align-items:center;justify-content:center;">×</button>
+  </div>
+  <div style="background:#fff;padding:14px 16px;display:flex;flex-direction:column;gap:10px;">
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">
+      <div style="background:#eef2ff;border-radius:8px;padding:10px 12px;border-left:3px solid #1e3cb8;">
+        <div style="font-size:8px;font-weight:700;color:#6366f1;text-transform:uppercase;letter-spacing:.05em;margin-bottom:4px;">Route code</div>
+        <div style="font-size:22px;font-weight:700;color:#1e3cb8;letter-spacing:2px;" id="rc-pop-code">———</div>
+      </div>
+      <div style="background:#f0fdf4;border-radius:8px;padding:10px 12px;border-left:3px solid #16a34a;">
+        <div style="font-size:8px;font-weight:700;color:#16a34a;text-transform:uppercase;letter-spacing:.05em;margin-bottom:4px;">Collector</div>
+        <div style="font-size:13px;font-weight:700;color:#15803d;" id="rc-pop-collector">—</div>
+      </div>
+      <div style="background:#fafbff;border-radius:8px;padding:10px 12px;border-left:3px solid #6366f1;">
+        <div style="font-size:8px;font-weight:700;color:#6366f1;text-transform:uppercase;letter-spacing:.05em;margin-bottom:4px;">Date</div>
+        <div style="font-size:13px;font-weight:700;color:#4338ca;" id="rc-pop-date">—</div>
+      </div>
+      <div style="background:#fef9ee;border-radius:8px;padding:10px 12px;border-left:3px solid #d97706;">
+        <div style="font-size:8px;font-weight:700;color:#d97706;text-transform:uppercase;letter-spacing:.05em;margin-bottom:4px;">Vendos</div>
+        <div style="font-size:13px;font-weight:700;color:#92400e;" id="rc-pop-count">—</div>
+      </div>
+    </div>
+    <!-- PWA Link -->
+    <div style="background:#f8faff;border:1.5px solid #c7d2fe;border-radius:10px;padding:12px 14px;">
+      <div style="font-size:9px;font-weight:700;color:#6366f1;text-transform:uppercase;letter-spacing:.05em;margin-bottom:6px;">PWA link — share with collector</div>
+      <div style="font-size:11px;color:#1e3cb8;word-break:break-all;font-family:monospace;background:#eef2ff;border-radius:6px;padding:8px 10px;margin-bottom:8px;" id="rc-pop-link">—</div>
+      <button onclick="rcCopyLink()" style="width:100%;padding:9px;background:#1e3cb8;color:#fff;border:none;border-radius:7px;font-size:12px;font-weight:700;cursor:pointer;font-family:inherit;" id="rc-copy-btn">📋 Copy link</button>
+    </div>
+    <button onclick="document.getElementById('hv-route-confirm-pop').classList.remove('show')" style="width:100%;padding:9px;background:#f1f5f9;color:#374151;border:none;border-radius:7px;font-size:12px;font-weight:600;cursor:pointer;font-family:inherit;">Close</button>
+  </div>
+</div>
+</div>
+
 </body>
 </html>
