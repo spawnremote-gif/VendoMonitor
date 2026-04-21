@@ -157,23 +157,12 @@ textarea:focus{border-color:var(--red);}
 <div class="screen active" id="screen-entry">
   <div class="entry-card">
     <div class="entry-title">Start harvest</div>
-    <div class="entry-sub">Enter your name and route code to begin</div>
+    <div class="entry-sub">Enter your name and route code given by admin</div>
 
     <div class="field">
       <label>Your name</label>
-      <input type="text" id="collector-name" placeholder="e.g. Juan dela Cruz" autocomplete="off"
-        oninput="filterRoutesByName(this.value)">
+      <input type="text" id="collector-name" placeholder="e.g. Juan dela Cruz" autocomplete="off">
     </div>
-
-    <!-- Active routes list -->
-    <div id="active-routes-wrap" style="margin-bottom:12px;">
-      <div style="font-size:11px;font-weight:700;color:#6b7280;text-transform:uppercase;letter-spacing:.04em;margin-bottom:6px;">Active routes</div>
-      <div id="active-routes-list" style="display:flex;flex-direction:column;gap:6px;">
-        <div style="font-size:12px;color:#9ca3af;padding:8px;text-align:center;">Loading...</div>
-      </div>
-    </div>
-
-    <div style="font-size:10px;color:#9ca3af;text-align:center;margin:8px 0;">— or enter code manually —</div>
 
     <div class="field">
       <label>Route code</label>
@@ -295,8 +284,6 @@ let currentItem  = null;
 let offlineQueue = JSON.parse(localStorage.getItem('harvest_queue') || '[]');
 
 // ── SERVICE WORKER ──
-let _allActiveRoutes = [];
-loadActiveRoutes();
 
 if ('serviceWorker' in navigator) {
   navigator.serviceWorker.register('sw.js').catch(() => {});
@@ -353,61 +340,12 @@ window.addEventListener('DOMContentLoaded', () => {
 
 
 // ── LOAD ACTIVE ROUTES ON LOGIN SCREEN ──
+let _allActiveRoutes = [];
 
-async function loadActiveRoutes() {
-  const list = document.getElementById('active-routes-list');
-  if (!list) return;
-  try {
-    const r = await fetch(`${SB}/rest/v1/routes?status=eq.active&order=created_at.desc&limit=20`, { headers: HDR });
-    _allActiveRoutes = await r.json();
-    renderActiveRoutes(_allActiveRoutes);
-  } catch(e) {
-    if (list) list.innerHTML = '<div style="font-size:12px;color:#9ca3af;padding:8px;text-align:center;">Could not load routes</div>';
-  }
-}
 
-function renderActiveRoutes(routes) {
-  const list = document.getElementById('active-routes-list');
-  if (!list) return;
-  if (!routes.length) {
-    list.innerHTML = '<div style="font-size:12px;color:#9ca3af;padding:8px;text-align:center;">No active routes</div>';
-    return;
-  }
-  list.innerHTML = routes.map(rt => {
-    const vendoCount = rt.notes ? (() => { try { return JSON.parse(rt.notes).length; } catch(e) { return '?'; } })() : '?';
-    return `<div onclick="pickRoute('${rt.route_code}','${rt.collector}')"
-      style="background:#f8faff;border:1.5px solid #c7d2fe;border-radius:10px;padding:10px 14px;cursor:pointer;transition:background .15s;"
-      onmouseover="this.style.background='#eef2ff'" onmouseout="this.style.background='#f8faff'">
-      <div style="display:flex;justify-content:space-between;align-items:center;">
-        <div>
-          <div style="font-size:16px;font-weight:700;color:#1e3cb8;letter-spacing:2px;">${rt.route_code}</div>
-          <div style="font-size:11px;color:#6b7280;margin-top:2px;">${rt.collector} · ${rt.route_date||''} · ${rt.area||'all areas'}</div>
-          <div style="font-size:10px;color:#9ca3af;">${vendoCount} vendos</div>
-        </div>
-        <div style="font-size:20px;color:#c7d2fe;">›</div>
-      </div>
-    </div>`;
-  }).join('');
-}
 
-function filterRoutesByName(name) {
-  if (!_allActiveRoutes.length) return;
-  const q = name.toLowerCase().trim();
-  if (!q) { renderActiveRoutes(_allActiveRoutes); return; }
-  const filtered = _allActiveRoutes.filter(rt =>
-    (rt.collector||'').toLowerCase().includes(q)
-  );
-  renderActiveRoutes(filtered);
-}
 
-function pickRoute(code, collector) {
-  document.getElementById('route-code-inp').value = code;
-  // Pre-fill name if collector field is empty
-  const nameInp = document.getElementById('collector-name');
-  if (nameInp && !nameInp.value.trim()) nameInp.value = collector;
-  // Scroll to button
-  document.querySelector('.btn-blue')?.scrollIntoView({ behavior: 'smooth' });
-}
+
 
 
 // ── LOAD ROUTE ──
@@ -549,7 +487,7 @@ function openVendo(idx) {
   showScreen('screen-form');
 }
 
-// ── LOAD VENDO BY TG NAME ──
+// ── LOAD VENDO BY TG NAME (QR scan) ──
 async function loadVendoByTG(tgName) {
   showScreen('screen-form');
   document.getElementById('form-vname').textContent = 'Loading…';
@@ -612,10 +550,10 @@ async function submitHarvest() {
 
   const harvestRecord = {
     harvest_date:    today,
-    vendo_name:      currentItem.sheet_name || currentItem.tg_name || '',
-    tg_name:         currentItem.tg_name    || null,
-    sheet_name:      currentItem.sheet_name || null,
-    area:            currentItem.area       || null,
+    created_at:      now,
+    vendo_name:      currentItem.sheet_name || currentItem.tg_name,
+    tg_name:         currentItem.tg_name,
+    area:            currentItem.area,
     collector:       collector,
     route_code:      currentRoute?.route_code || null,
     coins_total:     total,
@@ -623,7 +561,9 @@ async function submitHarvest() {
     coins_old:       old,
     net_collectible: net,
     spawn_share:     spawn,
-    customer_share:  customer
+    customer_share:  customer,
+    status:          'harvested',
+    collector_note:  ''
   };
 
   try {
@@ -636,7 +576,7 @@ async function submitHarvest() {
       });
       if (!r1.ok) {
         const errText = await r1.text();
-        throw new Error('Save failed ' + r1.status + ': ' + errText.substring(0,300));
+        throw new Error('Save failed ' + r1.status + ': ' + errText.substring(0,120));
       }
 
       // Update route_item status
@@ -647,6 +587,7 @@ async function submitHarvest() {
           body: JSON.stringify({
             status: 'harvested', harvested_at: now,
             coins_total: total, coins_free: free, coins_old: old,
+            // correct column names
             net_collectible: net, spawn_share: spawn, customer_share: customer
           })
         });
@@ -833,9 +774,9 @@ function goHome() {
   showScreen('screen-entry');
 }
 
-// ── QR SCAN REMOVED ──
+// ── QR SCAN (placeholder) ──
 function startQR() {
-  toast('QR scanning not available');
+  const tg = prompt('Enter vendo TG name (QR scanner coming soon):');
   if (tg) loadVendoByTG(tg.trim());
 }
 
