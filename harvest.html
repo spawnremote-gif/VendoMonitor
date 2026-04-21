@@ -573,19 +573,20 @@ async function submitHarvest() {
   const windowStart = currentItem.last_harvest_date || '2026-03-01';
 
   const harvestRecord = {
-    harvest_date:    today,
-    vendo_name:      currentItem.sheet_name || currentItem.tg_name || '',
-    tg_name:         currentItem.tg_name    || null,
-    sheet_name:      currentItem.sheet_name || null,
-    area:            currentItem.area       || null,
-    collector:       collector,
-    route_code:      currentRoute?.route_code || null,
-    coins_total:     total,
-    coins_free:      free,
-    coins_old:       old,
-    net_collectible: net,
-    spawn_share:     spawn,
-    customer_share:  customer
+    harvest_date:         today,
+    harvest_window_start: windowStart,
+    vendo_name:           currentItem.sheet_name || currentItem.tg_name || '',
+    tg_name:              currentItem.tg_name    || null,
+    sheet_name:           currentItem.sheet_name || null,
+    area:                 currentItem.area       || null,
+    collector:            collector,
+    route_code:           currentRoute?.route_code || null,
+    coins_total:          total,
+    coins_free:           free,
+    coins_old:            old,
+    net_collectible:      net,
+    spawn_share:          spawn,
+    customer_share:       customer
   };
 
   try {
