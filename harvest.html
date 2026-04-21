@@ -157,22 +157,30 @@ textarea:focus{border-color:var(--red);}
 <div class="screen active" id="screen-entry">
   <div class="entry-card">
     <div class="entry-title">Start harvest</div>
-    <div class="entry-sub">Enter your route code or scan a QR code to begin</div>
+    <div class="entry-sub">Enter your name and route code to begin</div>
 
     <div class="field">
       <label>Your name</label>
-      <input type="text" id="collector-name" placeholder="e.g. Juan dela Cruz" autocomplete="off">
+      <input type="text" id="collector-name" placeholder="e.g. Juan dela Cruz" autocomplete="off"
+        oninput="filterRoutesByName(this.value)">
     </div>
+
+    <!-- Active routes list -->
+    <div id="active-routes-wrap" style="margin-bottom:12px;">
+      <div style="font-size:11px;font-weight:700;color:#6b7280;text-transform:uppercase;letter-spacing:.04em;margin-bottom:6px;">Active routes</div>
+      <div id="active-routes-list" style="display:flex;flex-direction:column;gap:6px;">
+        <div style="font-size:12px;color:#9ca3af;padding:8px;text-align:center;">Loading...</div>
+      </div>
+    </div>
+
+    <div style="font-size:10px;color:#9ca3af;text-align:center;margin:8px 0;">— or enter code manually —</div>
+
     <div class="field">
       <label>Route code</label>
       <input type="text" id="route-code-inp" class="code" placeholder="ABC123" maxlength="8" autocomplete="off"
         oninput="this.value=this.value.toUpperCase()">
     </div>
     <button class="btn btn-blue" onclick="loadRoute()">Load route →</button>
-
-
-
-    <button class="btn btn-outline" onclick="startQR()">📷 Scan vendo QR code</button>
   </div>
 </div>
 
@@ -287,6 +295,8 @@ let currentItem  = null;
 let offlineQueue = JSON.parse(localStorage.getItem('harvest_queue') || '[]');
 
 // ── SERVICE WORKER ──
+loadActiveRoutes();
+
 if ('serviceWorker' in navigator) {
   navigator.serviceWorker.register('sw.js').catch(() => {});
 }
@@ -340,6 +350,66 @@ window.addEventListener('DOMContentLoaded', () => {
   }
 });
 
+
+// ── LOAD ACTIVE ROUTES ON LOGIN SCREEN ──
+let _allActiveRoutes = [];
+
+async function loadActiveRoutes() {
+  const list = document.getElementById('active-routes-list');
+  if (!list) return;
+  try {
+    const r = await fetch(`${SB}/rest/v1/routes?status=eq.active&order=created_at.desc&limit=20`, { headers: HDR });
+    _allActiveRoutes = await r.json();
+    renderActiveRoutes(_allActiveRoutes);
+  } catch(e) {
+    if (list) list.innerHTML = '<div style="font-size:12px;color:#9ca3af;padding:8px;text-align:center;">Could not load routes</div>';
+  }
+}
+
+function renderActiveRoutes(routes) {
+  const list = document.getElementById('active-routes-list');
+  if (!list) return;
+  if (!routes.length) {
+    list.innerHTML = '<div style="font-size:12px;color:#9ca3af;padding:8px;text-align:center;">No active routes</div>';
+    return;
+  }
+  list.innerHTML = routes.map(rt => {
+    const vendoCount = rt.notes ? (() => { try { return JSON.parse(rt.notes).length; } catch(e) { return '?'; } })() : '?';
+    return `<div onclick="pickRoute('${rt.route_code}','${rt.collector}')"
+      style="background:#f8faff;border:1.5px solid #c7d2fe;border-radius:10px;padding:10px 14px;cursor:pointer;transition:background .15s;"
+      onmouseover="this.style.background='#eef2ff'" onmouseout="this.style.background='#f8faff'">
+      <div style="display:flex;justify-content:space-between;align-items:center;">
+        <div>
+          <div style="font-size:16px;font-weight:700;color:#1e3cb8;letter-spacing:2px;">${rt.route_code}</div>
+          <div style="font-size:11px;color:#6b7280;margin-top:2px;">${rt.collector} · ${rt.route_date||''} · ${rt.area||'all areas'}</div>
+          <div style="font-size:10px;color:#9ca3af;">${vendoCount} vendos</div>
+        </div>
+        <div style="font-size:20px;color:#c7d2fe;">›</div>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function filterRoutesByName(name) {
+  if (!_allActiveRoutes.length) return;
+  const q = name.toLowerCase().trim();
+  if (!q) { renderActiveRoutes(_allActiveRoutes); return; }
+  const filtered = _allActiveRoutes.filter(rt =>
+    (rt.collector||'').toLowerCase().includes(q)
+  );
+  renderActiveRoutes(filtered);
+}
+
+function pickRoute(code, collector) {
+  document.getElementById('route-code-inp').value = code;
+  // Pre-fill name if collector field is empty
+  const nameInp = document.getElementById('collector-name');
+  if (nameInp && !nameInp.value.trim()) nameInp.value = collector;
+  // Scroll to button
+  document.querySelector('.btn-blue')?.scrollIntoView({ behavior: 'smooth' });
+}
+
+
 // ── LOAD ROUTE ──
 async function loadRoute() {
   const code = document.getElementById('route-code-inp').value.trim().toUpperCase();
@@ -383,7 +453,7 @@ async function loadRoute() {
 
     document.getElementById('rt-code').textContent = currentRoute.route_code;
     document.getElementById('rt-meta').textContent =
-      `${currentRoute.collector} · ${currentRoute.harvest_date} · ${currentRoute.area || 'all areas'}`;
+      `${currentRoute.collector} · ${currentRoute.route_date||currentRoute.harvest_date||''} · ${currentRoute.area || 'all areas'}`;
     document.getElementById('topbar-sub').textContent = `Route ${code}`;
 
     // Save route to localStorage for offline use
@@ -530,7 +600,11 @@ async function submitHarvest() {
   const spawn    = net * 0.75;
   const customer = net * 0.25;
 
-  if (!total) { toast('Enter total coins first'); return; }
+  if (!total) {
+    toast('Enter total coins first');
+    submitBtns.forEach(function(b){ b.disabled = false; b.textContent = '✅ Submit harvest'; });
+    return;
+  }
 
   const now = new Date().toISOString();
   const today = now.split('T')[0];
@@ -575,6 +649,7 @@ async function submitHarvest() {
           body: JSON.stringify({
             status: 'harvested', harvested_at: now,
             coins_total: total, coins_free: free, coins_old: old,
+            // correct column names
             net_collectible: net, spawn_share: spawn, customer_share: customer
           })
         });
@@ -606,8 +681,6 @@ async function submitHarvest() {
       currentItem.coins_old       = old;
       currentItem.net_collectible = net;
     }
-    // Re-enable submit buttons for next vendo
-    document.querySelectorAll('.action-row .btn-green').forEach(function(b){ b.disabled = false; b.textContent = '✅ Submit harvest'; });
     // Re-enable submit button for next vendo
     document.querySelectorAll('.action-row .btn-green').forEach(function(b){ b.disabled = false; b.textContent = '✅ Submit harvest'; });
     // Save updated route to localStorage cache
