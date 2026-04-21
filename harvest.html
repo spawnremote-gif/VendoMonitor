@@ -339,7 +339,6 @@ window.addEventListener('DOMContentLoaded', () => {
 });
 
 
-// ── LOAD ACTIVE ROUTES ON LOGIN SCREEN ──
 
 
 
@@ -568,6 +567,10 @@ async function submitHarvest() {
   const now = new Date().toISOString();
   const today = now.split('T')[0];
   const collector = currentRoute?.collectorName || currentRoute?.collector || 'Collector';
+
+  // Store window start = last_harvest_date BEFORE this harvest updates it
+  // This is used by reconciliation to know the correct TG income window
+  const windowStart = currentItem.last_harvest_date || '2026-03-01';
 
   const harvestRecord = {
     harvest_date:    today,
