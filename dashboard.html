@@ -3139,6 +3139,7 @@ function vnApplyFilter() {
           <span style="font-size:13px;font-weight:700;color:#1e3cb8;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:210px;" title="${v.sheet_name||''}">${v.sheet_name||'<i style="color:#9ca3af;font-weight:400;font-size:11px;">no sheet name</i>'}</span>
           <span style="font-size:10px;color:#cbd5e1;">↔</span>
           <span style="font-size:11px;color:#374151;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:170px;" title="${v.tg_name||''}">${v.tg_name||'<i style="color:#d97706;font-weight:400;">no TG name</i>'}</span>
+          ${matched ? '<span style="font-size:9px;font-weight:700;padding:1px 7px;border-radius:10px;background:#dcfce7;color:#15803d;flex-shrink:0;">✅ confirmed</span>' : '<span style="font-size:9px;font-weight:700;padding:1px 7px;border-radius:10px;background:#fef3c7;color:#92400e;flex-shrink:0;">⚠ unmatched</span>'}
         </div>
         <div style="font-size:10px;color:#9ca3af;margin-top:2px;">${v.area||'—'} · VLAN ${v.vlan||'—'} · ${daysLbl}</div>
       </div>
@@ -5647,7 +5648,7 @@ async function fullBackup() {
       </select>
       <select id="vn-filter" style="padding:5px 8px;border:1.5px solid #c7d2fe;border-radius:7px;font-size:11px;font-family:inherit;outline:none;" onchange="vnApplyFilter()">
         <option value="all">All vendos</option>
-        <option value="matched">Matched only</option>
+        <option value="matched">Confirmed by me</option>
         <option value="unmatched">Unmatched only</option>
         <option value="no-harvest">No harvest date</option>
       </select>
