@@ -471,7 +471,6 @@ tr:hover td{background:#f8f9ff;cursor:pointer}
 #hbtn-records.on{background:#0369a1;border-color:#0369a1;}
 #hbtn-route.on{background:#1e3cb8;border-color:#1e3cb8;}
 #hbtn-vnames.on{background:#0f766e;border-color:#0f766e;}
-.vn-hist{display:none;}.vn-hist.vn-open{display:block!important;}
 
 /* STEP GUIDE - compact single line */
 .hv-guide{background:#f0f7ff;border-bottom:1px solid #dbeafe;padding:3px 10px;display:flex;align-items:center;gap:5px;font-size:10px;color:var(--mu);}
@@ -889,6 +888,8 @@ tr:hover td{background:#f8f9ff;cursor:pointer}
       </div>
       <div class="hv-nc-scroll" id="hv-nchips">
         <div class="hv-nc r">Island vendo May 7 — ₱8,218 gap<button class="hv-nx" onclick="this.closest('.hv-nc').remove()">×</button></div>
+        <div class="hv-nc a">COGON/BANDERA — no TG match yet<button class="hv-nx" onclick="this.closest('.hv-nc').remove()">×</button></div>
+        <div class="hv-nc g">Onis ✅ Labadlabad ✅ Navasca ✅<button class="hv-nx" onclick="this.closest('.hv-nc').remove()">×</button></div>
       </div>
       <div class="hv-cdots">
         <div class="hv-cd s" style="background:var(--blue);" onclick="hvSelColor('b',this)"></div>
@@ -1068,7 +1069,10 @@ tr:hover td{background:#f8f9ff;cursor:pointer}
       <div style="font-size:15px;font-weight:700;color:#fff;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;" id="hv-dp-title">Vendo details</div>
       <div style="font-size:10px;color:rgba(255,255,255,.7);margin-top:3px;" id="hv-dp-sub"></div>
     </div>
-    <button onclick="document.getElementById('hv-detail-pop').classList.remove('show')" style="flex-shrink:0;width:28px;height:28px;border-radius:50%;border:1.5px solid rgba(255,255,255,.4);background:rgba(255,255,255,.15);color:#fff;font-size:16px;cursor:pointer;display:flex;align-items:center;justify-content:center;">×</button>
+    <div style="display:flex;flex-direction:column;align-items:flex-end;gap:4px;">
+      <span id="hv-dp-match-badge" style="display:none;font-size:9px;font-weight:700;padding:2px 8px;border-radius:10px;background:rgba(255,255,255,.2);color:#fff;"></span>
+      <button onclick="document.getElementById('hv-detail-pop').classList.remove('show')" style="flex-shrink:0;width:28px;height:28px;border-radius:50%;border:1.5px solid rgba(255,255,255,.4);background:rgba(255,255,255,.15);color:#fff;font-size:16px;cursor:pointer;display:flex;align-items:center;justify-content:center;">×</button>
+    </div>
   </div>
 
   <div id="hv-dp-alert" style="display:none;background:#fef2f2;border-left:4px solid #dc2626;padding:8px 14px;font-size:11px;color:#991b1b;"></div>
@@ -1786,6 +1790,15 @@ async function hvSaveDetailEdits() {
     if (updates.sheet_name) document.getElementById('hv-dp-sheet').textContent = updates.sheet_name;
     if (updates.tg_name)    document.getElementById('hv-dp-tg').textContent    = updates.tg_name;
 
+    // Backfill tg_name into harvests if sheet_name was set
+    if (updates.sheet_name && updates.tg_name) {
+      await fetch(`${_SB}/rest/v1/harvests?sheet_name=eq.${encodeURIComponent(updates.sheet_name)}&tg_name=is.null`, {
+        method: 'PATCH',
+        headers: { 'apikey': _KEY, 'Authorization': 'Bearer ' + _KEY, 'Content-Type': 'application/json', 'Prefer': 'return=minimal' },
+        body: JSON.stringify({ tg_name: updates.tg_name })
+      });
+    }
+
     // Clear inputs
     document.getElementById('hv-dp-sheet-inp').value = '';
     document.getElementById('hv-dp-tg-inp').value    = '';
@@ -1793,14 +1806,43 @@ async function hvSaveDetailEdits() {
     _hvSelectedSheetName = '';
     _hvSelectedTGName    = '';
 
+    // Show saved badge on the save button
+    const saveBtn = document.querySelector('#hv-detail-pop button[onclick="hvSaveDetailEdits()"]');
+    if (saveBtn) {
+      saveBtn.textContent = '✅ Saved!';
+      saveBtn.style.background = '#16a34a';
+      saveBtn.disabled = true;
+      setTimeout(() => {
+        saveBtn.textContent = '💾 Save changes';
+        saveBtn.style.background = '#1e3cb8';
+        saveBtn.disabled = false;
+      }, 2500);
+    }
+
+    // Show match badge in popup header if now fully matched
+    const newSheet = updates.sheet_name || hvCurrentDetail?.sheet || '';
+    const newTg    = updates.tg_name    || hvCurrentDetail?.tg    || '';
+    const matchBadge = document.getElementById('hv-dp-match-badge');
+    if (matchBadge) {
+      if (newSheet && newTg) {
+        matchBadge.textContent = '✅ Matched';
+        matchBadge.style.display = 'inline-block';
+      } else {
+        matchBadge.textContent = '⚠ Unmatched';
+        matchBadge.style.display = 'inline-block';
+      }
+    }
+
     const toast = document.getElementById('hv-refresh-toast');
     if (toast) {
       toast.textContent = '✅ Saved — refreshing list';
       toast.classList.add('show');
       setTimeout(() => toast.classList.remove('show'), 2500);
     }
-    document.getElementById('hv-detail-pop').classList.remove('show');
     await hvLoadVendos();
+    if (typeof vnLoad === 'function' && document.getElementById('hv-tab-vnames') && !document.getElementById('hv-tab-vnames').classList.contains('hv-hidden')) {
+      vnLoad();
+    }
   } catch(e) {
     alert('❌ Save failed: ' + e.message);
   }
@@ -1853,6 +1895,14 @@ function hvOpenDetailFromRow(row) {
   const dpTr = document.getElementById('hv-dp-tg-results');
   if (dpTr) dpTr.style.display = 'none';
   hvLoadSheetNamesCache();
+  // Show match badge
+  const badge = document.getElementById('hv-dp-match-badge');
+  if (badge) {
+    const isMatched = !!(d.sheet && d.tg);
+    badge.textContent = isMatched ? '✅ Matched' : '⚠ Unmatched';
+    badge.style.display = 'inline-block';
+    badge.style.background = isMatched ? 'rgba(22,163,74,.3)' : 'rgba(217,119,6,.3)';
+  }
   document.getElementById('hv-detail-pop').classList.add('show');
 }
 
@@ -3012,41 +3062,34 @@ async function hvShowHarvestHistory() {
 }
 
 
-/* ─── VENDO NAMES & HARVEST HISTORY ─── */
-let _vnAll = [], _vnHarvests = {};
+/* ─── VENDO NAMES TAB ─── */
+let _vnAll = [], _vnFiltered = [];
 
 async function vnLoad() {
-  const list = document.getElementById('vn-list');
+  const list  = document.getElementById('vn-list');
   const stats = document.getElementById('vn-stats');
   if (!list) return;
   list.innerHTML = '<div style="padding:20px;text-align:center;color:#9ca3af;font-size:12px;">Loading...</div>';
   try {
-    const rv = await fetch(`${_SB}/rest/v1/vendos?select=id,tg_name,sheet_name,area,vlan,last_harvest_date&order=area.asc,sheet_name.asc,tg_name.asc&limit=2000`, {
+    const rv = await fetch(`${_SB}/rest/v1/vendos?select=id,tg_name,sheet_name,area,vlan,last_harvest_date,harvest_interval,admin_notes&order=area.asc,sheet_name.asc,tg_name.asc&limit=2000`, {
       headers: { 'apikey': _KEY, 'Authorization': 'Bearer ' + _KEY }
     });
     _vnAll = await rv.json();
-
-    const rh = await fetch(`${_SB}/rest/v1/harvests?select=tg_name,sheet_name,harvest_date,coins_total,net_collectible,spawn_share,collector,route_code&order=harvest_date.desc&limit=3000`, {
-      headers: { 'apikey': _KEY, 'Authorization': 'Bearer ' + _KEY }
-    });
-    const harvRows = await rh.json();
-    _vnHarvests = {};
-    harvRows.forEach(h => {
-      const key = h.tg_name || h.sheet_name || '';
-      if (!key) return;
-      if (!_vnHarvests[key]) _vnHarvests[key] = [];
-      if (_vnHarvests[key].length < 3) _vnHarvests[key].push(h);
-    });
 
     const matched  = _vnAll.filter(v => v.tg_name && v.sheet_name).length;
     const tgOnly   = _vnAll.filter(v => v.tg_name && !v.sheet_name).length;
     const withDate = _vnAll.filter(v => v.last_harvest_date).length;
     stats.innerHTML = [
-      ['Total vendos', _vnAll.length, '#1e3cb8'],
+      ['Total', _vnAll.length, '#1e3cb8'],
       ['Matched', matched, '#16a34a'],
       ['TG only', tgOnly, '#d97706'],
-      ['With harvest date', withDate, '#7c3aed']
-    ].map(([lbl,val,clr]) => `<div style="background:#f8faff;border-radius:8px;padding:10px 12px;border-left:3px solid ${clr};"><div style="font-size:9px;color:#6b7280;text-transform:uppercase;font-weight:700;">${lbl}</div><div style="font-size:20px;font-weight:700;color:${clr};">${val}</div></div>`).join('');
+      ['Have harvest date', withDate, '#7c3aed']
+    ].map(([lbl,val,clr]) =>
+      `<div style="background:#f8faff;border-radius:8px;padding:10px 12px;border-left:3px solid ${clr};">
+        <div style="font-size:9px;color:#6b7280;text-transform:uppercase;font-weight:700;">${lbl}</div>
+        <div style="font-size:20px;font-weight:700;color:${clr};">${val}</div>
+      </div>`
+    ).join('');
     vnApplyFilter();
   } catch(e) {
     list.innerHTML = `<div style="padding:20px;text-align:center;color:#dc2626;font-size:12px;">Error: ${e.message}</div>`;
@@ -3057,10 +3100,8 @@ function vnApplyFilter() {
   const q      = (document.getElementById('vn-search')?.value || '').toLowerCase();
   const area   = document.getElementById('vn-area')?.value || '';
   const filter = document.getElementById('vn-filter')?.value || 'all';
-  const today  = new Date().toISOString().split('T')[0];
-  const DEFAULT_START = '2026-03-01';
 
-  let rows = _vnAll.filter(v => {
+  _vnFiltered = _vnAll.filter(v => {
     if (area && v.area !== area) return false;
     const name = (v.sheet_name||'') + ' ' + (v.tg_name||'');
     if (q && !name.toLowerCase().includes(q)) return false;
@@ -3072,100 +3113,65 @@ function vnApplyFilter() {
 
   const list = document.getElementById('vn-list');
   if (!list) return;
-  if (!rows.length) { list.innerHTML = '<div style="padding:20px;text-align:center;color:#9ca3af;font-size:12px;">No vendos found</div>'; return; }
+  if (!_vnFiltered.length) {
+    list.innerHTML = '<div style="padding:20px;text-align:center;color:#9ca3af;font-size:12px;">No vendos found</div>';
+    return;
+  }
 
-  list.innerHTML = rows.map(v => {
-    const matched  = v.tg_name && v.sheet_name;
+  list.innerHTML = _vnFiltered.map((v) => {
+    const matched  = !!(v.tg_name && v.sheet_name);
     const dotClr   = matched ? '#16a34a' : v.tg_name ? '#d97706' : '#9ca3af';
-    const startDate = v.last_harvest_date || DEFAULT_START;
-    const daysSince = Math.floor((new Date(today) - new Date(startDate)) / 86400000);
-    const windowLbl = v.last_harvest_date ? `Since ${v.last_harvest_date} (${daysSince}d)` : `Since ${DEFAULT_START} — default start`;
-    const harvs = _vnHarvests[v.tg_name] || _vnHarvests[v.sheet_name] || [];
-    const histRows = harvs.length ? harvs.map(h =>
-      `<div style="display:flex;justify-content:space-between;align-items:center;padding:4px 0;border-bottom:0.5px solid #f0f0f0;font-size:11px;">
-        <div><span style="color:#374151;">${h.harvest_date}</span><span style="color:#9ca3af;margin-left:6px;">${h.collector||'—'} · ${h.route_code||'—'}</span></div>
-        <div><span style="font-weight:700;color:#16a34a;">₱${parseFloat(h.net_collectible||0).toLocaleString('en-PH',{minimumFractionDigits:2})}</span></div>
-      </div>`).join('') : '<div style="font-size:11px;color:#9ca3af;padding:6px 0;">No PWA harvests recorded yet</div>';
+    const today    = new Date().toISOString().split('T')[0];
+    const start    = v.last_harvest_date || '2026-03-01';
+    const days     = Math.floor((new Date(today) - new Date(start)) / 86400000);
+    const daysLbl  = v.last_harvest_date
+      ? `${days}d since last harvest`
+      : `${days}d since default start`;
 
-    const safeSheet = (v.sheet_name||'').replace(/'/g,"\'");
-    const safeTg    = (v.tg_name||'').replace(/'/g,"\'");
-    const matchType = v.tg_name ? 'sheet' : 'tg';
-
-    return `<div style="background:#fff;border:1.5px solid #e5e7eb;border-radius:10px;overflow:hidden;">
-      <div style="padding:10px 14px;display:flex;align-items:center;gap:10px;cursor:pointer;" onclick="this.nextElementSibling.classList.toggle('vn-open')">
-        <div style="width:8px;height:8px;border-radius:50%;background:${dotClr};flex-shrink:0;"></div>
-        <div style="flex:1;min-width:0;">
-          <div style="display:flex;gap:8px;align-items:baseline;flex-wrap:wrap;">
-            <span style="font-size:13px;font-weight:700;color:#1e3cb8;">${v.sheet_name||'<span style="color:#9ca3af;font-style:italic;">no sheet name</span>'}</span>
-            <span style="font-size:10px;color:#9ca3af;">↔</span>
-            <span style="font-size:11px;color:#374151;">${v.tg_name||'<span style="color:#d97706;font-style:italic;">no TG name</span>'}</span>
-          </div>
-          <div style="font-size:10px;color:#9ca3af;margin-top:2px;">${v.area||'—'} · VLAN ${v.vlan||'—'} · ${windowLbl}</div>
+    return `<div data-vnid="${v.id}"
+      style="background:#fff;border:1.5px solid #e5e7eb;border-radius:10px;padding:11px 14px;display:flex;align-items:center;gap:10px;cursor:pointer;transition:border-color .15s,background .15s;"
+      onmouseover="this.style.borderColor='#93c5fd';this.style.background='#f8faff'"
+      onmouseout="this.style.borderColor='#e5e7eb';this.style.background='#fff'"
+      onclick="vnClickRow(this)">
+      <div style="width:9px;height:9px;border-radius:50%;background:${dotClr};flex-shrink:0;"></div>
+      <div style="flex:1;min-width:0;">
+        <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;">
+          <span style="font-size:13px;font-weight:700;color:#1e3cb8;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:210px;" title="${v.sheet_name||''}">${v.sheet_name||'<i style="color:#9ca3af;font-weight:400;font-size:11px;">no sheet name</i>'}</span>
+          <span style="font-size:10px;color:#cbd5e1;">↔</span>
+          <span style="font-size:11px;color:#374151;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:170px;" title="${v.tg_name||''}">${v.tg_name||'<i style="color:#d97706;font-weight:400;">no TG name</i>'}</span>
         </div>
-        <div style="text-align:right;flex-shrink:0;">
-          <div style="font-size:10px;color:#6b7280;">Last harvest</div>
-          <div style="font-size:12px;font-weight:700;color:${v.last_harvest_date?'#15803d':'#9ca3af'};">${v.last_harvest_date||'—'}</div>
-        </div>
-        <div style="color:#9ca3af;font-size:12px;">▾</div>
+        <div style="font-size:10px;color:#9ca3af;margin-top:2px;">${v.area||'—'} · VLAN ${v.vlan||'—'} · ${daysLbl}</div>
       </div>
-      <div class="vn-hist" style="padding:0 14px 10px;border-top:1px solid #f0f0f0;">
-        <div style="font-size:9px;font-weight:700;color:#6b7280;text-transform:uppercase;letter-spacing:.05em;margin-bottom:6px;padding-top:8px;">PWA Harvest history (last 3)</div>
-        ${histRows}
-        ${!matched ? `<div style="margin-top:8px;"><button onclick="event.stopPropagation();hvOpenMatch(${v.id},'${safeSheet||safeTg}','${matchType}')" style="padding:4px 10px;background:#eef2ff;border:1px solid #c7d2fe;border-radius:6px;font-size:11px;color:#1e3cb8;cursor:pointer;font-family:inherit;">🔗 Match names</button></div>` : ''}
+      <div style="text-align:right;flex-shrink:0;">
+        <div style="font-size:11px;font-weight:700;color:${v.last_harvest_date?'#15803d':'#9ca3af'};">${v.last_harvest_date||'—'}</div>
+        <div style="font-size:9px;color:#9ca3af;">last harvest</div>
       </div>
+      <div style="color:#9ca3af;font-size:16px;flex-shrink:0;">›</div>
     </div>`;
   }).join('');
 }
 
-/* ─── HARVEST HISTORY POPUP (from detail popup button) ─── */
-async function hvShowHarvestHistory() {
-  if (!hvCurrentDetail) return;
-  const tgName    = hvCurrentDetail.tg;
-  const sheetName = hvCurrentDetail.sheet;
-  const name      = sheetName || tgName || 'Vendo';
-  const pop       = document.getElementById('hv-hist-pop');
-  const content   = document.getElementById('hv-hist-content');
-  const sub       = document.getElementById('hv-hist-sub');
-  if (sub) sub.textContent = name;
-  content.innerHTML = '<div style="padding:20px;text-align:center;color:#9ca3af;font-size:12px;">Loading...</div>';
-  pop.classList.add('show');
-  try {
-    const url = tgName
-      ? `${_SB}/rest/v1/harvests?tg_name=eq.${encodeURIComponent(tgName)}&order=harvest_date.desc&limit=50`
-      : `${_SB}/rest/v1/harvests?sheet_name=eq.${encodeURIComponent(sheetName)}&order=harvest_date.desc&limit=50`;
-    const r = await fetch(url, { headers: { 'apikey': _KEY, 'Authorization': 'Bearer ' + _KEY } });
-    const rows = await r.json();
-    if (!rows.length) {
-      const lastDate = hvCurrentDetail.lastHarvest || '2026-03-01';
-      const days = Math.floor((new Date() - new Date(lastDate)) / 86400000);
-      content.innerHTML = `<div style="text-align:center;padding:20px 10px;"><div style="font-size:28px;margin-bottom:8px;">📭</div><div style="font-size:13px;font-weight:600;color:#374151;margin-bottom:4px;">No PWA harvest records yet</div><div style="font-size:11px;color:#9ca3af;">TG counting started from: <b>${lastDate}</b></div><div style="font-size:11px;color:#9ca3af;">${days} days since last harvest date</div></div>`;
-      return;
+function vnClickRow(el) {
+  const vid = parseInt(el.dataset.vnid);
+  if (!vid) return;
+  // Find the vendo in _vnFiltered and build the same row dataset that hvOpenDetail expects
+  const v = _vnFiltered.find(x => x.id === vid);
+  if (!v) return;
+  // Create a fake row object matching what hvOpenDetail reads
+  const fakeRow = {
+    dataset: {
+      vid:     String(v.id),
+      sheet:   v.sheet_name || '',
+      tg:      v.tg_name || '',
+      gc:      '',
+      area:    v.area || '',
+      vlan:    String(v.vlan || ''),
+      matched: String(!!(v.tg_name && v.sheet_name)),
+      status:  v.last_harvest_date ? 'low' : 'critical',
+      last:    v.last_harvest_date || ''
     }
-    const totalNet   = rows.reduce((s,h) => s+(parseFloat(h.net_collectible)||0), 0);
-    const totalSpawn = rows.reduce((s,h) => s+(parseFloat(h.spawn_share)||0), 0);
-    content.innerHTML = `
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:12px;">
-        <div style="background:#f0fdf4;border-radius:8px;padding:10px 12px;border-left:3px solid #16a34a;"><div style="font-size:9px;color:#16a34a;text-transform:uppercase;font-weight:700;">Total net collected</div><div style="font-size:18px;font-weight:700;color:#15803d;">₱${totalNet.toLocaleString('en-PH',{minimumFractionDigits:2})}</div></div>
-        <div style="background:#eef2ff;border-radius:8px;padding:10px 12px;border-left:3px solid #1e3cb8;"><div style="font-size:9px;color:#1e3cb8;text-transform:uppercase;font-weight:700;">Spawn share (75%)</div><div style="font-size:18px;font-weight:700;color:#1e3cb8;">₱${totalSpawn.toLocaleString('en-PH',{minimumFractionDigits:2})}</div></div>
-      </div>
-      <div style="font-size:9px;font-weight:700;color:#6b7280;text-transform:uppercase;letter-spacing:.05em;margin-bottom:8px;">${rows.length} harvest record${rows.length>1?'s':''}</div>
-      ${rows.map(h => {
-        const net=parseFloat(h.net_collectible||0), spawn=parseFloat(h.spawn_share||0), owner=parseFloat(h.customer_share||0), coins=parseFloat(h.coins_total||0);
-        return `<div style="border:1px solid #e5e7eb;border-radius:8px;padding:10px 12px;margin-bottom:6px;">
-          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;">
-            <div><div style="font-size:12px;font-weight:700;color:#374151;">${h.harvest_date}</div><div style="font-size:10px;color:#9ca3af;">${h.collector||'—'} · Route: ${h.route_code||'—'}</div></div>
-            <div style="font-size:14px;font-weight:700;color:#16a34a;">₱${net.toLocaleString('en-PH',{minimumFractionDigits:2})}</div>
-          </div>
-          <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:4px;font-size:10px;">
-            <div style="background:#f9fafb;border-radius:4px;padding:4px 6px;"><div style="color:#9ca3af;">Total coins</div><div style="font-weight:600;">₱${coins.toLocaleString()}</div></div>
-            <div style="background:#f0fdf4;border-radius:4px;padding:4px 6px;"><div style="color:#16a34a;">Spawn 75%</div><div style="font-weight:600;">₱${spawn.toLocaleString()}</div></div>
-            <div style="background:#fef9ee;border-radius:4px;padding:4px 6px;"><div style="color:#d97706;">Owner 25%</div><div style="font-weight:600;">₱${owner.toLocaleString()}</div></div>
-          </div>
-        </div>`;
-      }).join('')}`;
-  } catch(e) {
-    content.innerHTML = `<div style="padding:20px;text-align:center;color:#dc2626;font-size:12px;">Error: ${e.message}</div>`;
-  }
+  };
+  hvOpenDetail(fakeRow);
 }
 
 function toast(msg, dur) {
@@ -3271,61 +3277,11 @@ async function hvLoadRecords() { hvLoadRecordDates(); }
 
 <!-- ══ DEVICES ══ -->
 <div id="panel-devices" class="panel">
-<style>
-.hrc-card{background:#fff;border:1.5px solid #e5e7eb;border-radius:10px;padding:14px 16px;margin-bottom:10px;}
-.hrc-title{font-size:13px;font-weight:700;color:#1e3cb8;margin-bottom:2px;}
-.hrc-sub{font-size:10px;color:#6b7280;margin-bottom:10px;}
-.hrc-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-bottom:10px;}
-.hrc-stat{background:#f8faff;border-radius:7px;padding:10px;text-align:center;}
-.hrc-stat-val{font-size:16px;font-weight:700;color:#1e3cb8;}
-.hrc-stat-lbl{font-size:9px;color:#6b7280;margin-top:2px;text-transform:uppercase;letter-spacing:.04em;}
-.hrc-match{font-size:11px;padding:6px 10px;border-radius:6px;margin-top:6px;font-weight:600;}
-.hrc-match.ok{background:#dcfce7;color:#15803d;}
-.hrc-match.warn{background:#fef3c7;color:#92400e;}
-.hrc-match.bad{background:#fef2f2;color:#dc2626;}
-.hrc-row{display:flex;justify-content:space-between;padding:5px 0;border-bottom:1px solid #f0f0f0;font-size:11px;}
-.hrc-route-card{background:#fff;border:1.5px solid #e5e7eb;border-radius:10px;padding:12px 14px;margin-bottom:8px;}
-.hrc-rc{font-size:14px;font-weight:700;color:#1e3cb8;letter-spacing:.06em;}
-.hrc-badge{font-size:8px;font-weight:700;padding:2px 7px;border-radius:6px;}
-.hrc-badge.active{background:#dcfce7;color:#15803d;}
-.hrc-badge.completed{background:#dbeafe;color:#1e40af;}
-.hrc-actions{display:flex;gap:6px;margin-top:8px;flex-wrap:wrap;}
-.hrc-btn{padding:4px 10px;border-radius:5px;border:1px solid #e5e7eb;background:#fff;font-size:10px;font-weight:600;cursor:pointer;font-family:inherit;}
-.hrc-btn.blue{background:#1e3cb8;color:#fff;border-color:#1e3cb8;}
-.hrc-btn.red{color:#dc2626;border-color:#fca5a5;}
-.hrc-btn.green{background:#16a34a;color:#fff;border-color:#16a34a;}
-.hrc-empty{text-align:center;padding:40px;color:#9ca3af;font-size:12px;line-height:1.8;}
-.hrc-filter-row{display:flex;gap:8px;margin-bottom:14px;flex-wrap:wrap;align-items:center;}
-.hrc-date-inp{padding:5px 10px;border:1.5px solid #c7d2fe;border-radius:7px;font-size:12px;font-family:inherit;outline:none;color:#1e3cb8;}
-</style>
-
-<!-- Header -->
-<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;">
-  <div>
-    <div style="font-size:16px;font-weight:700;color:#1e3cb8;">⚖️ Harvest Reconciliation</div>
-    <div style="font-size:11px;color:#6b7280;margin-top:2px;">Compare collector coin report vs Telegram system income</div>
+  <div style="display:flex;align-items:center;justify-content:center;height:300px;flex-direction:column;gap:10px;">
+    <div style="font-size:32px;">🔧</div>
+    <div style="font-size:14px;font-weight:600;color:#374151;">Devices panel</div>
+    <div style="font-size:12px;color:#9ca3af;">Coming soon</div>
   </div>
-  <button onclick="loadReconciliation()" style="padding:6px 14px;background:#1e3cb8;color:#fff;border:none;border-radius:7px;font-size:11px;font-weight:700;cursor:pointer;font-family:inherit;">⟳ Refresh</button>
-</div>
-
-<!-- Filters -->
-<div class="hrc-filter-row">
-  <input type="date" id="hrc-date" class="hrc-date-inp" value="">
-  <select id="hrc-area-sel" style="padding:5px 10px;border:1.5px solid #c7d2fe;border-radius:7px;font-size:12px;font-family:inherit;color:#1e3cb8;background:#fff;outline:none;">
-    <option value="">All areas</option>
-    <option>DAPITAN</option><option>DIPOLOG</option><option>SINDANGAN</option>
-    <option>ROXAS</option><option>POLANCO</option><option>SINAMAN</option>
-    <option>MINAOG</option><option>MIX AREAS</option>
-  </select>
-  <button onclick="loadReconciliation()" style="padding:5px 14px;background:#1e3cb8;color:#fff;border:none;border-radius:7px;font-size:11px;font-weight:700;cursor:pointer;font-family:inherit;">Filter</button>
-</div>
-
-<!-- Routes section -->
-<div style="font-size:12px;font-weight:700;color:#374151;margin-bottom:8px;">📋 Routes</div>
-<div id="hrc-routes-list">
-  <div class="hrc-empty">Click ⟳ Refresh to load</div>
-</div>
-
 </div>
 
 <!-- ══ ANALYTICS ══ -->
@@ -5675,7 +5631,7 @@ async function fullBackup() {
   <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;flex-wrap:wrap;gap:8px;">
     <div>
       <div style="font-size:14px;font-weight:700;color:#0f766e;">🔗 Vendo Names &amp; Harvest History</div>
-      <div style="font-size:11px;color:#6b7280;margin-top:2px;">Match sheet names to TG names · view harvest history per vendo</div>
+      <div style="font-size:11px;color:#6b7280;margin-top:2px;">Click any vendo to view details, edit names, and see harvest history</div>
     </div>
     <div style="display:flex;gap:6px;align-items:center;flex-wrap:wrap;">
       <input id="vn-search" placeholder="Search vendo..." style="padding:5px 10px;border:1.5px solid #c7d2fe;border-radius:7px;font-size:11px;font-family:inherit;outline:none;width:180px;" oninput="vnApplyFilter()"/>
@@ -5702,22 +5658,6 @@ async function fullBackup() {
   <div id="vn-list" style="display:flex;flex-direction:column;gap:6px;">
     <div style="padding:20px;text-align:center;color:#9ca3af;font-size:12px;">Click Refresh to load vendos</div>
   </div>
-</div>
-
-<!-- HARVEST HISTORY POPUP -->
-<div class="hv-popbg" id="hv-hist-pop">
-<div style="width:500px;border-radius:12px;overflow:hidden;box-shadow:0 16px 48px rgba(0,0,0,.22);max-height:90vh;display:flex;flex-direction:column;">
-  <div style="background:#15803d;padding:14px 16px;display:flex;align-items:flex-start;justify-content:space-between;gap:10px;flex-shrink:0;">
-    <div>
-      <div style="font-size:15px;font-weight:700;color:#fff;">📋 Harvest records</div>
-      <div style="font-size:10px;color:rgba(255,255,255,.7);margin-top:3px;" id="hv-hist-sub">Loading...</div>
-    </div>
-    <button onclick="document.getElementById('hv-hist-pop').classList.remove('show')" style="flex-shrink:0;width:28px;height:28px;border-radius:50%;border:1.5px solid rgba(255,255,255,.4);background:rgba(255,255,255,.15);color:#fff;font-size:16px;cursor:pointer;display:flex;align-items:center;justify-content:center;">×</button>
-  </div>
-  <div style="background:#fff;padding:14px 16px;overflow-y:auto;flex:1;">
-    <div id="hv-hist-content"><div style="padding:20px;text-align:center;color:#9ca3af;font-size:12px;">Loading...</div></div>
-  </div>
-</div>
 </div>
 
 </body>
