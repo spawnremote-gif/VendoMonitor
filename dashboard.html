@@ -2077,6 +2077,12 @@ async function hvConfirmMatch() {
     });
     if (!r1.ok) throw new Error('PATCH tg vendo failed: ' + r1.status);
 
+    // Step 1b: Backfill tg_name into harvests where sheet_name matches — activates history
+    await fetch(`${_SB}/rest/v1/harvests?sheet_name=eq.${encodeURIComponent(sheetName)}&tg_name=is.null`, {
+      method: 'PATCH', headers,
+      body: JSON.stringify({ tg_name: tgName })
+    });
+
     // Step 2: Delete the now-redundant sheet-only vendo row (it has no tg_name)
     const r2 = await fetch(`${_SB}/rest/v1/vendos?id=eq.${sheetVendoId}`, {
       method: 'DELETE', headers
@@ -2723,7 +2729,7 @@ async function hvLoadRecordsByDate(date, btn) {
             </div>
             <div style="text-align:right;">
               <div style="font-weight:700;color:#16a34a;">₱${parseFloat(h.net_collectible||0).toLocaleString('en-PH',{minimumFractionDigits:2})}</div>
-              <div style="font-size:9px;color:#6b7280;">Total: ₱${parseFloat(h.total_coins||0).toLocaleString()}</div>
+              <div style="font-size:9px;color:#6b7280;">Total: ₱${parseFloat(h.coins_total||0).toLocaleString()}</div>
             </div>
           </div>`;
         }).join('');
@@ -2808,22 +2814,42 @@ async function hvLoadRecon() {
   content.innerHTML = '<div style="padding:20px;text-align:center;color:var(--mu);">Loading reconciliation...</div>';
 
   try {
-    // Load harvests for date
+    // Load harvests for selected date
     const rh = await fetch(`${_SB}/rest/v1/harvests?harvest_date=eq.${date}&select=vendo_name,tg_name,net_collectible,route_code,collector&limit=500`, {
       headers: { 'apikey': _KEY, 'Authorization': 'Bearer ' + _KEY }
     });
     const harvests = await rh.json();
     if (!harvests.length) { content.innerHTML = '<div class="hv-rec-empty">No harvest records for ' + date + '</div>'; return; }
 
-    // Load TG transactions for date
-    const rt = await fetch(`${_SB}/rest/v1/transactions?date=eq.${date}&select=amount,vendo&limit=10000`, {
+    // Get last_harvest_date per vendo — this is the STARTING POINT for the TG window
+    const tgNames = [...new Set(harvests.map(h => h.tg_name).filter(Boolean))];
+    const lastHarvestMap = {};
+    if (tgNames.length) {
+      const rv = await fetch(`${_SB}/rest/v1/vendos?tg_name=in.(${tgNames.map(n=>'"'+n+'"').join(',')})&select=tg_name,last_harvest_date`, {
+        headers: { 'apikey': _KEY, 'Authorization': 'Bearer ' + _KEY }
+      });
+      const vendoRows = await rv.json();
+      vendoRows.forEach(v => { lastHarvestMap[v.tg_name] = v.last_harvest_date; });
+    }
+
+    // Window floor = earliest last_harvest_date across all vendos in this batch
+    const allStartDates = Object.values(lastHarvestMap).filter(Boolean);
+    const windowStart = allStartDates.length ? allStartDates.reduce((a,b) => a<b?a:b) : date;
+
+    // Load TG transactions for the full window
+    const rt = await fetch(`${_SB}/rest/v1/transactions?date=gte.${windowStart}&date=lte.${date}&select=amount,vendo,date&limit=50000`, {
       headers: { 'apikey': _KEY, 'Authorization': 'Bearer ' + _KEY }
     });
     const txData = await rt.json();
 
-    // Build TG income map by vendo
+    // Build TG income map — only count transactions AFTER that vendo's own last_harvest_date
     const tgMap = {};
-    txData.forEach(tx => { tgMap[tx.vendo] = (tgMap[tx.vendo]||0) + (parseFloat(tx.amount)||0); });
+    txData.forEach(tx => {
+      const vendoStart = lastHarvestMap[tx.vendo] || windowStart;
+      if (tx.date > vendoStart) {
+        tgMap[tx.vendo] = (tgMap[tx.vendo]||0) + (parseFloat(tx.amount)||0);
+      }
+    });
 
     // Group harvests by route
     const byRoute = {};
@@ -4175,7 +4201,7 @@ async function buildReconCard(rt) {
   div.className = 'hrc-route-card';
   let harvests = [], coinNet = 0, tgTotal = 0;
   try {
-    const rh = await fetch('https://cviraqfhphhsonjmrtvu.supabase.co/rest/v1/harvests?route_code=eq.' + rt.route_code + '&select=vendo_name,tg_name,net_collectible,total_coins,free_coins,old_coins', {
+    const rh = await fetch('https://cviraqfhphhsonjmrtvu.supabase.co/rest/v1/harvests?route_code=eq.' + rt.route_code + '&select=vendo_name,tg_name,net_collectible,coins_total,coins_free,coins_old', {
       headers: { 'apikey': 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImN2aXJhcWZocGhoc29uam1ydHZ1Iiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc3NTY5NjYxOSwiZXhwIjoyMDkxMjcyNjE5fQ.qLPX_TW2U6W51nbOiotRdjUoofXnoWHi3oNfcIDmsek', 'Authorization': 'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImN2aXJhcWZocGhoc29uam1ydHZ1Iiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc3NTY5NjYxOSwiZXhwIjoyMDkxMjcyNjE5fQ.qLPX_TW2U6W51nbOiotRdjUoofXnoWHi3oNfcIDmsek' }
     });
     harvests = await rh.json() || [];
