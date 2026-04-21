@@ -19,7 +19,7 @@
   --gray:#6b7280;--border:#e5e7eb;--bg:#f8fafc;
   --text:#111827;--muted:#6b7280;
 }
-body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:var(--bg);min-height:100vh;color:var(--text);}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:var(--bg);min-height:100vh;color:var(--text);font-size:16px;-webkit-text-size-adjust:100%;}
 
 /* TOP BAR */
 .topbar{background:var(--blue);color:#fff;padding:12px 16px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:100;}
@@ -30,19 +30,19 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
 .sync-dot.off{background:#f87171;}
 
 /* SCREENS */
-.screen{display:none;min-height:calc(100vh - 52px);padding:16px;}
+.screen{display:none;min-height:calc(100vh - 52px);padding:16px;box-sizing:border-box;max-width:600px;margin:0 auto;}
 .screen.active{display:block;}
 
 /* ENTRY SCREEN */
-.entry-card{background:#fff;border-radius:12px;border:1px solid var(--border);padding:24px 20px;margin-top:20px;}
+.entry-card{background:#fff;border-radius:12px;border:1px solid var(--border);padding:20px 16px;margin-top:16px;}
 .entry-title{font-size:18px;font-weight:700;color:var(--blue);margin-bottom:4px;}
 .entry-sub{font-size:12px;color:var(--muted);margin-bottom:20px;}
 .field{margin-bottom:14px;}
 .field label{display:block;font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.04em;margin-bottom:5px;}
-.field input{width:100%;padding:12px 14px;border:1.5px solid var(--border);border-radius:8px;font-size:15px;font-family:inherit;outline:none;color:var(--text);}
+.field input{width:100%;padding:12px 14px;border:1.5px solid var(--border);border-radius:8px;font-size:16px;font-family:inherit;outline:none;color:var(--text);box-sizing:border-box;}
 .field input:focus{border-color:var(--blue);}
-.field input.code{text-transform:uppercase;letter-spacing:.1em;font-weight:700;font-size:18px;text-align:center;}
-.btn{width:100%;padding:14px;border-radius:10px;border:none;font-size:15px;font-weight:700;cursor:pointer;font-family:inherit;transition:.15s;}
+.field input.code{text-transform:uppercase;letter-spacing:.1em;font-weight:700;font-size:18px;text-align:center;-webkit-appearance:none;}
+.btn{width:100%;padding:16px;border-radius:10px;border:none;font-size:16px;font-weight:700;cursor:pointer;font-family:inherit;transition:.15s;}
 .btn-blue{background:var(--blue);color:#fff;}
 .btn-blue:active{background:#1630a0;}
 .btn-green{background:var(--green);color:#fff;}
@@ -61,12 +61,12 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
 .progress-labels{display:flex;justify-content:space-between;font-size:10px;color:var(--muted);margin-top:3px;}
 
 /* VENDO LIST */
-.vendo-item{background:#fff;border-radius:10px;border:1px solid var(--border);padding:12px 14px;margin-bottom:8px;display:flex;align-items:center;justify-content:space-between;cursor:pointer;}
+.vendo-item{background:#fff;border-radius:10px;border:1px solid var(--border);padding:14px;margin-bottom:10px;display:flex;align-items:center;justify-content:space-between;cursor:pointer;-webkit-tap-highlight-color:rgba(0,0,0,0.05);}
 .vendo-item:active{background:var(--blue-light);}
 .vendo-item.done{border-color:#86efac;background:var(--green-light);}
 .vendo-item.pending-item{border-color:#fca5a5;background:var(--red-light);}
 .vi-left{flex:1;min-width:0;}
-.vi-name{font-size:14px;font-weight:700;color:var(--text);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+.vi-name{font-size:15px;font-weight:700;color:var(--text);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
 .vi-tg{font-size:10px;color:var(--muted);margin-top:1px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
 .vi-area{font-size:10px;color:var(--blue);margin-top:1px;}
 .vi-status{flex-shrink:0;margin-left:10px;text-align:right;}
@@ -80,7 +80,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
 .form-header{background:var(--blue);color:#fff;border-radius:12px;padding:14px 16px;margin-bottom:14px;}
 .form-vname{font-size:17px;font-weight:700;}
 .form-vmeta{font-size:10px;opacity:.75;margin-top:2px;}
-.form-card{background:#fff;border-radius:12px;border:1px solid var(--border);padding:16px;margin-bottom:12px;}
+.form-card{background:#fff;border-radius:12px;border:1px solid var(--border);padding:16px;margin-bottom:12px;box-sizing:border-box;}
 .form-card-title{font-size:11px;font-weight:700;color:var(--blue);text-transform:uppercase;letter-spacing:.05em;margin-bottom:12px;}
 .coin-field{margin-bottom:12px;}
 .coin-label{font-size:12px;font-weight:600;color:var(--text);margin-bottom:4px;display:flex;justify-content:space-between;}
@@ -469,9 +469,9 @@ function openVendo(idx) {
 
   // Pre-fill if already harvested
   if (currentItem.status === 'harvested') {
-    if (currentItem.coins_total) document.getElementById('coin-total').value = currentItem.coins_total;
-    if (currentItem.coins_free)  document.getElementById('coin-free').value  = currentItem.coins_free;
-    if (currentItem.coins_old)   document.getElementById('coin-old').value   = currentItem.coins_old;
+    if (currentItem.total_coins) document.getElementById('coin-total').value = currentItem.total_coins;
+    if (currentItem.free_coins)  document.getElementById('coin-free').value  = currentItem.free_coins;
+    if (currentItem.old_coins)   document.getElementById('coin-old').value   = currentItem.old_coins;
     calcNet();
     toast('Already harvested — tap Submit to update');
   }
@@ -543,9 +543,9 @@ async function submitHarvest() {
     area:            currentItem.area,
     collector:       collector,
     route_code:      currentRoute?.route_code || null,
-    coins_total:     total,
-    coins_free:      free,
-    coins_old:       old,
+    total_coins:     total,
+    free_coins:      free,
+    old_coins:       old,
     net_collectible: net,
     spawn_share:     spawn,
     customer_share:  customer,
@@ -573,7 +573,7 @@ async function submitHarvest() {
           headers: { ...HDR, 'Prefer': 'return=minimal' },
           body: JSON.stringify({
             status: 'harvested', harvested_at: now,
-            coins_total: total, coins_free: free, coins_old: old,
+            total_coins: total, free_coins: free, old_coins: old,
             net_collectible: net, spawn_share: spawn, customer_share: customer
           })
         });
@@ -600,9 +600,9 @@ async function submitHarvest() {
     // Update local item status
     if (currentItem) {
       currentItem.status          = 'harvested';
-      currentItem.coins_total     = total;
-      currentItem.coins_free      = free;
-      currentItem.coins_old       = old;
+      currentItem.total_coins     = total;
+      currentItem.free_coins      = free;
+      currentItem.old_coins       = old;
       currentItem.net_collectible = net;
     }
     // Save updated route to localStorage cache
@@ -705,7 +705,7 @@ async function loadDailySummary() {
   const collector = currentRoute?.collector || '';
   const routeCode = currentRoute?.route_code || '';
   try {
-    const r = await fetch(`${SB}/rest/v1/harvests?route_code=eq.${routeCode}&select=vendo_name,coins_total,coins_free,coins_old,net_collectible,spawn_share,customer_share,collector`, {
+    const r = await fetch(`${SB}/rest/v1/harvests?route_code=eq.${routeCode}&select=vendo_name,total_coins,free_coins,old_coins,net_collectible,spawn_share,customer_share,collector`, {
       headers: HDR
     });
     const data = await r.json();
