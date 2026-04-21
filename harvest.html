@@ -330,14 +330,9 @@ window.addEventListener('DOMContentLoaded', () => {
   } else if (vendo) {
     loadVendoByTG(vendo);
   } else {
-    const lastCode = localStorage.getItem('last_route_code');
-    if (lastCode) {
-      document.getElementById('route-code-inp').value = lastCode;
-      const hint = document.createElement('div');
-      hint.style.cssText = 'font-size:10px;color:var(--blue);margin-top:6px;text-align:center;';
-      hint.textContent = 'Last route: ' + lastCode + ' — tap Load to continue';
-      document.getElementById('route-code-inp').parentNode.appendChild(hint);
-    }
+    // No pre-fill — collector must enter route code manually as passkey
+    // Clear any cached route code to prevent confusion
+    localStorage.removeItem('last_route_code');
   }
 });
 
@@ -414,7 +409,7 @@ async function loadRoute() {
 
     // Save route to localStorage for offline use
     localStorage.setItem('cached_route_' + code, JSON.stringify(currentRoute));
-    localStorage.setItem('last_route_code', code);
+    // Not saving last route code — collectors must enter manually
 
     renderVendoList();
   } catch(e) {
