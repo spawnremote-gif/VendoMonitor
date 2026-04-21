@@ -1766,6 +1766,8 @@ async function hvSaveDetailEdits() {
         vnApplyFilter && vnApplyFilter();
         const cntEl = document.getElementById('vn-saved-count');
         if (cntEl) cntEl.textContent = _vnAll.filter(x=>x.name_confirmed).length;
+        // Refresh full list from DB to reflect change
+        if (typeof vnLoad === 'function') await vnLoad();
       }
     } catch(e) { console.error(e); }
     return;
@@ -1855,7 +1857,7 @@ async function hvSaveDetailEdits() {
     if (cntEl && _vnAll) cntEl.textContent = _vnAll.filter(x=>x.name_confirmed).length;
     await hvLoadVendos();
     if (typeof vnLoad === 'function') {
-      vnLoad();
+      await vnLoad();
     }
   } catch(e) {
     alert('❌ Save failed: ' + e.message);
@@ -2375,7 +2377,7 @@ async function hvConfirmRoute() {
 
     // Show styled route confirm popup
     const pwa = 'https://spawninternet.github.io/VendoMonitor/harvest.html';
-    const link = pwa + '?code=' + code;
+    const link = pwa;  // collectors open the app then pick their route by code
     const pop = document.getElementById('hv-route-confirm-pop');
     if (pop) {
       document.getElementById('rc-pop-code').textContent      = code;
@@ -2426,7 +2428,7 @@ async function hvRefreshPendingRoutes() {
 }
 
 function hvShowRouteDetail(code) {
-  alert('Route: ' + code + '\nOpen harvest.html?code=' + code + ' to view collector progress.');
+  alert('Route: ' + code + '\nOpen https://spawninternet.github.io/VendoMonitor/harvest.html');
 }
 
 function hvClearRoute() {
@@ -3020,32 +3022,69 @@ async function hvLoadRecon() {
     const harvests = await rh.json();
     if (!harvests.length) { content.innerHTML = '<div class="hv-rec-empty">No harvest records for ' + date + '</div>'; return; }
 
-    // Get last_harvest_date per vendo — this is the STARTING POINT for the TG window
+    // Window START = the previous harvest date for each vendo (before current harvest_date)
+    // We look in the harvests table itself for the most recent record BEFORE this date
+    // This avoids using vendos.last_harvest_date which is already updated to today
+    const DEFAULT_START = '2026-03-01';
     const tgNames = [...new Set(harvests.map(h => h.tg_name).filter(Boolean))];
-    const lastHarvestMap = {};
+    const windowStartMap = {}; // tg_name → window start date
+
     if (tgNames.length) {
-      const rv = await fetch(`${_SB}/rest/v1/vendos?tg_name=in.(${tgNames.map(n=>'"'+n+'"').join(',')})&select=tg_name,last_harvest_date`, {
-        headers: { 'apikey': _KEY, 'Authorization': 'Bearer ' + _KEY }
-      });
-      const vendoRows = await rv.json();
-      vendoRows.forEach(v => { lastHarvestMap[v.tg_name] = v.last_harvest_date; });
+      // Find the most recent previous harvest per vendo before the selected date
+      const encodedNames = tgNames.map(n => '"' + encodeURIComponent(n) + '"').join(',');
+      const prevUrl = `${_SB}/rest/v1/harvests?tg_name=in.(${tgNames.map(n=>'"'+n+'"').join(',')})&harvest_date=lt.${date}&select=tg_name,harvest_date&order=harvest_date.desc&limit=500`;
+      try {
+        const rp = await fetch(prevUrl, { headers: { 'apikey': _KEY, 'Authorization': 'Bearer ' + _KEY } });
+        const prevHarvests = await rp.json();
+        // For each tg_name, grab most recent previous harvest date
+        tgNames.forEach(tg => {
+          const prev = prevHarvests.find(h => h.tg_name === tg);
+          windowStartMap[tg] = prev ? prev.harvest_date : null;
+        });
+      } catch(e) { console.warn('prev harvest lookup failed:', e); }
+
+      // For vendos with no previous harvest in harvests table,
+      // look at route_items for this route — find the vendo's last_harvest_date
+      // stored BEFORE PWA updated it. We use DEFAULT_START as safe fallback.
+      const missingTgs = tgNames.filter(tg => !windowStartMap[tg]);
+      if (missingTgs.length) {
+        try {
+          const rv = await fetch(`${_SB}/rest/v1/vendos?tg_name=in.(${missingTgs.map(n=>'"'+n+'"').join(',')})&select=tg_name,last_harvest_date`, {
+            headers: { 'apikey': _KEY, 'Authorization': 'Bearer ' + _KEY }
+          });
+          const vendoRows = await rv.json();
+          vendoRows.forEach(v => {
+            // Use last_harvest_date regardless — even if it equals harvest date
+            // because the TG window is FROM that date TO harvest date
+            if (v.last_harvest_date) {
+              windowStartMap[v.tg_name] = v.last_harvest_date;
+            } else {
+              windowStartMap[v.tg_name] = DEFAULT_START;
+            }
+          });
+        } catch(e) { console.warn('vendos lookup failed:', e); }
+        // Any still missing → default start
+        missingTgs.forEach(tg => {
+          if (!windowStartMap[tg]) windowStartMap[tg] = DEFAULT_START;
+        });
+      }
     }
 
-    // Window floor = earliest last_harvest_date across all vendos in this batch
-    const allStartDates = Object.values(lastHarvestMap).filter(Boolean);
-    const windowStart = allStartDates.length ? allStartDates.reduce((a,b) => a<b?a:b) : date;
+    // Global window = from earliest start across all vendos to selected date
+    const allStarts = Object.values(windowStartMap).filter(Boolean);
+    const windowStart = allStarts.length ? allStarts.reduce((a,b) => a<b?a:b) : DEFAULT_START;
 
-    // Load TG transactions for the full window
-    const rt = await fetch(`${_SB}/rest/v1/transactions?date=gte.${windowStart}&date=lte.${date}&select=amount,vendo,date&limit=50000`, {
+    // Load TG transactions for the full window — exclude skipped/admin
+    const rt = await fetch(`${_SB}/rest/v1/transactions?date=gte.${windowStart}&date=lte.${date}&is_skipped=eq.false&select=amount,vendo,date&limit=50000`, {
       headers: { 'apikey': _KEY, 'Authorization': 'Bearer ' + _KEY }
     });
     const txData = await rt.json();
 
-    // Build TG income map — only count transactions AFTER that vendo's own last_harvest_date
+    // Build TG income map — per vendo, only count txs AFTER that vendo's own window start
     const tgMap = {};
     txData.forEach(tx => {
-      const vendoStart = lastHarvestMap[tx.vendo] || windowStart;
-      if (tx.date > vendoStart) {
+      const vendoStart = windowStartMap[tx.vendo] || DEFAULT_START;
+      if (tx.date >= vendoStart) {
         tgMap[tx.vendo] = (tgMap[tx.vendo]||0) + (parseFloat(tx.amount)||0);
       }
     });
@@ -3349,7 +3388,7 @@ function rcCopyDetails() {
   const dt    = document.getElementById('rc-pop-date')?.textContent || '';
   const cnt   = document.getElementById('rc-pop-count')?.textContent || '';
   const link  = document.getElementById('rc-pop-link')?.textContent || '';
-  const text  = `Route code: ${code}\nCollector: ${col}\nDate: ${dt}\nVendos: ${cnt}\nLink: ${link}`;
+  const text  = `Route code: ${code}\nCollector: ${col}\nDate: ${dt}\nVendos: ${cnt}\n\nOpen this link:\n${link}\n\nThen enter route code: ${code}`;
   navigator.clipboard.writeText(text).then(() => {
     const toast = document.getElementById('hv-refresh-toast');
     if (toast) { toast.textContent = '✅ Details copied!'; toast.classList.add('show'); setTimeout(()=>toast.classList.remove('show'),2000); }
@@ -5870,7 +5909,7 @@ async function fullBackup() {
       </div>
     </div>
     <div style="background:#f8faff;border:1.5px solid #c7d2fe;border-radius:10px;padding:12px 14px;">
-      <div style="font-size:9px;font-weight:700;color:#6366f1;text-transform:uppercase;letter-spacing:.05em;margin-bottom:6px;">PWA link — share with collector</div>
+      <div style="font-size:9px;font-weight:700;color:#6366f1;text-transform:uppercase;letter-spacing:.05em;margin-bottom:6px;">Harvest app link · Share this, then tell them the route code</div>
       <div style="font-size:11px;color:#1e3cb8;word-break:break-all;font-family:monospace;background:#eef2ff;border-radius:6px;padding:8px 10px;margin-bottom:8px;" id="rc-pop-link">—</div>
       <div style="display:flex;gap:6px;">
         <button onclick="rcCopyLink()" id="rc-copy-btn" style="flex:1;padding:9px;background:#1e3cb8;color:#fff;border:none;border-radius:7px;font-size:12px;font-weight:700;cursor:pointer;font-family:inherit;">📋 Copy link</button>
