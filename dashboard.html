@@ -767,6 +767,7 @@ tr:hover td{background:#f8f9ff;cursor:pointer}
       <button class="hv-hvtab" id="hbtn-schedule" onclick="hvShowTab('schedule',this)">⏰ Schedule</button>
       <button class="hv-hvtab" id="hbtn-records" onclick="hvShowTab('records',this)">📊 Records</button>
       <button class="hv-hvtab" id="hbtn-recon" onclick="hvShowTab('recon',this)">⚖️ Reconciliation</button>
+      <button class="hv-hvtab" id="hbtn-addharvest" onclick="hvShowTab('addharvest',this)" style="background:#f0fdf4;border-color:#bbf7d0;color:#15803d;">➕ Add Harvest</button>
       <button class="hv-hvtab" id="hbtn-vnames" onclick="hvShowTab('vnames',this)">🔗 Vendo Names</button>
     </div>
   </div>
@@ -1324,12 +1325,13 @@ function hvShowTab(tab, btn) {
     sched:  document.getElementById('hv-tab-schedule'),
     rec:    document.getElementById('hv-tab-records'),
     recon:  document.getElementById('hv-tab-recon'),
-    vnames: document.getElementById('hv-tab-vnames')
+    vnames: document.getElementById('hv-tab-vnames'),
+    addharvest: document.getElementById('hv-tab-addharvest')
   };
   // Use classList to force display:none (overcomes !important in CSS)
   const hide = el => { if (!el) return; el.classList.add('hv-hidden'); el.style.display = ''; };
   const show = (el, disp) => { if (!el) return; el.style.display = ''; el.classList.remove('hv-hidden'); if (disp) el.style.display = disp; };
-  [els.page, els.area, els.filt, els.sched, els.rec, els.recon, els.vnames, guide].forEach(hide);
+  [els.page, els.area, els.filt, els.sched, els.rec, els.recon, els.vnames, els.addharvest, guide].forEach(hide);
   if (isRoute) {
     show(guide, ''); show(els.page, 'grid'); show(els.area, 'flex'); show(els.filt, 'flex');
   } else if (tab === 'schedule') {
@@ -1340,6 +1342,8 @@ function hvShowTab(tab, btn) {
     show(els.recon, 'block');
   } else if (tab === 'vnames') {
     show(els.vnames, 'block');
+  } else if (tab === 'addharvest') {
+    show(els.addharvest, 'block');
   }
   if (tab === 'records') hvLoadRecordDates();
   if (tab === 'schedule') hvLoadSchedule();
@@ -3185,6 +3189,129 @@ async function hvLoadRecon() {
   }
 }
 
+
+/* ─── ADMIN HARVEST ENTRY ─── */
+let _ahVendo = null; // selected vendo object
+
+function ahCalc() {
+  const total = parseFloat(document.getElementById('ah-total').value) || 0;
+  const free  = parseFloat(document.getElementById('ah-free').value)  || 0;
+  const old   = parseFloat(document.getElementById('ah-old').value)   || 0;
+  const net   = Math.max(0, total - free - old);
+  const spawn = net * 0.75;
+  const owner = net * 0.25;
+  const fmt = v => '₱' + v.toLocaleString('en-PH', {minimumFractionDigits:2});
+  document.getElementById('ah-net').textContent   = fmt(net);
+  document.getElementById('ah-spawn').textContent = fmt(spawn);
+  document.getElementById('ah-owner').textContent = fmt(owner);
+}
+
+function ahSearch(q) {
+  const res = document.getElementById('ah-results');
+  if (!q || q.length < 2) { res.innerHTML = ''; return; }
+  const matches = (_vnAll || []).filter(v => {
+    const n = ((v.sheet_name||'') + ' ' + (v.tg_name||'')).toLowerCase();
+    return n.includes(q.toLowerCase());
+  }).slice(0, 8);
+  if (!matches.length) { res.innerHTML = '<div style="padding:8px 10px;font-size:11px;color:#9ca3af;">No vendos found</div>'; return; }
+  res.innerHTML = matches.map(v => `
+    <div onclick='ahSelectVendo(${JSON.stringify(v.id)})'
+      style="padding:8px 10px;font-size:12px;cursor:pointer;border-radius:5px;border-bottom:1px solid #f0f0f0;"
+      onmouseover="this.style.background='#f0fdf4'" onmouseout="this.style.background=''">
+      <div style="font-weight:600;color:#374151;">${v.sheet_name||'<i style="color:#9ca3af;">no sheet name</i>'}</div>
+      <div style="font-size:10px;color:#9ca3af;">${v.tg_name||'—'} · ${v.area||'—'} · VLAN ${v.vlan||'—'}</div>
+    </div>`).join('');
+}
+
+function ahSelectVendo(id) {
+  const v = (_vnAll || []).find(x => x.id === id);
+  if (!v) return;
+  _ahVendo = v;
+  document.getElementById('ah-results').innerHTML = '';
+  document.getElementById('ah-search').value = '';
+  document.getElementById('ah-selected').style.display = 'block';
+  document.getElementById('ah-sel-name').textContent = v.sheet_name || v.tg_name || '—';
+  document.getElementById('ah-sel-meta').textContent = (v.area||'—') + ' · VLAN ' + (v.vlan||'—') + (v.last_harvest_date ? ' · Last harvest: ' + v.last_harvest_date : '');
+  // Auto-fill window start from last harvest date
+  const winEl = document.getElementById('ah-window');
+  if (winEl && v.last_harvest_date) winEl.value = v.last_harvest_date;
+  // Auto-fill harvest date to today
+  const dateEl = document.getElementById('ah-date');
+  if (dateEl && !dateEl.value) dateEl.value = new Date().toISOString().split('T')[0];
+}
+
+function ahClearVendo() {
+  _ahVendo = null;
+  document.getElementById('ah-selected').style.display = 'none';
+  document.getElementById('ah-search').value = '';
+  document.getElementById('ah-results').innerHTML = '';
+}
+
+async function ahSubmit() {
+  const msg = document.getElementById('ah-msg');
+  if (!_ahVendo) { msg.innerHTML = '<span style="color:#dc2626;">⚠ Please select a vendo first.</span>'; return; }
+  const collector = document.getElementById('ah-collector').value.trim();
+  const date      = document.getElementById('ah-date').value;
+  const window_   = document.getElementById('ah-window').value;
+  const route     = document.getElementById('ah-route').value.trim() || 'ADMIN';
+  const total     = parseFloat(document.getElementById('ah-total').value) || 0;
+  const free      = parseFloat(document.getElementById('ah-free').value)  || 0;
+  const old       = parseFloat(document.getElementById('ah-old').value)   || 0;
+  const net       = Math.max(0, total - free - old);
+  const spawn     = net * 0.75;
+  const owner     = net * 0.25;
+
+  if (!collector) { msg.innerHTML = '<span style="color:#dc2626;">⚠ Enter collector name.</span>'; return; }
+  if (!date)      { msg.innerHTML = '<span style="color:#dc2626;">⚠ Select harvest date.</span>'; return; }
+  if (!total)     { msg.innerHTML = '<span style="color:#dc2626;">⚠ Enter total coins.</span>'; return; }
+
+  msg.innerHTML = '<span style="color:#6b7280;">Saving...</span>';
+
+  const record = {
+    harvest_date:         date,
+    harvest_window_start: window_ || '2026-03-01',
+    vendo_name:           _ahVendo.sheet_name || _ahVendo.tg_name || '',
+    tg_name:              _ahVendo.tg_name    || null,
+    sheet_name:           _ahVendo.sheet_name || null,
+    area:                 _ahVendo.area       || null,
+    collector:            collector,
+    route_code:           route,
+    coins_total:          total,
+    coins_free:           free,
+    coins_old:            old,
+    net_collectible:      net,
+    spawn_share:          spawn,
+    customer_share:       owner
+  };
+
+  try {
+    const r1 = await fetch(`${_SB}/rest/v1/harvests`, {
+      method: 'POST',
+      headers: { 'apikey': _KEY, 'Authorization': 'Bearer ' + _KEY, 'Content-Type': 'application/json', 'Prefer': 'return=minimal' },
+      body: JSON.stringify(record)
+    });
+    if (!r1.ok) throw new Error('Save failed: ' + await r1.text());
+
+    // Update last_harvest_date on vendos table
+    const filter = _ahVendo.tg_name
+      ? `tg_name=eq.${encodeURIComponent(_ahVendo.tg_name)}`
+      : `id=eq.${_ahVendo.id}`;
+    await fetch(`${_SB}/rest/v1/vendos?${filter}`, {
+      method: 'PATCH',
+      headers: { 'apikey': _KEY, 'Authorization': 'Bearer ' + _KEY, 'Content-Type': 'application/json', 'Prefer': 'return=minimal' },
+      body: JSON.stringify({ last_harvest_date: date })
+    });
+
+    msg.innerHTML = `<span style="color:#15803d;">✅ Harvest saved! Net: ₱${net.toLocaleString('en-PH',{minimumFractionDigits:2})} · Spawn: ₱${spawn.toLocaleString('en-PH',{minimumFractionDigits:2})}</span>`;
+
+    // Reset form
+    ['ah-total','ah-free','ah-old','ah-collector','ah-route'].forEach(id => { const el = document.getElementById(id); if(el) el.value=''; });
+    ahCalc();
+    ahClearVendo();
+  } catch(e) {
+    msg.innerHTML = `<span style="color:#dc2626;">❌ ${e.message}</span>`;
+  }
+}
 
 /* ─── RECONCILIATION NOTE ─── */
 async function hvRecNote(harvestId, existingNote) {
@@ -6014,8 +6141,98 @@ async function fullBackup() {
 </div>
 
 
+<!-- ADD HARVEST PANEL -->
+<div id="hv-tab-addharvest" class="hv-hidden" style="padding:16px;max-width:560px;margin:0 auto;">
+  <div style="font-size:15px;font-weight:700;color:#15803d;margin-bottom:4px;">➕ Admin Harvest Entry</div>
+  <div style="font-size:11px;color:#6b7280;margin-bottom:16px;">Record a harvest manually without using the collector PWA.</div>
+
+  <!-- VENDO SEARCH -->
+  <div style="background:#fff;border:1.5px solid #e5e7eb;border-radius:10px;padding:14px;margin-bottom:12px;">
+    <div style="font-size:11px;font-weight:700;color:#374151;text-transform:uppercase;letter-spacing:.04em;margin-bottom:8px;">📍 Vendo</div>
+    <input id="ah-search" placeholder="Search vendo name..." oninput="ahSearch(this.value)"
+      style="width:100%;padding:10px 12px;border:1.5px solid #e5e7eb;border-radius:7px;font-size:13px;font-family:inherit;outline:none;box-sizing:border-box;">
+    <div id="ah-results" style="margin-top:6px;max-height:180px;overflow-y:auto;border-radius:7px;"></div>
+    <div id="ah-selected" style="display:none;margin-top:8px;background:#f0fdf4;border:1.5px solid #bbf7d0;border-radius:7px;padding:8px 12px;">
+      <div style="font-size:12px;font-weight:700;color:#15803d;" id="ah-sel-name">—</div>
+      <div style="font-size:10px;color:#6b7280;" id="ah-sel-meta">—</div>
+      <button onclick="ahClearVendo()" style="font-size:9px;color:#dc2626;background:none;border:none;cursor:pointer;margin-top:2px;">✕ Clear</button>
+    </div>
+  </div>
+
+  <!-- COLLECTOR + DATES -->
+  <div style="background:#fff;border:1.5px solid #e5e7eb;border-radius:10px;padding:14px;margin-bottom:12px;">
+    <div style="font-size:11px;font-weight:700;color:#374151;text-transform:uppercase;letter-spacing:.04em;margin-bottom:10px;">👤 Collector & Dates</div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:10px;">
+      <div>
+        <div style="font-size:10px;font-weight:700;color:#6b7280;margin-bottom:4px;">Collector name</div>
+        <input id="ah-collector" placeholder="e.g. Juan dela Cruz"
+          style="width:100%;padding:9px 11px;border:1.5px solid #e5e7eb;border-radius:7px;font-size:13px;font-family:inherit;outline:none;box-sizing:border-box;">
+      </div>
+      <div>
+        <div style="font-size:10px;font-weight:700;color:#6b7280;margin-bottom:4px;">Route code (optional)</div>
+        <input id="ah-route" placeholder="e.g. ABC123"
+          style="width:100%;padding:9px 11px;border:1.5px solid #e5e7eb;border-radius:7px;font-size:13px;font-family:inherit;outline:none;box-sizing:border-box;text-transform:uppercase;" oninput="this.value=this.value.toUpperCase()">
+      </div>
+    </div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
+      <div>
+        <div style="font-size:10px;font-weight:700;color:#6b7280;margin-bottom:4px;">Harvest date</div>
+        <input type="date" id="ah-date"
+          style="width:100%;padding:9px 11px;border:1.5px solid #e5e7eb;border-radius:7px;font-size:13px;font-family:inherit;outline:none;box-sizing:border-box;">
+      </div>
+      <div>
+        <div style="font-size:10px;font-weight:700;color:#6b7280;margin-bottom:4px;">Window start (last harvest)</div>
+        <input type="date" id="ah-window"
+          style="width:100%;padding:9px 11px;border:1.5px solid #e5e7eb;border-radius:7px;font-size:13px;font-family:inherit;outline:none;box-sizing:border-box;">
+      </div>
+    </div>
+  </div>
+
+  <!-- COINS -->
+  <div style="background:#fff;border:1.5px solid #e5e7eb;border-radius:10px;padding:14px;margin-bottom:12px;">
+    <div style="font-size:11px;font-weight:700;color:#374151;text-transform:uppercase;letter-spacing:.04em;margin-bottom:10px;">💰 Coins</div>
+    <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin-bottom:12px;">
+      <div>
+        <div style="font-size:10px;font-weight:700;color:#6b7280;margin-bottom:4px;">Total coins</div>
+        <input type="number" id="ah-total" placeholder="0" min="0" oninput="ahCalc()"
+          style="width:100%;padding:9px 11px;border:1.5px solid #e5e7eb;border-radius:7px;font-size:15px;font-weight:700;font-family:inherit;outline:none;text-align:right;box-sizing:border-box;">
+      </div>
+      <div>
+        <div style="font-size:10px;font-weight:700;color:#dc2626;margin-bottom:4px;">Free time coins</div>
+        <input type="number" id="ah-free" placeholder="0" min="0" oninput="ahCalc()"
+          style="width:100%;padding:9px 11px;border:1.5px solid #fca5a5;border-radius:7px;font-size:15px;font-weight:700;font-family:inherit;outline:none;text-align:right;box-sizing:border-box;">
+      </div>
+      <div>
+        <div style="font-size:10px;font-weight:700;color:#d97706;margin-bottom:4px;">Old coins</div>
+        <input type="number" id="ah-old" placeholder="0" min="0" oninput="ahCalc()"
+          style="width:100%;padding:9px 11px;border:1.5px solid #fcd34d;border-radius:7px;font-size:15px;font-weight:700;font-family:inherit;outline:none;text-align:right;box-sizing:border-box;">
+      </div>
+    </div>
+    <!-- Summary -->
+    <div style="background:#f0fdf4;border:1.5px solid #bbf7d0;border-radius:8px;padding:12px;">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;">
+        <span style="font-size:12px;font-weight:700;color:#15803d;">Net collectible</span>
+        <span style="font-size:20px;font-weight:700;color:#15803d;" id="ah-net">₱0</span>
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;">
+        <div style="background:#fff;border-radius:6px;padding:8px 10px;">
+          <div style="font-size:9px;color:#16a34a;font-weight:700;">Spawn share (75%)</div>
+          <div style="font-size:15px;font-weight:700;color:#15803d;" id="ah-spawn">₱0</div>
+        </div>
+        <div style="background:#fff;border-radius:6px;padding:8px 10px;">
+          <div style="font-size:9px;color:#7c3aed;font-weight:700;">Owner share (25%)</div>
+          <div style="font-size:15px;font-weight:700;color:#7c3aed;" id="ah-owner">₱0</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- SUBMIT -->
+  <button onclick="ahSubmit()" style="width:100%;padding:14px;background:#15803d;color:#fff;border:none;border-radius:10px;font-size:15px;font-weight:700;cursor:pointer;font-family:inherit;">💾 Save harvest record</button>
+  <div id="ah-msg" style="margin-top:10px;font-size:12px;text-align:center;"></div>
+</div>
+
 <!-- VENDO NAMES PANEL -->
-<div id="hv-tab-vnames" class="hv-hidden" style="padding:14px 16px;">
   <!-- Sub-tabs: All vendos / Saved by me -->
   <div style="display:flex;gap:0;margin-bottom:10px;border-bottom:2px solid #e5e7eb;">
     <button id="vn-subtab-all" onclick="vnSubTab('all',this)" style="padding:7px 18px;font-size:12px;font-weight:700;border:none;background:none;cursor:pointer;font-family:inherit;color:#0f766e;border-bottom:2px solid #0f766e;margin-bottom:-2px;">All vendos</button>
