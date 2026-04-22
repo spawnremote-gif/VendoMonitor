@@ -1251,14 +1251,19 @@ tr:hover td{background:#f8f9ff;cursor:pointer}
 
 <!-- RECONCILIATION TAB -->
 <div class="hv-hidden" id="hv-tab-recon" style="padding:12px;overflow-y:auto;height:calc(100vh - 72px);">
-<div style="font-size:13px;font-weight:700;color:#1e3cb8;margin-bottom:4px;">⚖️ Harvest Reconciliation</div>
-<div style="font-size:10px;color:#6b7280;margin-bottom:12px;">Compare collector coin report vs Telegram system income per route</div>
-<div style="display:flex;gap:8px;margin-bottom:12px;flex-wrap:wrap;">
-  <input type="date" id="hv-recon-date" style="padding:5px 10px;border:1.5px solid #c7d2fe;border-radius:7px;font-size:11px;font-family:inherit;outline:none;color:#1e3cb8;">
-  <button onclick="hvLoadRecon()" style="padding:5px 14px;background:#1e3cb8;color:#fff;border:none;border-radius:7px;font-size:11px;font-weight:700;cursor:pointer;font-family:inherit;">⟳ Load</button>
+<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;flex-wrap:wrap;gap:8px;">
+  <div>
+    <div style="font-size:13px;font-weight:700;color:#1e3cb8;">⚖️ Harvest Reconciliation</div>
+    <div style="font-size:10px;color:#6b7280;">Compare collector coin report vs Telegram system income per route</div>
+  </div>
+  <button onclick="hvLoadReconDates()" style="padding:5px 14px;background:#1e3cb8;color:#fff;border:none;border-radius:7px;font-size:11px;font-weight:700;cursor:pointer;font-family:inherit;">⟳ Refresh</button>
 </div>
+<!-- Date tabs -->
+<div id="hv-recon-date-tabs" style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:12px;"></div>
+<!-- Hidden date input kept for backward compat -->
+<input type="hidden" id="hv-recon-date">
 <div id="hv-recon-content">
-  <div class="hv-rec-empty">Select a date and click Load to see reconciliation</div>
+  <div class="hv-rec-empty">Loading harvest dates...</div>
 </div>
 </div>
 
@@ -1348,10 +1353,7 @@ function hvShowTab(tab, btn) {
   if (tab === 'records') hvLoadRecordDates();
   if (tab === 'schedule') hvLoadSchedule();
   if (tab === 'recon') {
-    const today = new Date().toISOString().split('T')[0];
-    const di = document.getElementById('hv-recon-date');
-    if (di && !di.value) di.value = today;
-    hvLoadRecon();
+    hvLoadReconDates();
   }
   if (tab === 'vnames') vnLoad();
   if (tab === 'addharvest' && (!_vnAll || !_vnAll.length)) vnLoad();
@@ -3044,6 +3046,59 @@ async function hvDeleteRoute(routeCode) {
     if (dateBtn) hvLoadRecordsByDate(dateBtn.dataset.date || '', dateBtn);
     else hvLoadRecordDates();
   } catch(e) { alert('Error: ' + e.message); }
+}
+
+/* ─── RECONCILIATION DATE TABS ─── */
+async function hvLoadReconDates() {
+  const tabBar = document.getElementById('hv-recon-date-tabs');
+  const content = document.getElementById('hv-recon-content');
+  if (!tabBar) return;
+  tabBar.innerHTML = '<span style="font-size:11px;color:#9ca3af;">Loading dates...</span>';
+  content.innerHTML = '<div style="padding:20px;text-align:center;color:var(--mu);">Loading...</div>';
+
+  try {
+    // Get distinct harvest dates from last 60 days
+    const r = await fetch(`${_SB}/rest/v1/harvests?select=harvest_date&order=harvest_date.desc&limit=500`, {
+      headers: { 'apikey': _KEY, 'Authorization': 'Bearer ' + _KEY }
+    });
+    const rows = await r.json();
+    const dates = [...new Set(rows.map(r => r.harvest_date))].sort((a,b) => b.localeCompare(a));
+
+    if (!dates.length) {
+      tabBar.innerHTML = '<span style="font-size:11px;color:#9ca3af;">No harvest records yet</span>';
+      content.innerHTML = '<div class="hv-rec-empty">No harvest records found</div>';
+      return;
+    }
+
+    tabBar.innerHTML = dates.map((d, i) => {
+      const label = new Date(d + 'T12:00:00').toLocaleDateString('en-PH', {month:'short', day:'numeric', year:'numeric'});
+      return `<button class="hv-recon-dtab${i===0?' on':''}" data-date="${d}" onclick="hvReconSelectDate('${d}',this)"
+        style="padding:5px 12px;border-radius:20px;border:1.5px solid ${i===0?'#1e3cb8':'#e5e7eb'};background:${i===0?'#1e3cb8':'#fff'};color:${i===0?'#fff':'#374151'};font-size:11px;font-weight:700;cursor:pointer;font-family:inherit;white-space:nowrap;">${label}</button>`;
+    }).join('');
+
+    // Auto-load the most recent date
+    const di = document.getElementById('hv-recon-date');
+    if (di) di.value = dates[0];
+    hvLoadRecon();
+  } catch(e) {
+    tabBar.innerHTML = `<span style="font-size:11px;color:#dc2626;">Error: ${e.message}</span>`;
+  }
+}
+
+function hvReconSelectDate(date, btn) {
+  document.querySelectorAll('.hv-recon-dtab').forEach(b => {
+    b.style.background = '#fff';
+    b.style.borderColor = '#e5e7eb';
+    b.style.color = '#374151';
+    b.classList.remove('on');
+  });
+  btn.style.background = '#1e3cb8';
+  btn.style.borderColor = '#1e3cb8';
+  btn.style.color = '#fff';
+  btn.classList.add('on');
+  const di = document.getElementById('hv-recon-date');
+  if (di) di.value = date;
+  hvLoadRecon();
 }
 
 async function hvLoadRecon() {
