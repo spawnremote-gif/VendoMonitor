@@ -2877,7 +2877,7 @@ async function hvLoadRecordsByDate(date, btn) {
     const allItems = await ri.json();
 
     // Also load harvests for this date for coin data
-    const rh = await fetch(`${_SB}/rest/v1/harvests?harvest_date=eq.${date}&select=tg_name,net_collectible,spawn_share,customer_share,coins_total,created_at,collector_note,status`, {
+    const rh = await fetch(`${_SB}/rest/v1/harvests?harvest_date=eq.${date}&select=tg_name,net_collectible,spawn_share,customer_share,coins_total,coins_free,coins_old,coins_saloy,created_at,collector_note,status`, {
       headers: { 'apikey': _KEY, 'Authorization': 'Bearer ' + _KEY }
     });
     const harvests = await rh.json();
@@ -2917,23 +2917,34 @@ async function hvLoadRecordsByDate(date, btn) {
           const isDone  = item.status === 'harvested';
           const harv    = harvestMap[item.tg_name] || {};
           const net     = parseFloat(item.net_collectible || harv.net_collectible || 0);
-          const coins   = parseFloat(item.coins_total || harv.coins_total || 0);
+          const coins   = parseFloat(item.total_coins || item.coins_total || harv.coins_total || 0);
+          const free    = parseFloat(item.free_coins  || harv.coins_free  || 0);
+          const old     = parseFloat(item.old_coins   || harv.coins_old   || 0);
+          const saloy   = parseFloat(item.saloy_coins || harv.coins_saloy || 0);
           const timeStr = item.harvested_at
             ? new Date(item.harvested_at).toLocaleTimeString('en-PH',{hour:'2-digit',minute:'2-digit',hour12:true})
             : '—';
           const name = item.sheet_name || item.tg_name || '—';
+          const coinBreakdown = isDone ? `
+            <div style="display:flex;gap:4px;flex-wrap:wrap;margin-top:4px;">
+              <span style="font-size:9px;background:#f3f4f6;color:#374151;padding:2px 6px;border-radius:4px;">Total: ₱${coins.toLocaleString()}</span>
+              ${free ? `<span style="font-size:9px;background:#fef2f2;color:#dc2626;padding:2px 6px;border-radius:4px;">− Free: ₱${free.toLocaleString()}</span>` : ''}
+              ${old  ? `<span style="font-size:9px;background:#fffbeb;color:#d97706;padding:2px 6px;border-radius:4px;">− Old: ₱${old.toLocaleString()}</span>` : ''}
+              <span style="font-size:9px;background:#f0fdf4;color:#16a34a;font-weight:700;padding:2px 6px;border-radius:4px;">= ₱${net.toLocaleString('en-PH',{minimumFractionDigits:2})}</span>
+            </div>` : '';
           return `<div class="hv-rs-row" style="display:flex;justify-content:space-between;align-items:flex-start;padding:7px 0;border-bottom:0.5px solid #f0f0f0;">
-            <div>
+            <div style="flex:1;min-width:0;">
               <div style="font-size:12px;font-weight:600;color:#374151;">${name}</div>
               <div style="display:flex;align-items:center;gap:6px;margin-top:2px;">
                 <span style="font-size:9px;font-weight:700;padding:1px 6px;border-radius:6px;background:${isDone?'#dcfce7':'#fef9c3'};color:${isDone?'#15803d':'#92400e'};">${isDone?'✅ Done':'⏳ Pending'}</span>
                 ${timeStr !== '—' ? `<span style="font-size:9px;color:#9ca3af;">${timeStr}</span>` : ''}
               </div>
               ${item.collector_note ? `<div style="font-size:9px;color:#6b7280;margin-top:2px;">📝 ${item.collector_note}</div>` : ''}
+              ${coinBreakdown}
             </div>
-            <div style="text-align:right;flex-shrink:0;">
+            <div style="text-align:right;flex-shrink:0;margin-left:8px;">
               ${isDone ? `<div style="font-size:13px;font-weight:700;color:#16a34a;">₱${net.toLocaleString('en-PH',{minimumFractionDigits:2})}</div>
-              <div style="font-size:9px;color:#9ca3af;">Coins: ₱${coins.toLocaleString()}</div>` : '<div style="font-size:11px;color:#9ca3af;">—</div>'}
+              <div style="font-size:9px;color:#9ca3af;">net</div>` : '<div style="font-size:11px;color:#9ca3af;">—</div>'}
             </div>
           </div>`;
         }).join('');
