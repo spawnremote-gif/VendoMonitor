@@ -3295,6 +3295,7 @@ async function vnLoad() {
       </div>`
     ).join('');
     vnApplyFilter();
+    vnUpdateAreaCounts();
   } catch(e) {
     list.innerHTML = `<div style="padding:20px;text-align:center;color:#dc2626;font-size:12px;">Error: ${e.message}</div>`;
   }
@@ -3390,14 +3391,45 @@ function vnSubTab(tab, btn) {
   btn.style.color = '#0f766e';
   btn.style.borderBottomColor = '#0f766e';
   if (tab === 'saved') {
-    // Force filter to confirmed only
     _vnSubTabMode = 'saved';
   } else {
     _vnSubTabMode = 'all';
   }
+  // Reset area tab to All when switching modes
+  document.querySelectorAll('.vn-atab').forEach(b => b.classList.remove('vn-atab-on'));
+  const allTab = document.querySelector('.vn-atab');
+  if (allTab) allTab.classList.add('vn-atab-on');
+  const inp = document.getElementById('vn-area');
+  if (inp) inp.value = '';
+  vnUpdateAreaCounts();
   vnApplyFilter();
 }
 let _vnSubTabMode = 'all';
+
+/* vn area tab styles */
+const _vnAtabStyle = document.createElement('style');
+_vnAtabStyle.textContent = `.vn-atab{padding:4px 10px;border:1.5px solid #e5e7eb;border-radius:20px;font-size:11px;font-weight:600;cursor:pointer;background:#fff;color:#6b7280;font-family:inherit;transition:.15s;}.vn-atab:hover{border-color:#93c5fd;color:#1e3cb8;}.vn-atab-on{background:#1e3cb8;color:#fff!important;border-color:#1e3cb8;}`;
+document.head.appendChild(_vnAtabStyle);
+
+function vnAreaTab(area, btn) {
+  document.querySelectorAll('.vn-atab').forEach(b => b.classList.remove('vn-atab-on'));
+  btn.classList.add('vn-atab-on');
+  // Update hidden input so vnApplyFilter still reads it
+  const inp = document.getElementById('vn-area');
+  if (inp) inp.value = area;
+  vnApplyFilter();
+  // Update area tab counts
+  vnUpdateAreaCounts();
+}
+
+function vnUpdateAreaCounts() {
+  const base = _vnSubTabMode === 'saved' ? _vnAll.filter(v => v.name_confirmed) : _vnAll;
+  const areas = { '':'all', 'DAPITAN':'dapitan','DIPOLOG':'dipolog','SINDANGAN':'sindangan','ROXAS':'roxas','POLANCO':'polanco','SINAMAN':'sinaman','MINAOG':'minaog','MIX AREAS':'mix' };
+  Object.entries(areas).forEach(([a, key]) => {
+    const el = document.getElementById('vnat-' + key);
+    if (el) el.textContent = a === '' ? base.length : base.filter(v => v.area === a).length;
+  });
+}
 
 
 function rcCopyLink() {
@@ -5958,26 +5990,31 @@ async function fullBackup() {
 
 <!-- VENDO NAMES PANEL -->
 <div id="hv-tab-vnames" class="hv-hidden" style="padding:14px 16px;">
-  <!-- Sub-tabs -->
-  <div style="display:flex;gap:0;margin-bottom:14px;border-bottom:2px solid #e5e7eb;">
+  <!-- Sub-tabs: All vendos / Saved by me -->
+  <div style="display:flex;gap:0;margin-bottom:10px;border-bottom:2px solid #e5e7eb;">
     <button id="vn-subtab-all" onclick="vnSubTab('all',this)" style="padding:7px 18px;font-size:12px;font-weight:700;border:none;background:none;cursor:pointer;font-family:inherit;color:#0f766e;border-bottom:2px solid #0f766e;margin-bottom:-2px;">All vendos</button>
     <button id="vn-subtab-saved" onclick="vnSubTab('saved',this)" style="padding:7px 18px;font-size:12px;font-weight:700;border:none;background:none;cursor:pointer;font-family:inherit;color:#6b7280;border-bottom:2px solid transparent;margin-bottom:-2px;">✅ Saved by me &nbsp;<span id="vn-saved-count" style="font-size:10px;background:#dcfce7;color:#15803d;padding:1px 6px;border-radius:10px;">0</span></button>
   </div>
-  <!-- Controls -->
+
+  <!-- Area tabs -->
+  <div style="display:flex;gap:4px;flex-wrap:wrap;margin-bottom:10px;">
+    <button class="vn-atab vn-atab-on" onclick="vnAreaTab('',this)">All <span id="vnat-all" style="font-size:9px;background:#e0e7ff;color:#1e3cb8;padding:1px 5px;border-radius:8px;margin-left:2px;">—</span></button>
+    <button class="vn-atab" onclick="vnAreaTab('DAPITAN',this)">Dapitan <span id="vnat-dapitan" style="font-size:9px;background:#e0e7ff;color:#1e3cb8;padding:1px 5px;border-radius:8px;margin-left:2px;">—</span></button>
+    <button class="vn-atab" onclick="vnAreaTab('DIPOLOG',this)">Dipolog <span id="vnat-dipolog" style="font-size:9px;background:#e0e7ff;color:#1e3cb8;padding:1px 5px;border-radius:8px;margin-left:2px;">—</span></button>
+    <button class="vn-atab" onclick="vnAreaTab('SINDANGAN',this)">Sindangan <span id="vnat-sindangan" style="font-size:9px;background:#e0e7ff;color:#1e3cb8;padding:1px 5px;border-radius:8px;margin-left:2px;">—</span></button>
+    <button class="vn-atab" onclick="vnAreaTab('ROXAS',this)">Roxas <span id="vnat-roxas" style="font-size:9px;background:#e0e7ff;color:#1e3cb8;padding:1px 5px;border-radius:8px;margin-left:2px;">—</span></button>
+    <button class="vn-atab" onclick="vnAreaTab('POLANCO',this)">Polanco <span id="vnat-polanco" style="font-size:9px;background:#e0e7ff;color:#1e3cb8;padding:1px 5px;border-radius:8px;margin-left:2px;">—</span></button>
+    <button class="vn-atab" onclick="vnAreaTab('SINAMAN',this)">Sinaman <span id="vnat-sinaman" style="font-size:9px;background:#e0e7ff;color:#1e3cb8;padding:1px 5px;border-radius:8px;margin-left:2px;">—</span></button>
+    <button class="vn-atab" onclick="vnAreaTab('MINAOG',this)">Minaog <span id="vnat-minaog" style="font-size:9px;background:#e0e7ff;color:#1e3cb8;padding:1px 5px;border-radius:8px;margin-left:2px;">—</span></button>
+    <button class="vn-atab" onclick="vnAreaTab('MIX AREAS',this)">Mix <span id="vnat-mix" style="font-size:9px;background:#e0e7ff;color:#1e3cb8;padding:1px 5px;border-radius:8px;margin-left:2px;">—</span></button>
+  </div>
+
+  <!-- Search + refresh -->
   <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;flex-wrap:wrap;gap:8px;">
     <div style="font-size:11px;color:#6b7280;">Click any vendo to view details, edit names, and see harvest history</div>
-    <div style="display:flex;gap:6px;align-items:center;flex-wrap:wrap;">
-      <input id="vn-search" placeholder="Search vendo..." style="padding:5px 10px;border:1.5px solid #c7d2fe;border-radius:7px;font-size:11px;font-family:inherit;outline:none;width:180px;" oninput="vnApplyFilter()"/>
-      <select id="vn-area" style="padding:5px 8px;border:1.5px solid #c7d2fe;border-radius:7px;font-size:11px;font-family:inherit;outline:none;" onchange="vnApplyFilter()">
-        <option value="">All areas</option>
-        <option value="DAPITAN">Dapitan</option>
-        <option value="DIPOLOG">Dipolog</option>
-        <option value="SINDANGAN">Sindangan</option>
-        <option value="ROXAS">Roxas</option>
-        <option value="POLANCO">Polanco</option>
-        <option value="SINAMAN">Sinaman</option>
-        <option value="MINAOG">Minaog</option>
-      </select>
+    <div style="display:flex;gap:6px;align-items:center;">
+      <input id="vn-search" placeholder="🔍 Search vendo..." style="padding:5px 10px;border:1.5px solid #c7d2fe;border-radius:7px;font-size:11px;font-family:inherit;outline:none;width:180px;" oninput="vnApplyFilter()"/>
+      <input id="vn-area" type="hidden" value="">
       <button onclick="vnLoad()" style="padding:5px 12px;background:#0f766e;color:#fff;border:none;border-radius:7px;font-size:11px;font-weight:700;cursor:pointer;font-family:inherit;">⟳ Refresh</button>
     </div>
   </div>
