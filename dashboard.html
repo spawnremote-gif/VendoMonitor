@@ -415,6 +415,7 @@ tr:hover td{background:#f8f9ff;cursor:pointer}
       <button class="tab-btn active" onclick="showVTab('txns',this)">📝 Transactions</button>
       <button class="tab-btn" onclick="showVTab('chart',this)">📊 Monthly Chart</button>
       <button class="tab-btn" onclick="showVTab('suspicious',this)" id="sus-tab-btn" style="color:#dc2626;">⚠️ Suspicious</button>
+      <button class="tab-btn" onclick="showVTab('harvest',this);loadVendoHarvestRecords();" style="color:#15803d;">📋 Harvest</button>
     </div>
 
     <!-- Transactions tab -->
@@ -449,6 +450,13 @@ tr:hover td{background:#f8f9ff;cursor:pointer}
     <!-- Suspicious tab -->
     <div id="vt-suspicious" class="subpanel">
       <div id="sus-list"></div>
+    </div>
+
+    <!-- Harvest Records tab -->
+    <div id="vt-harvest" class="subpanel">
+      <div id="vt-harvest-content">
+        <div style="padding:20px;text-align:center;color:#9ca3af;font-size:12px;">Click the Harvest tab to load records</div>
+      </div>
     </div>
   </div>
 </div>
@@ -3016,7 +3024,7 @@ async function hvLoadRecon() {
 
   try {
     // Load harvests for selected date
-    const rh = await fetch(`${_SB}/rest/v1/harvests?harvest_date=eq.${date}&select=vendo_name,tg_name,net_collectible,route_code,collector,harvest_window_start&limit=500`, {
+    const rh = await fetch(`${_SB}/rest/v1/harvests?harvest_date=eq.${date}&select=id,vendo_name,tg_name,net_collectible,route_code,collector,harvest_window_start,admin_notes&limit=500`, {
       headers: { 'apikey': _KEY, 'Authorization': 'Bearer ' + _KEY }
     });
     const harvests = await rh.json();
@@ -3091,24 +3099,36 @@ async function hvLoadRecon() {
       const diff    = coinNet - tgTotal;
       const diffCls = Math.abs(diff)<100 ? 'color:#16a34a' : diff>0 ? 'color:#d97706' : 'color:#dc2626';
       const diffTxt = Math.abs(diff)<100 ? '✅ Match' : diff>0 ? '⚠ Coins +₱'+Math.abs(diff).toLocaleString() : '🔴 TG +₱'+Math.abs(diff).toLocaleString();
+      const collector = items[0]?.collector || '—';
 
       const rows = items.map(h => {
         const tgAmt = tgMap[h.tg_name] || tgMapLower[(h.tg_name||'').toLowerCase().trim()] || 0;
         const gap   = (parseFloat(h.net_collectible)||0) - tgAmt;
         const rowCls = Math.abs(gap)<50 ? '' : gap>0 ? 'background:#fffbeb' : 'background:#fef2f2';
+        const noteHtml = h.admin_notes
+          ? `<div style="font-size:10px;color:#92400e;background:#fffbeb;border-radius:4px;padding:3px 6px;margin-top:3px;">📝 ${h.admin_notes}</div>`
+          : '';
         return `<tr style="${rowCls}">
-          <td style="padding:5px 8px;font-size:11px;">${h.vendo_name||h.tg_name||'—'}</td>
-          <td style="padding:5px 8px;font-size:11px;font-weight:700;color:#16a34a;">₱${parseFloat(h.net_collectible||0).toLocaleString('en-PH',{minimumFractionDigits:2})}</td>
-          <td style="padding:5px 8px;font-size:11px;color:${tgAmt>0?'#374151':'#9ca3af'};">₱${tgAmt.toLocaleString('en-PH',{minimumFractionDigits:2})}</td>
-          <td style="padding:5px 8px;font-size:11px;font-weight:700;${Math.abs(gap)<50?'color:#16a34a':gap>0?'color:#d97706':'color:#dc2626'};">${Math.abs(gap)<50?'✅':'₱'+Math.abs(gap).toLocaleString()+(gap>0?' surplus':' deficit')}</td>
+          <td style="padding:6px 8px;font-size:11px;">
+            <div style="font-weight:600;">${h.vendo_name||h.tg_name||'—'}</div>
+            <div style="font-size:9px;color:#6b7280;">Collector: ${h.collector||'—'}</div>
+            ${noteHtml}
+            <div style="margin-top:4px;">
+              <button onclick="hvRecNote(${h.id},${JSON.stringify(h.admin_notes||'')})" style="font-size:9px;padding:2px 7px;border-radius:4px;border:1px solid #d1d5db;background:#f9fafb;cursor:pointer;color:#374151;">📝 ${h.admin_notes ? 'Edit note' : 'Add note'}</button>
+            </div>
+          </td>
+          <td style="padding:6px 8px;font-size:11px;font-weight:700;color:#16a34a;">₱${parseFloat(h.net_collectible||0).toLocaleString('en-PH',{minimumFractionDigits:2})}</td>
+          <td style="padding:6px 8px;font-size:11px;color:${tgAmt>0?'#374151':'#9ca3af'};">₱${tgAmt.toLocaleString('en-PH',{minimumFractionDigits:2})}</td>
+          <td style="padding:6px 8px;font-size:11px;font-weight:700;${Math.abs(gap)<50?'color:#16a34a':gap>0?'color:#d97706':'color:#dc2626'};">${Math.abs(gap)<50?'✅':'₱'+Math.abs(gap).toLocaleString()+(gap>0?' surplus':' deficit')}</td>
         </tr>`;
       }).join('');
 
       return `<div style="background:#fff;border:1.5px solid #e5e7eb;border-radius:10px;padding:12px 14px;margin-bottom:10px;">
-        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px;">
           <span style="font-size:13px;font-weight:700;color:#1e3cb8;">Route: ${rc}</span>
           <span style="font-size:11px;font-weight:700;${diffCls};">${diffTxt}</span>
         </div>
+        <div style="font-size:10px;color:#6b7280;margin-bottom:8px;">👤 Collector: <b style="color:#374151;">${collector}</b></div>
         <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px;margin-bottom:8px;">
           <div style="background:#f0fdf4;border-radius:6px;padding:7px;text-align:center;">
             <div style="font-size:14px;font-weight:700;color:#16a34a;">₱${coinNet.toLocaleString('en-PH',{minimumFractionDigits:2})}</div>
@@ -3139,6 +3159,24 @@ async function hvLoadRecon() {
   }
 }
 
+
+/* ─── RECONCILIATION NOTE ─── */
+async function hvRecNote(harvestId, existingNote) {
+  const note = prompt('Admin note for this vendo harvest:', existingNote || '');
+  if (note === null) return; // cancelled
+  try {
+    const r = await fetch(`${_SB}/rest/v1/harvests?id=eq.${harvestId}`, {
+      method: 'PATCH',
+      headers: { 'apikey': _KEY, 'Authorization': 'Bearer ' + _KEY, 'Content-Type': 'application/json', 'Prefer': 'return=minimal' },
+      body: JSON.stringify({ admin_notes: note.trim() || null })
+    });
+    if (!r.ok) throw new Error('Save failed');
+    // Reload reconciliation
+    hvLoadRecon();
+  } catch(e) {
+    alert('Error saving note: ' + e.message);
+  }
+}
 
 /* ─── HARVEST HISTORY POPUP ─── */
 async function hvShowHarvestHistory() {
@@ -4317,6 +4355,89 @@ async function openVendoDetail(vendo, area) {
   document.getElementById("vtxn-from").value="";
 
   await Promise.all([loadVendoTxns(), loadVendoMonthly(vendo), loadVendoSuspicious(vendo)]);
+}
+
+async function loadVendoHarvestRecords() {
+  const vendo = currentVendo;
+  const content = document.getElementById('vt-harvest-content');
+  if (!vendo) return;
+  content.innerHTML = '<div style="padding:20px;text-align:center;color:#9ca3af;font-size:12px;">Loading harvest records...</div>';
+
+  try {
+    const r = await fetch(`${SB_URL}/rest/v1/harvests?tg_name=eq.${encodeURIComponent(vendo)}&order=harvest_date.desc&limit=50`, {
+      headers: HDR
+    });
+    let rows = await r.json();
+
+    // Also try by vendo_name if tg_name returns nothing
+    if (!rows.length) {
+      const r2 = await fetch(`${SB_URL}/rest/v1/harvests?vendo_name=eq.${encodeURIComponent(vendo)}&order=harvest_date.desc&limit=50`, {
+        headers: HDR
+      });
+      rows = await r2.json();
+    }
+
+    if (!rows.length) {
+      content.innerHTML = `
+        <div style="text-align:center;padding:30px 10px;">
+          <div style="font-size:32px;margin-bottom:8px;">📭</div>
+          <div style="font-size:13px;font-weight:600;color:#374151;margin-bottom:4px;">No PWA harvest records yet</div>
+          <div style="font-size:11px;color:#9ca3af;">Once this vendo is harvested via the PWA, records will appear here.</div>
+        </div>`;
+      return;
+    }
+
+    const totalNet   = rows.reduce((s,h) => s+(parseFloat(h.net_collectible)||0), 0);
+    const totalSpawn = rows.reduce((s,h) => s+(parseFloat(h.spawn_share)||0), 0);
+    const totalOwner = rows.reduce((s,h) => s+(parseFloat(h.customer_share)||0), 0);
+
+    content.innerHTML = `
+      <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-bottom:14px;">
+        <div style="background:#f0fdf4;border-radius:8px;padding:10px;border-left:3px solid #16a34a;">
+          <div style="font-size:9px;color:#16a34a;text-transform:uppercase;font-weight:700;">Total net</div>
+          <div style="font-size:16px;font-weight:700;color:#15803d;">₱${totalNet.toLocaleString('en-PH',{minimumFractionDigits:2})}</div>
+        </div>
+        <div style="background:#eef2ff;border-radius:8px;padding:10px;border-left:3px solid #1e3cb8;">
+          <div style="font-size:9px;color:#1e3cb8;text-transform:uppercase;font-weight:700;">Spawn 75%</div>
+          <div style="font-size:16px;font-weight:700;color:#1e3cb8;">₱${totalSpawn.toLocaleString('en-PH',{minimumFractionDigits:2})}</div>
+        </div>
+        <div style="background:#fdf4ff;border-radius:8px;padding:10px;border-left:3px solid #7c3aed;">
+          <div style="font-size:9px;color:#7c3aed;text-transform:uppercase;font-weight:700;">Owner 25%</div>
+          <div style="font-size:16px;font-weight:700;color:#7c3aed;">₱${totalOwner.toLocaleString('en-PH',{minimumFractionDigits:2})}</div>
+        </div>
+      </div>
+      <div style="font-size:9px;font-weight:700;color:#6b7280;text-transform:uppercase;letter-spacing:.05em;margin-bottom:8px;">${rows.length} harvest record${rows.length>1?'s':''}</div>
+      ${rows.map(h => {
+        const net    = parseFloat(h.net_collectible||0);
+        const spawn  = parseFloat(h.spawn_share||0);
+        const owner  = parseFloat(h.customer_share||0);
+        const total  = parseFloat(h.coins_total||0);
+        const free   = parseFloat(h.coins_free||0);
+        const old    = parseFloat(h.coins_old||0);
+        const saloy  = parseFloat(h.coins_saloy||0);
+        const winStart = h.harvest_window_start || '—';
+        return `<div style="border:1px solid #e5e7eb;border-radius:8px;padding:10px 12px;margin-bottom:8px;">
+          <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:6px;">
+            <div>
+              <div style="font-size:13px;font-weight:700;color:#374151;">${h.harvest_date}</div>
+              <div style="font-size:10px;color:#9ca3af;">👤 ${h.collector||'—'} · Route: <b>${h.route_code||'—'}</b></div>
+              <div style="font-size:10px;color:#9ca3af;">Window: ${winStart} → ${h.harvest_date}</div>
+            </div>
+            <div style="font-size:16px;font-weight:700;color:#16a34a;">₱${net.toLocaleString('en-PH',{minimumFractionDigits:2})}</div>
+          </div>
+          <div style="display:grid;grid-template-columns:repeat(5,1fr);gap:4px;font-size:10px;">
+            <div style="background:#f9fafb;border-radius:4px;padding:4px 6px;"><div style="color:#9ca3af;">Total</div><div style="font-weight:600;">₱${total.toLocaleString()}</div></div>
+            <div style="background:#fef2f2;border-radius:4px;padding:4px 6px;"><div style="color:#dc2626;">Free</div><div style="font-weight:600;">₱${free.toLocaleString()}</div></div>
+            <div style="background:#fffbeb;border-radius:4px;padding:4px 6px;"><div style="color:#d97706;">Old</div><div style="font-weight:600;">₱${old.toLocaleString()}</div></div>
+            ${saloy ? `<div style="background:#fff7ed;border-radius:4px;padding:4px 6px;"><div style="color:#ea580c;">Saloy</div><div style="font-weight:600;">₱${saloy.toLocaleString()}</div></div>` : ''}
+            <div style="background:#f0fdf4;border-radius:4px;padding:4px 6px;"><div style="color:#16a34a;">Spawn</div><div style="font-weight:600;">₱${spawn.toLocaleString()}</div></div>
+          </div>
+          ${h.admin_notes ? `<div style="margin-top:6px;font-size:10px;color:#92400e;background:#fffbeb;border-radius:4px;padding:4px 8px;">📝 ${h.admin_notes}</div>` : ''}
+        </div>`;
+      }).join('')}`;
+  } catch(e) {
+    content.innerHTML = `<div style="padding:20px;text-align:center;color:#dc2626;font-size:12px;">Error: ${e.message}</div>`;
+  }
 }
 
 async function loadVendoTxns() {
