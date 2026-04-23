@@ -1435,7 +1435,11 @@ function hvShowTab(tab, btn) {
   } else if (tab === 'addharvest') {
     show(els.addharvest, 'block');
   } else if (tab === 'audited') {
-    show(els.audited, 'block');
+    const ael = document.getElementById('hv-tab-audited');
+    if (ael) {
+      ael.classList.remove('hv-hidden');
+      ael.style.cssText = 'display:block !important;position:fixed;top:128px;left:0;right:0;bottom:0;background:#f0f4fa;z-index:9999;padding:24px;overflow-y:auto;';
+    }
   }
   if (tab === 'records') hvLoadRecordDates();
   if (tab === 'schedule') hvLoadSchedule();
@@ -4318,7 +4322,7 @@ async function hvLoadRecords() { hvLoadRecordDates(); }
 </script>
 
 
-<div class="hv-hidden" id="hv-tab-audited" style="padding:24px;overflow-y:auto;position:fixed;top:128px;left:0;right:0;bottom:0;background:#f0f4fa;z-index:50;">
+<div class="hv-hidden" id="hv-tab-audited" style="padding:24px;overflow-y:auto;position:fixed;top:128px;left:0;right:0;bottom:0;background:#f0f4fa;z-index:9999;min-height:400px;min-width:400px;">
   <div style="font-size:15px;font-weight:800;color:#dc2626;margin-bottom:20px;">🤖 Claude Audited Vendos</div>
   <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;max-width:600px;">
     <a href="https://spawninternet.github.io/VendoMonitor/denzel_audit_report.html" target="_blank"
