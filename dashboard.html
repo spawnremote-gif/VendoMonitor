@@ -770,6 +770,7 @@ tr:hover td{background:#f8f9ff;cursor:pointer}
       <button class="hv-hvtab" id="hbtn-recon" onclick="hvShowTab('recon',this)">⚖️ Reconciliation</button>
       <button class="hv-hvtab" id="hbtn-addharvest" onclick="hvShowTab('addharvest',this)" style="background:#f0fdf4;border-color:#bbf7d0;color:#15803d;">➕ Add Harvest</button>
       <button class="hv-hvtab" id="hbtn-vnames" onclick="hvShowTab('vnames',this)">🔗 Vendo Names</button>
+      <button class="hv-hvtab" id="hbtn-audited" onclick="hvShowTab('audited',this)" style="background:#fef2f2;border-color:#fca5a5;color:#dc2626;">🤖 Claude Audited Vendos</button>
     </div>
   </div>
   <!-- Step guide — compact single line -->
@@ -1223,6 +1224,28 @@ tr:hover td{background:#f8f9ff;cursor:pointer}
       <button onclick="document.getElementById('hv-qr-pop').classList.remove('show')" style="padding:7px 10px;border:1px solid var(--bd);border-radius:5px;font-size:11px;cursor:pointer;background:#fff;font-family:inherit;">Close</button>
     </div>
   </div>
+<div class="hv-hidden" id="hv-tab-audited" style="padding:12px;overflow-y:auto;height:calc(100vh - 72px);">
+  <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;">
+    <div style="font-size:13px;font-weight:800;color:#dc2626;">🤖 Claude Audited Vendos</div>
+    <div style="font-size:11px;color:#6b7280;">Click a vendo tab to view its full audit report</div>
+  </div>
+  <!-- Vendo audit sub-tabs -->
+  <div id="audit-sub-tabs" style="display:flex;gap:6px;margin-bottom:12px;flex-wrap:wrap;">
+    <button class="audit-stab on" data-audit="denzel" onclick="auditShowVendo('denzel',this)"
+      style="padding:6px 14px;border-radius:8px;border:2px solid #dc2626;background:#dc2626;color:#fff;font-size:12px;font-weight:700;cursor:pointer;font-family:inherit;">
+      🔴 Denzel VLAN 44
+    </button>
+    <!-- Future audited vendos will be added here -->
+    <div style="padding:6px 14px;border-radius:8px;border:2px dashed #d1d5db;color:#9ca3af;font-size:12px;font-style:italic;">
+      + More audits coming...
+    </div>
+  </div>
+  <!-- Audit report frame -->
+  <div id="audit-frame-container" style="background:#fff;border-radius:12px;border:1.5px solid #e5e7eb;overflow:hidden;height:calc(100vh - 160px);">
+    <iframe id="audit-iframe" style="width:100%;height:100%;border:none;" srcdoc=""></iframe>
+  </div>
+</div>
+
 </div>
 
 <!-- ADMIN HARVEST POPUP (used from Reconciliation tab) -->
@@ -1414,12 +1437,13 @@ function hvShowTab(tab, btn) {
     rec:    document.getElementById('hv-tab-records'),
     recon:  document.getElementById('hv-tab-recon'),
     vnames: document.getElementById('hv-tab-vnames'),
-    addharvest: document.getElementById('hv-tab-addharvest')
+    addharvest: document.getElementById('hv-tab-addharvest'),
+    audited: document.getElementById('hv-tab-audited')
   };
   // Use classList to force display:none (overcomes !important in CSS)
   const hide = el => { if (!el) return; el.classList.add('hv-hidden'); el.style.display = ''; };
   const show = (el, disp) => { if (!el) return; el.style.display = ''; el.classList.remove('hv-hidden'); if (disp) el.style.display = disp; };
-  [els.page, els.area, els.filt, els.sched, els.rec, els.recon, els.vnames, els.addharvest, guide].forEach(hide);
+  [els.page, els.area, els.filt, els.sched, els.rec, els.recon, els.vnames, els.addharvest, els.audited, guide].forEach(hide);
   if (isRoute) {
     show(guide, ''); show(els.page, 'grid'); show(els.area, 'flex'); show(els.filt, 'flex');
   } else if (tab === 'schedule') {
@@ -1440,6 +1464,7 @@ function hvShowTab(tab, btn) {
   }
   if (tab === 'vnames') vnLoad();
   if (tab === 'addharvest' && (!_vnAll || !_vnAll.length)) vnLoad();
+  if (tab === 'audited') auditShowVendo('denzel', document.querySelector('.audit-stab.on'));
 }
 
 /* ─── AREA / STATUS / SEARCH FILTERS ─── */
@@ -3509,6 +3534,56 @@ async function ahSubmit() {
   } catch(e) {
     msg.innerHTML = `<span style="color:#dc2626;">❌ ${e.message}</span>`;
   }
+}
+
+/* ─── AUDITED VENDOS TAB ─── */
+const _auditReports = {};  // cache loaded reports
+
+async function auditShowVendo(key, btn) {
+  // Update active tab style
+  document.querySelectorAll('.audit-stab').forEach(b => {
+    b.style.background = '#fff';
+    b.style.color = '#dc2626';
+    b.classList.remove('on');
+  });
+  if (btn) { btn.style.background = '#dc2626'; btn.style.color = '#fff'; btn.classList.add('on'); }
+
+  const iframe = document.getElementById('audit-iframe');
+  if (!iframe) return;
+
+  // Show loading
+  iframe.srcdoc = '<div style="display:flex;align-items:center;justify-content:center;height:100vh;font-family:sans-serif;color:#6b7280;font-size:14px;">Loading audit report...</div>';
+
+  if (key === 'denzel') {
+    // Fetch the denzel report from GitHub Pages
+    if (_auditReports['denzel']) {
+      iframe.srcdoc = _auditReports['denzel'];
+      return;
+    }
+    try {
+      const r = await fetch('https://spawninternet.github.io/VendoMonitor/audits/denzel_vlan44.html');
+      if (r.ok) {
+        const html = await r.text();
+        _auditReports['denzel'] = html;
+        iframe.srcdoc = html;
+      } else {
+        iframe.srcdoc = _auditFallback('Denzel VLAN 44', 'Could not load report. Make sure denzel_vlan44.html is uploaded to GitHub Pages under /audits/ folder.');
+      }
+    } catch(e) {
+      iframe.srcdoc = _auditFallback('Denzel VLAN 44', 'Network error: ' + e.message);
+    }
+  }
+}
+
+function _auditFallback(name, msg) {
+  return `<div style="display:flex;flex-direction:column;align-items:center;justify-content:center;height:100vh;font-family:sans-serif;text-align:center;padding:40px;">
+    <div style="font-size:40px;margin-bottom:16px;">📄</div>
+    <div style="font-size:16px;font-weight:700;color:#1e3a8a;margin-bottom:8px;">${name} — Audit Report</div>
+    <div style="font-size:13px;color:#6b7280;max-width:400px;line-height:1.7;">${msg}</div>
+    <div style="margin-top:20px;padding:12px 20px;background:#f0fdf4;border-radius:8px;font-size:12px;color:#15803d;font-weight:600;">
+      Upload path: SpawnInternet/VendoMonitor → audits/denzel_vlan44.html
+    </div>
+  </div>`;
 }
 
 /* ─── ADMIN HARVEST POPUP (Reconciliation tab) ─── */
