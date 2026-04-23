@@ -3270,7 +3270,7 @@ async function hvLoadRecon() {
       const tgTotal = items.reduce((s,h) => s+(tgMap[h.tg_name] || tgMapLower[(h.tg_name||'').toLowerCase().trim()] || 0), 0);
       const diff    = coinNet - tgTotal;
       const diffCls = Math.abs(diff)<100 ? 'color:#16a34a' : diff>0 ? 'color:#d97706' : 'color:#dc2626';
-      const diffTxt = Math.abs(diff)<100 ? '✅ Match' : diff>0 ? '⚠ Coins +₱'+Math.abs(diff).toLocaleString() : '🔴 TG +₱'+Math.abs(diff).toLocaleString();
+      const diffTxt = diff===0 ? '✅ Match' : Math.abs(diff)<100 ? (diff>0?'✅ Coins +₱':'✅ TG +₱')+Math.abs(diff).toLocaleString() : diff>0 ? '⚠ Coins +₱'+Math.abs(diff).toLocaleString() : '🔴 TG +₱'+Math.abs(diff).toLocaleString();
 
       const rows = items.map(h => {
         const tgAmt = tgMap[h.tg_name] || tgMapLower[(h.tg_name||'').toLowerCase().trim()] || 0;
@@ -3291,7 +3291,7 @@ async function hvLoadRecon() {
           </td>
           <td style="padding:6px 8px;font-size:11px;font-weight:700;color:#16a34a;">₱${parseFloat(h.net_collectible||0).toLocaleString('en-PH',{minimumFractionDigits:2})}</td>
           <td style="padding:6px 8px;font-size:11px;color:${tgAmt>0?'#374151':'#9ca3af'};">₱${tgAmt.toLocaleString('en-PH',{minimumFractionDigits:2})}</td>
-          <td style="padding:6px 8px;font-size:11px;font-weight:700;${Math.abs(gap)<50?'color:#16a34a':gap>0?'color:#d97706':'color:#dc2626'};">${Math.abs(gap)<50?'✅':'₱'+Math.abs(gap).toLocaleString()+(gap>0?' surplus':' deficit')}</td>
+          <td style="padding:6px 8px;font-size:11px;font-weight:700;${Math.abs(gap)<50?'color:#16a34a':gap>0?'color:#d97706':'color:#dc2626'};">${Math.abs(gap)<50?(gap===0?'✅ Match':'✅ ₱'+Math.abs(gap).toLocaleString()):'₱'+Math.abs(gap).toLocaleString()+(gap>0?' surplus':' deficit')}</td>
         </tr>`;
       }).join('');
 
@@ -3733,7 +3733,7 @@ async function hvExportCollector(collector, date) {
   try {
     // Fetch all harvest records for this collector + date
     const r = await fetch(
-      `${_SB}/rest/v1/harvests?harvest_date=eq.${date}&collector=eq.${encodeURIComponent(collector)}&select=id,vendo_name,tg_name,sheet_name,area,vlan,route_code,harvest_date,harvest_window_start,coins_total,coins_free,coins_old,net_collectible,spawn_share,customer_share,admin_notes&order=route_code.asc,vendo_name.asc&limit=500`,
+      `${_SB}/rest/v1/harvests?harvest_date=eq.${date}&collector=eq.${encodeURIComponent(collector)}&select=id,vendo_name,tg_name,sheet_name,area,route_code,harvest_date,harvest_window_start,coins_total,coins_free,coins_old,net_collectible,spawn_share,customer_share,admin_notes&order=route_code.asc,vendo_name.asc&limit=500`,
       { headers: { 'apikey': _KEY, 'Authorization': 'Bearer ' + _KEY } }
     );
     const harvests = await r.json();
@@ -3790,7 +3790,7 @@ async function hvExportCollector(collector, date) {
 
       // Column headers
       ws_data.push([
-        'Vendo Name', 'TG Name', 'Sheet Name', 'Area', 'VLAN',
+        'Vendo Name', 'TG Name', 'Sheet Name', 'Area',
         'Total Coins', 'Free Coins', 'Old Coins',
         'Net Collectible', 'Spawn Share (75%)', 'Owner Share (25%)',
         'TG Income', 'Difference', 'Window Start', 'Harvest Date', 'Notes'
@@ -3805,7 +3805,6 @@ async function hvExportCollector(collector, date) {
           h.tg_name || '',
           h.sheet_name || '',
           h.area || '',
-          h.vlan || '',
           fmt2(h.coins_total),
           fmt2(h.coins_free),
           fmt2(h.coins_old),
@@ -3833,7 +3832,7 @@ async function hvExportCollector(collector, date) {
 
     // Column widths
     ws['!cols'] = [
-      {wch:30},{wch:30},{wch:25},{wch:12},{wch:8},
+      {wch:30},{wch:30},{wch:25},{wch:12},
       {wch:12},{wch:12},{wch:12},
       {wch:16},{wch:16},{wch:16},
       {wch:14},{wch:14},{wch:14},{wch:14},{wch:40}
