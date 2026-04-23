@@ -472,7 +472,7 @@ tr:hover td{background:#f8f9ff;cursor:pointer}
 .hv-head{background:#fff;border-bottom:1px solid var(--bd);flex-shrink:0;}
 .hv-toprow{padding:5px 12px;display:flex;align-items:center;justify-content:space-between;gap:8px;border-bottom:1px solid var(--bd);}
 .hv-title{font-size:13px;font-weight:700;color:var(--blue);}
-.hv-tabs{display:flex;gap:4px;align-items:center;overflow-x:auto;scrollbar-width:none;flex-wrap:nowrap;}
+.hv-tabs{display:flex;gap:4px;align-items:center;overflow-x:auto;scrollbar-width:none;flex-wrap:wrap;}
 .hv-tabs::-webkit-scrollbar{display:none;}
 .hv-hvtab{padding:5px 14px;border-radius:6px;border:2px solid var(--bd);background:#fff;font-size:12px;font-weight:700;color:var(--mu);cursor:pointer;font-family:inherit;transition:.12s;}
 .hv-hvtab:hover{background:var(--bg);border-color:var(--blue);color:var(--blue);}
@@ -770,7 +770,7 @@ tr:hover td{background:#f8f9ff;cursor:pointer}
       <button class="hv-hvtab" id="hbtn-recon" onclick="hvShowTab('recon',this)">⚖️ Reconciliation</button>
       <button class="hv-hvtab" id="hbtn-addharvest" onclick="hvShowTab('addharvest',this)" style="background:#f0fdf4;border-color:#bbf7d0;color:#15803d;">➕ Add Harvest</button>
       <button class="hv-hvtab" id="hbtn-vnames" onclick="hvShowTab('vnames',this)">🔗 Vendo Names</button>
-      <button class="hv-hvtab" id="hbtn-audited" onclick="hvShowTab('audited',this)" style="background:#fef2f2;border-color:#fca5a5;color:#dc2626;">🤖 Claude Audited Vendos</button>
+      <button class="hv-hvtab" id="hbtn-audited" onclick="hvShowTab('audited',this)" style="background:#fef2f2;border-color:#fca5a5;color:#dc2626;font-size:11px;">🤖 Claude Audited Vendos</button>
     </div>
   </div>
   <!-- Step guide — compact single line -->
@@ -3523,11 +3523,45 @@ async function ahSubmit() {
   const div = document.createElement('div');
   div.id = 'hv-tab-audited';
   div.style.cssText = 'display:none;position:fixed;top:128px;left:0;width:100%;height:calc(100vh - 128px);background:#f0f4fa;z-index:9999;padding:24px;overflow-y:auto;box-sizing:border-box;';
-  div.innerHTML = '<div style="font-size:15px;font-weight:800;color:#dc2626;margin-bottom:20px;">🤖 Claude Audited Vendos</div>\n  <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;max-width:600px;">\n    <a href="https://spawninternet.github.io/VendoMonitor/denzel_audit_report.html" target="_blank"\n      style="display:block;background:#fef2f2;border:2px solid #fca5a5;border-radius:12px;padding:20px;text-decoration:none;cursor:pointer;">\n      <div style="font-size:24px;margin-bottom:8px;">🔴</div>\n      <div style="font-size:14px;font-weight:800;color:#dc2626;margin-bottom:4px;">Denzel VLAN 44</div>\n      <div style="font-size:11px;color:#6b7280;">Dicayas, Dipolog · ₱2,692 gap</div>\n      <div style="margin-top:12px;font-size:11px;color:#dc2626;font-weight:700;">Open Report →</div>\n    </a>\n    <a href="https://spawninternet.github.io/VendoMonitor/island_audit_report.html" target="_blank"\n      style="display:block;background:#fff5f5;border:2px solid #fca5a5;border-radius:12px;padding:20px;text-decoration:none;cursor:pointer;">\n      <div style="font-size:24px;margin-bottom:8px;">🏝️</div>\n      <div style="font-size:14px;font-weight:800;color:#7f1d1d;margin-bottom:4px;">Island VLAN 32</div>\n      <div style="font-size:11px;color:#6b7280;">Isla Tiki, Dapitan · ₱8,697 gap</div>\n      <div style="margin-top:12px;font-size:11px;color:#7f1d1d;font-weight:700;">Open Report →</div>\n    </a>\n  </div>\n  <div style="margin-top:16px;padding:12px 16px;background:#f8faff;border-radius:8px;border:1px solid #e5e7eb;font-size:11px;color:#6b7280;max-width:600px;">\n    💡 Click a card to open the full audit report in a new tab.\n  </div>';
+  div.innerHTML = `
+    <div style="display:flex;align-items:center;gap:8px;margin-bottom:12px;">
+      <span style="font-size:13px;font-weight:800;color:#dc2626;">🤖 Claude Audited Vendos</span>
+      <button onclick="auditLoad('denzel')" id="abtn-denzel"
+        style="padding:5px 14px;border-radius:8px;border:2px solid #dc2626;background:#dc2626;color:#fff;font-size:11px;font-weight:700;cursor:pointer;font-family:inherit;">
+        🔴 Denzel VLAN 44
+      </button>
+      <button onclick="auditLoad('island')" id="abtn-island"
+        style="padding:5px 14px;border-radius:8px;border:2px solid #7f1d1d;background:#fff;color:#7f1d1d;font-size:11px;font-weight:700;cursor:pointer;font-family:inherit;">
+        🏝️ Island VLAN 32
+      </button>
+    </div>
+    <iframe id="audit-report-frame" src="" style="width:100%;height:calc(100vh - 180px);border:none;border-radius:12px;background:#fff;"></iframe>
+  `;
+  auditLoad('denzel');
   document.body.appendChild(div);
 })();
 
 function auditShowVendo(key,btn){}
+function auditLoad(key) {
+  const urls = {
+    denzel: 'https://spawninternet.github.io/VendoMonitor/denzel_audit_report.html',
+    island: 'https://spawninternet.github.io/VendoMonitor/island_audit_report.html'
+  };
+  const frame = document.getElementById('audit-report-frame');
+  if (frame) frame.src = urls[key] || '';
+  // Update button styles
+  ['denzel','island'].forEach(k => {
+    const b = document.getElementById('abtn-' + k);
+    if (!b) return;
+    if (k === key) {
+      b.style.background = k === 'island' ? '#7f1d1d' : '#dc2626';
+      b.style.color = '#fff';
+    } else {
+      b.style.background = '#fff';
+      b.style.color = k === 'island' ? '#7f1d1d' : '#dc2626';
+    }
+  });
+}
 
 /* ─── ADMIN HARVEST POPUP (Reconciliation tab) ─── */
 // Delegation for audit-stab clicks
