@@ -1235,6 +1235,10 @@ tr:hover td{background:#f8f9ff;cursor:pointer}
       style="padding:6px 14px;border-radius:8px;border:2px solid #dc2626;background:#dc2626;color:#fff;font-size:12px;font-weight:700;cursor:pointer;font-family:inherit;">
       🔴 Denzel VLAN 44
     </button>
+    <button class="audit-stab" data-audit="island" onclick="auditShowVendo('island',this)"
+      style="padding:6px 14px;border-radius:8px;border:2px solid #7f1d1d;background:#fff;color:#7f1d1d;font-size:12px;font-weight:700;cursor:pointer;font-family:inherit;">
+      🏝️ Island VLAN 32
+    </button>
     <!-- Future audited vendos will be added here -->
     <div style="padding:6px 14px;border-radius:8px;border:2px dashed #d1d5db;color:#9ca3af;font-size:12px;font-style:italic;">
       + More audits coming...
@@ -1442,7 +1446,7 @@ function hvShowTab(tab, btn) {
   };
   // Use classList to force display:none (overcomes !important in CSS)
   const hide = el => { if (!el) return; el.classList.add('hv-hidden'); el.style.display = ''; };
-  const show = (el, disp) => { if (!el) return; el.style.display = ''; el.classList.remove('hv-hidden'); if (disp) el.style.display = disp; };
+  const show = (el, disp) => { if (!el) return; el.classList.remove('hv-hidden'); el.style.setProperty('display', disp || 'block', 'important'); };
   [els.page, els.area, els.filt, els.sched, els.rec, els.recon, els.vnames, els.addharvest, els.audited, guide].forEach(hide);
   if (isRoute) {
     show(guide, ''); show(els.page, 'grid'); show(els.area, 'flex'); show(els.filt, 'flex');
@@ -3556,7 +3560,14 @@ async function auditShowVendo(key, btn) {
   // Show loading
   iframe.srcdoc = '<div style="display:flex;align-items:center;justify-content:center;height:100vh;font-family:sans-serif;color:#6b7280;font-size:14px;">Loading audit report...</div>';
 
-  if (key === 'denzel') {
+  if (key === 'island') {
+    if (_auditReports['island']) { iframe.srcdoc = _auditReports['island']; return; }
+    try {
+      const r = await fetch('https://spawninternet.github.io/VendoMonitor/island_audit_report.html');
+      if (r.ok) { const html = await r.text(); _auditReports['island'] = html; iframe.srcdoc = html; }
+      else { iframe.srcdoc = _auditFallback('Island VLAN 32', 'Upload island_audit_report.html to GitHub Pages root.'); }
+    } catch(e) { iframe.srcdoc = _auditFallback('Island VLAN 32', 'Network error: ' + e.message); }
+  } else if (key === 'denzel') {
     // Fetch the denzel report from GitHub Pages
     if (_auditReports['denzel']) {
       iframe.srcdoc = _auditReports['denzel'];
