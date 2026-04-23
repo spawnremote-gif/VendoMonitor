@@ -3531,8 +3531,11 @@ async function ahSubmit() {
     </div>
     <iframe id="audit-report-frame" src="https://spawninternet.github.io/VendoMonitor/denzel_audit_report.html" style="width:100%;height:calc(100vh - 185px);border:1.5px solid #e5e7eb;border-radius:12px;background:#fff;display:block;"></iframe>
   `;
-  document.getElementById('abtn-denzel').addEventListener('click', () => auditLoad('denzel'));
-  document.getElementById('abtn-island').addEventListener('click', () => auditLoad('island'));
+  // Use event delegation instead of direct listeners since buttons are in innerHTML
+  div.addEventListener('click', function(e) {
+    if (e.target.id === 'abtn-denzel') auditLoad('denzel');
+    if (e.target.id === 'abtn-island') auditLoad('island');
+  });
   document.body.appendChild(div);
 })();
 
