@@ -472,7 +472,7 @@ tr:hover td{background:#f8f9ff;cursor:pointer}
 .hv-head{background:#fff;border-bottom:1px solid var(--bd);flex-shrink:0;}
 .hv-toprow{padding:5px 12px;display:flex;align-items:center;justify-content:space-between;gap:8px;border-bottom:1px solid var(--bd);}
 .hv-title{font-size:13px;font-weight:700;color:var(--blue);}
-.hv-tabs{display:flex;gap:4px;align-items:center;overflow-x:auto;scrollbar-width:none;flex-wrap:wrap;}
+.hv-tabs{display:flex;gap:4px;align-items:center;overflow-x:auto;scrollbar-width:none;flex-wrap:nowrap;min-width:0;}
 .hv-tabs::-webkit-scrollbar{display:none;}
 .hv-hvtab{padding:5px 14px;border-radius:6px;border:2px solid var(--bd);background:#fff;font-size:12px;font-weight:700;color:var(--mu);cursor:pointer;font-family:inherit;transition:.12s;}
 .hv-hvtab:hover{background:var(--bg);border-color:var(--blue);color:var(--blue);}
@@ -967,43 +967,35 @@ tr:hover td{background:#f8f9ff;cursor:pointer}
 <div class="hv-hidden" id="hv-tab-records" style="padding:12px;overflow-y:auto;height:calc(100vh - 72px);">
 <style>
 .hv-rec-empty{text-align:center;padding:40px;color:#9ca3af;font-size:12px;line-height:1.8;}
-.hrd-pop-bg{display:none;position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:400;align-items:center;justify-content:center;}
-.hrd-pop-bg.show{display:flex;}
-.hrd-pop{background:#fff;border-radius:12px;width:min(500px,96vw);max-height:88vh;overflow-y:auto;box-shadow:0 16px 48px rgba(0,0,0,.2);}
-.hrd-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;padding:12px 16px 0;}
-.hrd-box{border-radius:8px;padding:10px 12px;}
-.hrd-lbl{font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.04em;margin-bottom:3px;}
-.hrd-val{font-size:16px;font-weight:700;}
-.hrd-coins{display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px;padding:10px 16px;}
-.hrd-coin-box{border-radius:7px;padding:8px;text-align:center;}
-.hrd-coin-v{font-size:15px;font-weight:700;}
-.hrd-coin-l{font-size:9px;color:#6b7280;margin-top:2px;}
+.hrd-bg{display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:400;align-items:center;justify-content:center;}
+.hrd-bg.open{display:flex!important;}
+.hrd-pop{background:#fff;border-radius:12px;width:min(480px,95vw);max-height:88vh;overflow-y:auto;box-shadow:0 16px 48px rgba(0,0,0,.25);}
 </style>
 <div id="hv-rec-content"><div class="hv-rec-empty">Loading…</div></div>
-<div class="hrd-pop-bg" id="hrd-pop-bg" onclick="if(event.target===this)this.classList.remove('show')">
+<div class="hrd-bg" id="hrd-bg" onclick="if(event.target===this)this.classList.remove('open')">
   <div class="hrd-pop">
-    <div style="padding:14px 16px;border-radius:12px 12px 0 0;display:flex;justify-content:space-between;align-items:flex-start;background:#1e3cb8;">
-      <div><div style="font-size:15px;font-weight:700;color:#fff;" id="hrd-title">—</div><div style="font-size:10px;color:rgba(255,255,255,.7);margin-top:3px;" id="hrd-sub">—</div></div>
-      <button onclick="document.getElementById('hrd-pop-bg').classList.remove('show')" style="width:28px;height:28px;border-radius:50%;border:1.5px solid rgba(255,255,255,.4);background:rgba(255,255,255,.15);color:#fff;font-size:16px;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;">×</button>
+    <div id="hrd-header" style="padding:14px 16px;background:#1e3cb8;border-radius:12px 12px 0 0;display:flex;justify-content:space-between;align-items:flex-start;">
+      <div><div style="font-size:15px;font-weight:700;color:#fff" id="hrd-t">—</div><div style="font-size:10px;color:rgba(255,255,255,.7);margin-top:3px" id="hrd-s">—</div></div>
+      <button onclick="document.getElementById('hrd-bg').classList.remove('open')" style="width:28px;height:28px;border-radius:50%;border:1.5px solid rgba(255,255,255,.4);background:rgba(255,255,255,.15);color:#fff;font-size:16px;cursor:pointer;flex-shrink:0;line-height:1;">×</button>
     </div>
-    <div class="hrd-grid">
-      <div class="hrd-box" style="background:#f0fdf4;border-left:3px solid #16a34a;"><div class="hrd-lbl" style="color:#16a34a;">Net Collectible</div><div class="hrd-val" style="color:#15803d;" id="hrd-net">—</div></div>
-      <div class="hrd-box" style="background:#eef2ff;border-left:3px solid #1e3cb8;"><div class="hrd-lbl" style="color:#1e3cb8;">Spawn 75%</div><div class="hrd-val" style="color:#1e3cb8;" id="hrd-spawn">—</div></div>
-      <div class="hrd-box" style="background:#f5f3ff;border-left:3px solid #7c3aed;"><div class="hrd-lbl" style="color:#7c3aed;">Owner 25%</div><div class="hrd-val" style="color:#7c3aed;" id="hrd-owner">—</div></div>
-      <div class="hrd-box" style="background:#fafbff;border-left:3px solid #6366f1;"><div class="hrd-lbl" style="color:#6366f1;">Route</div><div class="hrd-val" style="color:#4338ca;font-size:12px;letter-spacing:.1em;" id="hrd-route">—</div><div style="font-size:9px;color:#6b7280;margin-top:2px;" id="hrd-src-lbl">—</div></div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;padding:12px 16px 0;">
+      <div style="background:#f0fdf4;border-left:3px solid #16a34a;border-radius:8px;padding:10px 12px;"><div style="font-size:9px;font-weight:700;color:#16a34a;text-transform:uppercase;margin-bottom:3px;">Net Collectible</div><div style="font-size:16px;font-weight:700;color:#15803d" id="hrd-net">—</div></div>
+      <div style="background:#eef2ff;border-left:3px solid #1e3cb8;border-radius:8px;padding:10px 12px;"><div style="font-size:9px;font-weight:700;color:#1e3cb8;text-transform:uppercase;margin-bottom:3px;">Spawn 75%</div><div style="font-size:16px;font-weight:700;color:#1e3cb8" id="hrd-spawn">—</div></div>
+      <div style="background:#f5f3ff;border-left:3px solid #7c3aed;border-radius:8px;padding:10px 12px;"><div style="font-size:9px;font-weight:700;color:#7c3aed;text-transform:uppercase;margin-bottom:3px;">Owner 25%</div><div style="font-size:16px;font-weight:700;color:#7c3aed" id="hrd-owner">—</div></div>
+      <div style="background:#fafbff;border-left:3px solid #6366f1;border-radius:8px;padding:10px 12px;"><div style="font-size:9px;font-weight:700;color:#6366f1;text-transform:uppercase;margin-bottom:3px;">Route</div><div style="font-size:13px;font-weight:700;color:#4338ca;letter-spacing:.08em" id="hrd-rc">—</div><div style="font-size:9px;color:#6b7280;margin-top:2px" id="hrd-src">—</div></div>
     </div>
-    <div class="hrd-coins">
-      <div class="hrd-coin-box" style="background:#f3f4f6;"><div class="hrd-coin-v" style="color:#374151;" id="hrd-total">—</div><div class="hrd-coin-l">Total coins</div></div>
-      <div class="hrd-coin-box" style="background:#fef2f2;"><div class="hrd-coin-v" style="color:#dc2626;" id="hrd-free">—</div><div class="hrd-coin-l">Free time</div></div>
-      <div class="hrd-coin-box" style="background:#fffbeb;"><div class="hrd-coin-v" style="color:#d97706;" id="hrd-old">—</div><div class="hrd-coin-l">Old coins</div></div>
+    <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px;padding:10px 16px;">
+      <div style="background:#f3f4f6;border-radius:7px;padding:8px;text-align:center;"><div style="font-size:15px;font-weight:700;color:#374151" id="hrd-tot">—</div><div style="font-size:9px;color:#6b7280;margin-top:2px;">Total coins</div></div>
+      <div style="background:#fef2f2;border-radius:7px;padding:8px;text-align:center;"><div style="font-size:15px;font-weight:700;color:#dc2626" id="hrd-fr">—</div><div style="font-size:9px;color:#6b7280;margin-top:2px;">Free time</div></div>
+      <div style="background:#fffbeb;border-radius:7px;padding:8px;text-align:center;"><div style="font-size:15px;font-weight:700;color:#d97706" id="hrd-ol">—</div><div style="font-size:9px;color:#6b7280;margin-top:2px;">Old coins</div></div>
     </div>
     <div style="padding:0 16px 10px;"><div style="background:#f8faff;border:1px solid #e5e7eb;border-radius:8px;padding:10px 12px;font-size:11px;">
-      <div style="display:flex;justify-content:space-between;padding:3px 0;border-bottom:1px solid #f0f0f0;"><span style="color:#6b7280;">Collector</span><span style="font-weight:600;" id="hrd-collector">—</span></div>
-      <div style="display:flex;justify-content:space-between;padding:3px 0;border-bottom:1px solid #f0f0f0;"><span style="color:#6b7280;">Harvest date</span><span style="font-weight:600;" id="hrd-date">—</span></div>
-      <div style="display:flex;justify-content:space-between;padding:3px 0;border-bottom:1px solid #f0f0f0;"><span style="color:#6b7280;">Window start</span><span style="font-weight:600;" id="hrd-window">—</span></div>
-      <div style="display:flex;justify-content:space-between;padding:3px 0;" id="hrd-note-row"><span style="color:#92400e;">📝 Note</span><span style="font-size:10px;color:#92400e;" id="hrd-note-txt"></span></div>
+      <div style="display:flex;justify-content:space-between;padding:3px 0;border-bottom:1px solid #f0f0f0;"><span style="color:#6b7280;">Collector</span><b id="hrd-col">—</b></div>
+      <div style="display:flex;justify-content:space-between;padding:3px 0;border-bottom:1px solid #f0f0f0;"><span style="color:#6b7280;">Harvest date</span><b id="hrd-dt">—</b></div>
+      <div style="display:flex;justify-content:space-between;padding:3px 0;border-bottom:1px solid #f0f0f0;"><span style="color:#6b7280;">Window start</span><b id="hrd-win">—</b></div>
+      <div id="hrd-nr" style="display:none;justify-content:space-between;padding:3px 0;"><span style="color:#92400e;">📝 Note</span><span style="font-size:10px;color:#92400e;" id="hrd-nt"></span></div>
     </div></div>
-    <div style="padding:0 16px 14px;"><button onclick="document.getElementById('hrd-pop-bg').classList.remove('show')" style="width:100%;padding:9px;background:#f1f5f9;color:#374151;border:none;border-radius:7px;font-size:12px;font-weight:600;cursor:pointer;font-family:inherit;">Close</button></div>
+    <div style="padding:0 16px 14px;"><button onclick="document.getElementById('hrd-bg').classList.remove('open')" style="width:100%;padding:9px;background:#f1f5f9;color:#374151;border:none;border-radius:7px;font-size:12px;font-weight:600;cursor:pointer;font-family:inherit;">Close</button></div>
   </div>
 </div>
 </div>
@@ -1462,23 +1454,28 @@ tr:hover td{background:#f8f9ff;cursor:pointer}
 <!-- RECONCILIATION TAB -->
 <div class="hv-hidden" id="hv-tab-recon" style="padding:12px;overflow-y:auto;height:calc(100vh - 72px);">
 <style>
-.rc-dtab{padding:5px 12px;border-radius:20px;border:1.5px solid #e5e7eb;background:#fff;color:#374151;font-size:11px;font-weight:700;cursor:pointer;font-family:inherit;white-space:nowrap;transition:.12s;}
+.rc-dtab{padding:5px 14px;border-radius:20px;border:1.5px solid #e5e7eb;background:#fff;color:#374151;font-size:11px;font-weight:700;cursor:pointer;font-family:inherit;white-space:nowrap;transition:.15s;}
 .rc-dtab.on{background:#1e3cb8;border-color:#1e3cb8;color:#fff;}
 .rc-dtab:hover:not(.on){border-color:#1e3cb8;color:#1e3cb8;}
-.rc-box{border-radius:7px;padding:8px;text-align:center;}
-.rc-box .rv{font-size:14px;font-weight:700;}
-.rc-box .rl{font-size:9px;color:#6b7280;margin-top:2px;}
+.rc-stat{border-radius:8px;padding:10px 12px;text-align:center;}
+.rc-stat .rv{font-size:15px;font-weight:700;}
+.rc-stat .rl{font-size:9px;color:#6b7280;margin-top:3px;}
 </style>
-<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;flex-wrap:wrap;gap:8px;">
+<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;gap:8px;">
   <div>
-    <div style="font-size:13px;font-weight:700;color:#1e3cb8;">⚖️ Harvest Reconciliation</div>
-    <div style="font-size:10px;color:#6b7280;">Coin net vs Telegram income · skipped excluded</div>
+    <div style="font-size:14px;font-weight:700;color:#1e3cb8;">⚖️ Harvest Reconciliation</div>
+    <div style="font-size:10px;color:#6b7280;margin-top:2px;">Coin net vs Telegram income per harvest date · skipped excluded</div>
   </div>
-  <button onclick="rcLoad()" style="padding:5px 14px;background:#1e3cb8;color:#fff;border:none;border-radius:7px;font-size:11px;font-weight:700;cursor:pointer;font-family:inherit;">⟳ Refresh</button>
+  <button id="rc-refresh-btn" onclick="rcLoad()" style="padding:6px 16px;background:#1e3cb8;color:#fff;border:none;border-radius:8px;font-size:11px;font-weight:700;cursor:pointer;font-family:inherit;white-space:nowrap;">⟳ Refresh</button>
 </div>
-<div id="rc-date-tabs" style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:12px;"></div>
-<input type="hidden" id="hv-recon-date">
-<div id="rc-content"><div class="hv-rec-empty">Click ⚖️ Reconcile to load</div></div>
+<div id="rc-date-tabs" style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:14px;min-height:28px;"></div>
+<div id="rc-content">
+  <div style="text-align:center;padding:60px 20px;color:#9ca3af;">
+    <div style="font-size:32px;margin-bottom:12px;">⚖️</div>
+    <div style="font-size:13px;font-weight:600;">Click ⟳ Refresh to load reconciliation data</div>
+    <div style="font-size:11px;margin-top:6px;">Compares your collector coin reports vs Telegram system income</div>
+  </div>
+</div>
 </div>
 
 
@@ -3048,224 +3045,251 @@ function hvSchedRowClick(vid) {
 }
 
 /* ─── RECORDS TAB ─── */
-const _HREC_COLORS=[
-  {bd:'#c7d2fe',bg:'#eef2ff',hdr:'#1e3cb8'},{bd:'#bbf7d0',bg:'#f0fdf4',hdr:'#15803d'},
-  {bd:'#fde68a',bg:'#fffbeb',hdr:'#92400e'},{bd:'#ddd6fe',bg:'#f5f3ff',hdr:'#5b21b6'},
-  {bd:'#fed7aa',bg:'#fff7ed',hdr:'#c2410c'},{bd:'#bfdbfe',bg:'#eff6ff',hdr:'#1d4ed8'},
+const _HCOLS=[
+  {bd:'#c7d2fe',bg:'#eef2ff',hd:'#1e3cb8'},{bd:'#bbf7d0',bg:'#f0fdf4',hd:'#15803d'},
+  {bd:'#fde68a',bg:'#fffbeb',hd:'#92400e'},{bd:'#ddd6fe',bg:'#f5f3ff',hd:'#5b21b6'},
+  {bd:'#fed7aa',bg:'#fff7ed',hd:'#c2410c'},{bd:'#bfdbfe',bg:'#eff6ff',hd:'#1d4ed8'},
 ];
-let _hrecAll=[],_hrecLoaded=false;
+let _hrAll=[],_hrLoaded=false;
+const _fP=v=>'₱'+Number(v||0).toLocaleString('en-PH',{minimumFractionDigits:2});
+
 async function hvLoadRecordDates(){
-  const el=document.getElementById('hv-rec-content');
-  if(!el)return;
-  if(_hrecLoaded){_hvRenderRec();return;}
-  el.innerHTML='<div class="hv-rec-empty">Loading harvest records…</div>';
+  const el=document.getElementById('hv-rec-content');if(!el)return;
+  if(_hrLoaded){_hrRender();return;}
+  el.innerHTML='<div class="hv-rec-empty">Loading…</div>';
   try{
     const r=await fetch(`${_SB}/rest/v1/harvests?select=*&order=harvest_date.desc,created_at.desc&limit=1000`,
       {headers:{'apikey':_KEY,'Authorization':'Bearer '+_KEY}});
-    _hrecAll=await r.json();_hrecLoaded=true;_hvRenderRec();
-  }catch(err){el.innerHTML=`<div class="hv-rec-empty" style="color:#dc2626;">Error: ${err.message}</div>`;}
+    _hrAll=await r.json();_hrLoaded=true;_hrRender();
+  }catch(e){el.innerHTML=`<div class="hv-rec-empty" style="color:#dc2626">Error: ${e.message}</div>`;}
 }
-function _hvRenderRec(){
-  const el=document.getElementById('hv-rec-content');
-  if(!el)return;
-  if(!_hrecAll.length){el.innerHTML='<div class="hv-rec-empty">No harvest records yet</div>';return;}
-  const fP=v=>'₱'+Number(v||0).toLocaleString('en-PH',{minimumFractionDigits:2});
+
+function _hrRender(){
+  const el=document.getElementById('hv-rec-content');if(!el)return;
+  if(!_hrAll.length){el.innerHTML='<div class="hv-rec-empty">No harvest records yet</div>';return;}
   const fD=d=>{try{return new Date(d+'T12:00:00').toLocaleDateString('en-PH',{weekday:'short',month:'long',day:'numeric',year:'numeric'});}catch{return d;}};
-  const byDate={};
-  _hrecAll.forEach(h=>{const d=h.harvest_date||'—';if(!byDate[d])byDate[d]=[];byDate[d].push(h);});
-  const dates=Object.keys(byDate).sort((a,b)=>b.localeCompare(a));
+  const byD={};_hrAll.forEach(h=>{const d=h.harvest_date||'—';if(!byD[d])byD[d]=[];byD[d].push(h);});
+  const dates=Object.keys(byD).sort((a,b)=>b.localeCompare(a));
   const frag=document.createDocumentFragment();
   dates.forEach((date,di)=>{
-    const rows=byDate[date],c=_HREC_COLORS[di%_HREC_COLORS.length];
-    const totalNet=rows.reduce((s,h)=>s+(parseFloat(h.net_collectible)||0),0);
-    const totalSpawn=rows.reduce((s,h)=>s+(parseFloat(h.spawn_share)||0),0);
+    const rows=byD[date],c=_HCOLS[di%_HCOLS.length];
+    const tNet=rows.reduce((s,h)=>s+(parseFloat(h.net_collectible)||0),0);
+    const tSpawn=rows.reduce((s,h)=>s+(parseFloat(h.spawn_share)||0),0);
     const cols=[...new Set(rows.map(h=>h.collector).filter(Boolean))].join(', ');
-    const block=document.createElement('div');
-    block.style.cssText=`border-radius:10px;margin-bottom:14px;overflow:hidden;border:1.5px solid ${c.bd};`;
+    const blk=document.createElement('div');
+    blk.style.cssText=`border-radius:10px;margin-bottom:14px;overflow:hidden;border:1.5px solid ${c.bd};`;
     const hdr=document.createElement('div');
-    hdr.style.cssText=`padding:10px 14px;background:${c.bg};display:flex;align-items:center;justify-content:space-between;cursor:pointer;`;
-    hdr.innerHTML=`<div><div style="font-size:14px;font-weight:800;color:${c.hdr};">📅 ${fD(date)}</div><div style="font-size:10px;color:#6b7280;margin-top:2px;">${rows.length} record${rows.length!==1?'s':''} · ${cols||'—'}</div></div>
-    <div style="display:flex;align-items:center;gap:12px;"><div style="text-align:right;"><div style="font-size:14px;font-weight:700;color:#16a34a;">${fP(totalNet)} net</div><div style="font-size:10px;color:#6b7280;">Spawn ${fP(totalSpawn)}</div></div><span class="hrc-ch" style="font-size:16px;color:${c.hdr};transition:.2s;">▾</span></div>`;
+    hdr.style.cssText=`padding:10px 14px;background:${c.bg};display:flex;align-items:center;justify-content:space-between;cursor:pointer;user-select:none;`;
+    hdr.innerHTML=`<div><div style="font-size:14px;font-weight:800;color:${c.hd}">📅 ${fD(date)}</div><div style="font-size:10px;color:#6b7280;margin-top:2px">${rows.length} record${rows.length!==1?'s':''} · ${cols||'—'}</div></div>
+      <div style="display:flex;align-items:center;gap:12px"><div style="text-align:right"><div style="font-size:14px;font-weight:700;color:#16a34a">${_fP(tNet)}</div><div style="font-size:10px;color:#6b7280">Spawn ${_fP(tSpawn)}</div></div><span class="hrc-ch" style="font-size:18px;color:${c.hd};transition:.2s">▾</span></div>`;
     hdr.addEventListener('click',function(){
-      const body=this.nextElementSibling,ch=this.querySelector('.hrc-ch'),isOpen=body.style.display!=='none';
-      body.style.display=isOpen?'none':'';if(ch)ch.style.transform=isOpen?'rotate(-90deg)':'';
+      const b=this.nextElementSibling,ch=this.querySelector('.hrc-ch'),open=b.style.display!=='none';
+      b.style.display=open?'none':'';if(ch)ch.style.transform=open?'rotate(-90deg)':'';
     });
-    block.appendChild(hdr);
+    blk.appendChild(hdr);
     const body=document.createElement('div');
-    body.style.cssText='background:#fff;padding:6px 14px 10px;';
-    body.innerHTML=`<div style="display:grid;grid-template-columns:1fr 90px 90px 75px 50px;gap:8px;padding:4px 10px 7px;border-bottom:2px solid #e5e7eb;margin-bottom:4px;">
-      <span style="font-size:9px;font-weight:700;color:#6b7280;text-transform:uppercase;">Vendo</span>
-      <span style="font-size:9px;font-weight:700;color:#6b7280;text-transform:uppercase;">Net</span>
-      <span style="font-size:9px;font-weight:700;color:#6b7280;text-transform:uppercase;">Spawn</span>
-      <span style="font-size:9px;font-weight:700;color:#6b7280;text-transform:uppercase;">Collector</span>
-      <span style="font-size:9px;font-weight:700;color:#6b7280;text-transform:uppercase;">Src</span>
+    body.style.cssText='background:#fff;padding:4px 12px 10px;';
+    body.innerHTML=`<div style="display:grid;grid-template-columns:1fr 85px 85px 70px 44px;gap:6px;padding:5px 8px 7px;border-bottom:2px solid #e5e7eb;margin-bottom:4px;">
+      <span style="font-size:9px;font-weight:700;color:#6b7280;text-transform:uppercase">Vendo</span>
+      <span style="font-size:9px;font-weight:700;color:#6b7280;text-transform:uppercase">Net</span>
+      <span style="font-size:9px;font-weight:700;color:#6b7280;text-transform:uppercase">Spawn 75%</span>
+      <span style="font-size:9px;font-weight:700;color:#6b7280;text-transform:uppercase">Collector</span>
+      <span style="font-size:9px;font-weight:700;color:#6b7280;text-transform:uppercase">Src</span>
     </div>`;
     rows.forEach(h=>{
       const net=parseFloat(h.net_collectible||0),spawn=parseFloat(h.spawn_share||0);
       const rc=(h.route_code||'').toUpperCase(),isAdm=!rc||rc==='ADMIN'||rc==='MANUAL';
-      const src=isAdm?'<span style="font-size:8px;font-weight:700;padding:1px 5px;border-radius:4px;background:#fef3c7;color:#92400e;">🔧</span>':'<span style="font-size:8px;font-weight:700;padding:1px 5px;border-radius:4px;background:#dbeafe;color:#1d4ed8;">📱</span>';
       const row=document.createElement('div');
-      row.style.cssText='display:grid;grid-template-columns:1fr 90px 90px 75px 50px;align-items:center;gap:8px;padding:7px 10px;border-radius:7px;cursor:pointer;border-bottom:1px solid #f0f0f8;';
-      row.innerHTML=`<div><div style="font-size:12px;font-weight:700;color:#1e3cb8;">${h.vendo_name||h.tg_name||'—'}${h.admin_notes?' 📝':''}</div><div style="font-size:10px;color:#6b7280;">${h.tg_name||'—'}</div></div>
-        <div style="font-size:12px;font-weight:700;color:#16a34a;">${fP(net)}</div>
-        <div style="font-size:12px;font-weight:600;color:#1e3cb8;">${fP(spawn)}</div>
-        <div style="font-size:11px;color:#374151;">${h.collector||'—'}</div><div>${src}</div>`;
+      row.style.cssText='display:grid;grid-template-columns:1fr 85px 85px 70px 44px;align-items:center;gap:6px;padding:7px 8px;border-radius:6px;cursor:pointer;border-bottom:1px solid #f0f0f8;transition:background .1s;';
+      row.innerHTML=`
+        <div><div style="font-size:12px;font-weight:700;color:#1e3cb8">${h.vendo_name||h.tg_name||'—'}${h.admin_notes?' 📝':''}</div><div style="font-size:10px;color:#6b7280">${h.tg_name||'—'}</div></div>
+        <div style="font-size:12px;font-weight:700;color:#16a34a">${_fP(net)}</div>
+        <div style="font-size:12px;font-weight:600;color:#1e3cb8">${_fP(spawn)}</div>
+        <div style="font-size:11px;color:#374151">${h.collector||'—'}</div>
+        <div>${isAdm?'<span style="font-size:8px;font-weight:700;padding:1px 5px;border-radius:4px;background:#fef3c7;color:#92400e">🔧</span>':'<span style="font-size:8px;font-weight:700;padding:1px 5px;border-radius:4px;background:#dbeafe;color:#1d4ed8">📱</span>'}</div>`;
       row.addEventListener('mouseover',function(){this.style.background='#f0f4ff';});
       row.addEventListener('mouseout',function(){this.style.background='';});
       Object.assign(row.dataset,{
-        vendoName:h.vendo_name||'',tgName:h.tg_name||'',harvestDate:h.harvest_date||'',
-        harvestWindowStart:h.harvest_window_start||'',netCollectible:net,spawnShare:spawn,
-        customerShare:parseFloat(h.customer_share||0),coinsTotal:parseFloat(h.coins_total||0),
-        coinsFree:parseFloat(h.coins_free||0),coinsOld:parseFloat(h.coins_old||0),
-        collector:h.collector||'',routeCode:rc,adminNotes:h.admin_notes||'',isAdmin:isAdm
+        vn:h.vendo_name||'',tg:h.tg_name||'',dt:h.harvest_date||'',
+        win:h.harvest_window_start||'',net:net,spawn:spawn,
+        own:parseFloat(h.customer_share||0),tot:parseFloat(h.coins_total||0),
+        fr:parseFloat(h.coins_free||0),ol:parseFloat(h.coins_old||0),
+        col:h.collector||'',rc:rc,note:h.admin_notes||'',adm:isAdm
       });
-      row.addEventListener('click',()=>hvOpenHrecDetail(row));
+      row.addEventListener('click',()=>_hrDetail(row));
       body.appendChild(row);
     });
-    block.appendChild(body);frag.appendChild(block);
+    blk.appendChild(body);frag.appendChild(blk);
   });
   el.innerHTML='';el.appendChild(frag);
 }
-function hvOpenHrecDetail(row){
-  const d=row.dataset,fP=v=>'₱'+Number(v||0).toLocaleString('en-PH',{minimumFractionDigits:2});
-  const set=(id,val)=>{const e=document.getElementById(id);if(e)e.textContent=val;};
-  set('hrd-title',d.vendoName||d.tgName||'—');set('hrd-sub',(d.harvestDate||'—')+' · '+(d.collector||'—'));
-  set('hrd-net',fP(d.netCollectible));set('hrd-spawn',fP(d.spawnShare));set('hrd-owner',fP(d.customerShare));
-  set('hrd-total',fP(d.coinsTotal));set('hrd-free',fP(d.coinsFree));set('hrd-old',fP(d.coinsOld));
-  set('hrd-collector',d.collector||'—');set('hrd-date',d.harvestDate||'—');
-  set('hrd-window',d.harvestWindowStart||'2026-03-01');
-  set('hrd-route',(d.routeCode||'').toUpperCase()||'—');
-  set('hrd-src-lbl',d.isAdmin==='true'?'🔧 Admin entry':'📱 PWA harvest');
-  const nr=document.getElementById('hrd-note-row'),nt=document.getElementById('hrd-note-txt');
-  if(nr&&nt){nr.style.display=d.adminNotes?'flex':'none';nt.textContent=d.adminNotes||'';}
-  document.getElementById('hrd-pop-bg').classList.add('show');
+
+function _hrDetail(row){
+  const d=row.dataset;
+  const set=(id,v)=>{const e=document.getElementById(id);if(e)e.textContent=v;};
+  set('hrd-t',d.vn||d.tg||'—');
+  set('hrd-s',(d.dt||'—')+' · '+(d.col||'—'));
+  set('hrd-net',_fP(d.net));set('hrd-spawn',_fP(d.spawn));set('hrd-owner',_fP(d.own));
+  set('hrd-tot',_fP(d.tot));set('hrd-fr',_fP(d.fr));set('hrd-ol',_fP(d.ol));
+  set('hrd-col',d.col||'—');set('hrd-dt',d.dt||'—');set('hrd-win',d.win||'2026-03-01');
+  set('hrd-rc',(d.rc||'').toUpperCase()||'—');
+  set('hrd-src',d.adm==='true'?'🔧 Admin entry':'📱 PWA harvest');
+  const nr=document.getElementById('hrd-nr'),nt=document.getElementById('hrd-nt');
+  if(nr&&nt){nr.style.display=d.note?'flex':'none';nt.textContent=d.note||'';}
+  document.getElementById('hrd-bg').classList.add('open');
 }
+
 async function hvLoadRecordsByDate(){}
 async function hvLoadRecords(){hvLoadRecordDates();}
 
-/* ─── RECONCILIATION ─── */
-let _rcH=[],_rcTG={},_rcWin={},_rcReady=false;
+/* ─── RECONCILIATION TAB ─── */
+let _rcH=[],_rcTG={},_rcWin={},_rcDone=false;
 const _RC_DEF='2026-03-01';
+
 async function rcLoad(){
-  _rcReady=false;
+  _rcDone=false;
   const ct=document.getElementById('rc-content'),tb=document.getElementById('rc-date-tabs');
-  if(ct)ct.innerHTML='<div class="hv-rec-empty">Loading harvest records…</div>';
+  const btn=document.getElementById('rc-refresh-btn');
+  if(btn){btn.textContent='Loading…';btn.disabled=true;}
+  if(ct)ct.innerHTML='<div class="hv-rec-empty" style="padding:30px">⏳ Loading harvest records…</div>';
   if(tb)tb.innerHTML='';
   try{
     const r=await fetch(`${_SB}/rest/v1/harvests?select=*&order=harvest_date.desc,created_at.desc&limit=1000`,
       {headers:{'apikey':_KEY,'Authorization':'Bearer '+_KEY}});
     _rcH=await r.json();
-    if(!_rcH.length){if(ct)ct.innerHTML='<div class="hv-rec-empty">No harvest records yet</div>';return;}
-    _rcWin={};_rcH.forEach(h=>{if(h.tg_name&&h.harvest_window_start)_rcWin[h.tg_name]=h.harvest_window_start;});
-    const dates=[...new Set(_rcH.map(h=>h.harvest_date))].sort((a,b)=>b.localeCompare(a));
-    if(tb)tb.innerHTML=dates.map((d,i)=>{
-      const lbl=new Date(d+'T12:00:00').toLocaleDateString('en-PH',{month:'short',day:'numeric',year:'numeric'});
-      return `<button class="rc-dtab${i===0?' on':''}" data-date="${d}" onclick="rcSelDate('${d}',this)">${lbl}</button>`;
-    }).join('');
-    const tgNames=[...new Set(_rcH.map(h=>h.tg_name).filter(Boolean))];
-    if(ct)ct.innerHTML=`<div class="hv-rec-empty">Fetching TG income for ${tgNames.length} vendos…</div>`;
+    if(!Array.isArray(_rcH)||!_rcH.length){
+      if(ct)ct.innerHTML='<div class="hv-rec-empty">No harvest records yet.<br>Complete a harvest via the PWA or Add Harvest tab.</div>';
+      if(btn){btn.textContent='⟳ Refresh';btn.disabled=false;}
+      return;
+    }
+    _rcWin={};
+    _rcH.forEach(h=>{if(h.tg_name&&h.harvest_window_start)_rcWin[h.tg_name]=h.harvest_window_start;});
+    const dates=[...new Set(_rcH.map(h=>h.harvest_date).filter(Boolean))].sort((a,b)=>b.localeCompare(a));
+    if(tb){
+      tb.innerHTML=dates.map((d,i)=>{
+        const lbl=new Date(d+'T12:00:00').toLocaleDateString('en-PH',{month:'short',day:'numeric',year:'numeric'});
+        return `<button class="rc-dtab${i===0?' on':''}" onclick="rcSelDate('${d}',this)">${lbl}</button>`;
+      }).join('');
+    }
+    const tgs=[...new Set(_rcH.map(h=>h.tg_name).filter(Boolean))];
+    if(ct)ct.innerHTML=`<div class="hv-rec-empty" style="padding:20px">⏳ Fetching TG income for ${tgs.length} vendos…</div>`;
     _rcTG={};
-    await Promise.all(tgNames.map(async tg=>{
+    // Fetch TG income in parallel, with skipped excluded
+    await Promise.all(tgs.map(async tg=>{
       const win=_rcWin[tg]||_RC_DEF;
-      const latest=_rcH.filter(h=>h.tg_name===tg).map(h=>h.harvest_date).sort().pop();
+      const latest=_rcH.filter(h=>h.tg_name===tg).map(h=>h.harvest_date).filter(Boolean).sort().pop();
       if(!latest)return;
       try{
-        const rt=await fetch(`${_SB}/rest/v1/transactions?vendo=eq.${encodeURIComponent(tg)}&date=gte.${win}&date=lte.${latest}&is_skipped=eq.false&select=amount,date`,
-          {headers:{'apikey':_KEY,'Authorization':'Bearer '+_KEY,'Range':'0-49999','Prefer':'count=none'}});
-        const tx=await rt.json();
-        _rcTG[tg]={};
-        tx.forEach(t=>{if(!_rcTG[tg][t.date])_rcTG[tg][t.date]=0;_rcTG[tg][t.date]+=parseFloat(t.amount)||0;});
-      }catch(e){_rcTG[tg]={};}
+        const res=await fetch(
+          `${_SB}/rest/v1/transactions?vendo=eq.${encodeURIComponent(tg)}&date=gte.${win}&date=lte.${latest}&is_skipped=eq.false&select=amount,date`,
+          {headers:{'apikey':_KEY,'Authorization':'Bearer '+_KEY,'Range':'0-49999','Prefer':'count=none'}}
+        );
+        const rows=res.ok?await res.json():[];
+        _rcTG[tg]={_total:0};
+        if(Array.isArray(rows))rows.forEach(t=>{
+          if(!_rcTG[tg][t.date])_rcTG[tg][t.date]=0;
+          _rcTG[tg][t.date]+=parseFloat(t.amount)||0;
+          _rcTG[tg]._total+=parseFloat(t.amount)||0;
+        });
+      }catch(e){_rcTG[tg]={_total:0};}
     }));
-    _rcReady=true;if(dates.length)rcRenderDate(dates[0]);
-  }catch(err){if(ct)ct.innerHTML=`<div class="hv-rec-empty" style="color:#dc2626;">Error: ${err.message}</div>`;}
+    _rcDone=true;
+    if(dates.length)rcSelDate(dates[0],tb&&tb.querySelector('.rc-dtab.on'));
+  }catch(err){
+    if(ct)ct.innerHTML=`<div class="hv-rec-empty" style="color:#dc2626">Error: ${err.message}</div>`;
+  }finally{
+    if(btn){btn.textContent='⟳ Refresh';btn.disabled=false;}
+  }
 }
-function rcSelDate(date,btn){document.querySelectorAll('.rc-dtab').forEach(b=>b.classList.remove('on'));if(btn)btn.classList.add('on');rcRenderDate(date);}
-function rcTgAmt(tg,win,upTo){
+
+function rcSelDate(date,btn){
+  document.querySelectorAll('.rc-dtab').forEach(b=>b.classList.remove('on'));
+  if(btn)btn.classList.add('on');
+  else{const b=document.querySelector(`.rc-dtab[onclick*="${date}"]`);if(b)b.classList.add('on');}
+  _rcRender(date);
+}
+
+function _rcTgAmt(tg,win,upTo){
   if(!tg||!_rcTG[tg])return 0;
   const w=win||_rcWin[tg]||_RC_DEF;
-  return Object.entries(_rcTG[tg]).filter(([d])=>d>=w&&d<=upTo).reduce((s,[,v])=>s+v,0);
+  return Object.entries(_rcTG[tg]).filter(([d])=>d&&d!=='_total'&&d>=w&&d<=upTo).reduce((s,[,v])=>s+v,0);
 }
-function rcRenderDate(date){
-  const ct=document.getElementById('rc-content');
-  if(!ct||!_rcReady)return;
+
+function _rcRender(date){
+  const ct=document.getElementById('rc-content');if(!ct||!_rcDone)return;
   const harvests=_rcH.filter(h=>h.harvest_date===date);
   if(!harvests.length){ct.innerHTML='<div class="hv-rec-empty">No records for this date</div>';return;}
-  const fP=v=>'₱'+Number(v||0).toLocaleString('en-PH',{minimumFractionDigits:2});
-  const dCls=v=>Math.abs(v)<200?'color:#16a34a':v>0?'color:#d97706':'color:#dc2626';
-  const dTxt=v=>Math.abs(v)<200?'✅ Match':v>0?`⚠ Coins +${fP(Math.abs(v))}`:`🔴 TG +${fP(Math.abs(v))}`;
+  const dCls=v=>Math.abs(v)<200?'#16a34a':v>0?'#d97706':'#dc2626';
+  const dTxt=v=>Math.abs(v)<200?'✅ Match':v>0?`⚠ Coins +${_fP(Math.abs(v))}`:`🔴 TG +${_fP(Math.abs(v))}`;
   const byCol={};
-  harvests.forEach(h=>{const c=(h.collector||'—').trim();if(!byCol[c])byCol[c]={};const rc=h.route_code||'No route';if(!byCol[c][rc])byCol[c][rc]=[];byCol[c][rc].push(h);});
+  harvests.forEach(h=>{
+    const c=(h.collector||'Unknown').trim();
+    const rc=h.route_code||'No route';
+    if(!byCol[c])byCol[c]={};
+    if(!byCol[c][rc])byCol[c][rc]=[];
+    byCol[c][rc].push(h);
+  });
   const gCoin=harvests.reduce((s,h)=>s+(parseFloat(h.net_collectible)||0),0);
-  const gTg=harvests.reduce((s,h)=>s+rcTgAmt(h.tg_name,h.harvest_window_start,date),0);
+  const gTg=harvests.reduce((s,h)=>s+_rcTgAmt(h.tg_name,h.harvest_window_start,date),0);
   const gDiff=gCoin-gTg;
-  let html=`<div style="display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:6px;margin-bottom:14px;">
-    <div class="rc-box" style="background:#f0fdf4;border-left:3px solid #16a34a;"><div class="rv" style="color:#16a34a;">${fP(gCoin)}</div><div class="rl">Grand Coin Net</div></div>
-    <div class="rc-box" style="background:#eef2ff;border-left:3px solid #1e3cb8;"><div class="rv" style="color:#1e3cb8;">${fP(gTg)}</div><div class="rl">Grand TG Income</div></div>
-    <div class="rc-box" style="background:#fafbff;"><div class="rv" style="${dCls(gDiff)}">${fP(Math.abs(gDiff))}</div><div class="rl">${gDiff>=0?'Surplus':'Deficit'}</div></div>
-    <div class="rc-box" style="background:#f8faff;"><div class="rv" style="${dCls(gDiff)};font-size:12px;">${dTxt(gDiff)}</div><div class="rl">${harvests.length} vendos</div></div>
+  let html=`
+  <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:16px;">
+    <div class="rc-stat" style="background:#f0fdf4;border-left:3px solid #16a34a"><div class="rv" style="color:#16a34a">${_fP(gCoin)}</div><div class="rl">Coin Net (total)</div></div>
+    <div class="rc-stat" style="background:#eef2ff;border-left:3px solid #1e3cb8"><div class="rv" style="color:#1e3cb8">${_fP(gTg)}</div><div class="rl">TG Income (total)</div></div>
+    <div class="rc-stat" style="background:#fafbff"><div class="rv" style="color:${dCls(gDiff)}">${_fP(Math.abs(gDiff))}</div><div class="rl">${gDiff>=0?'Surplus':'Deficit'}</div></div>
+    <div class="rc-stat" style="background:#f8faff"><div class="rv" style="color:${dCls(gDiff)};font-size:13px">${dTxt(gDiff)}</div><div class="rl">${harvests.length} vendo(s)</div></div>
   </div>`;
   Object.entries(byCol).forEach(([col,routes])=>{
-    const ai=Object.values(routes).flat();
-    const cCoin=ai.reduce((s,h)=>s+(parseFloat(h.net_collectible)||0),0);
-    const cTg=ai.reduce((s,h)=>s+rcTgAmt(h.tg_name,h.harvest_window_start,date),0);
+    const items=Object.values(routes).flat();
+    const cCoin=items.reduce((s,h)=>s+(parseFloat(h.net_collectible)||0),0);
+    const cTg=items.reduce((s,h)=>s+_rcTgAmt(h.tg_name,h.harvest_window_start,date),0);
     const cDiff=cCoin-cTg;
-    html+=`<div style="background:#fff;border:2px solid #e5e7eb;border-radius:12px;padding:14px 16px;margin-bottom:12px;">
-      <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:10px;">
-        <div><div style="font-size:15px;font-weight:800;color:#111;">👤 ${col}</div><div style="font-size:10px;color:#6b7280;margin-top:2px;">${Object.keys(routes).length} route(s) · ${ai.length} vendo(s)</div></div>
-        <div style="display:flex;align-items:center;gap:8px;">
-          <button class="hv-xls-btn" data-collector="${col.replace(/"/g,'&quot;')}" data-date="${date}" style="padding:4px 10px;background:#16a34a;color:#fff;border:none;border-radius:6px;font-size:10px;font-weight:700;cursor:pointer;font-family:inherit;">📥 Export</button>
-          <span style="font-size:11px;font-weight:700;${dCls(cDiff)};padding:4px 10px;border-radius:20px;background:${Math.abs(cDiff)<200?'#f0fdf4':cDiff>0?'#fffbeb':'#fef2f2'};">${dTxt(cDiff)}</span>
+    html+=`<div style="background:#fff;border:2px solid #e5e7eb;border-radius:12px;margin-bottom:14px;overflow:hidden;">
+      <div style="padding:12px 16px;background:#f8faff;border-bottom:1px solid #e5e7eb;display:flex;justify-content:space-between;align-items:center;">
+        <div><div style="font-size:14px;font-weight:800;color:#111">👤 ${col}</div><div style="font-size:10px;color:#6b7280;margin-top:2px">${Object.keys(routes).length} route(s) · ${items.length} vendo(s)</div></div>
+        <div style="display:flex;align-items:center;gap:8px">
+          <button class="hv-xls-btn" data-collector="${col.replace(/"/g,'&quot;')}" data-date="${date}" style="padding:4px 10px;background:#16a34a;color:#fff;border:none;border-radius:6px;font-size:10px;font-weight:700;cursor:pointer;font-family:inherit">📥 Export</button>
+          <span style="font-size:11px;font-weight:700;color:${dCls(cDiff)};padding:4px 12px;border-radius:20px;background:${Math.abs(cDiff)<200?'#f0fdf4':cDiff>0?'#fffbeb':'#fef2f2'}">${dTxt(cDiff)}</span>
         </div>
       </div>
-      <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px;margin-bottom:10px;">
-        <div class="rc-box" style="background:#f0fdf4;"><div class="rv" style="color:#16a34a;">${fP(cCoin)}</div><div class="rl">Coin net</div></div>
-        <div class="rc-box" style="background:#eef2ff;"><div class="rv" style="color:#1e3cb8;">${fP(cTg)}</div><div class="rl">TG income</div></div>
-        <div class="rc-box" style="background:#fafbff;"><div class="rv" style="${dCls(cDiff)}">${fP(Math.abs(cDiff))}</div><div class="rl">${cDiff>=0?'Surplus':'Deficit'}</div></div>
+      <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;padding:10px 16px;">
+        <div class="rc-stat" style="background:#f0fdf4"><div class="rv" style="color:#16a34a">${_fP(cCoin)}</div><div class="rl">Coin net</div></div>
+        <div class="rc-stat" style="background:#eef2ff"><div class="rv" style="color:#1e3cb8">${_fP(cTg)}</div><div class="rl">TG income</div></div>
+        <div class="rc-stat" style="background:#fafbff"><div class="rv" style="color:${dCls(cDiff)}">${_fP(Math.abs(cDiff))}</div><div class="rl">${cDiff>=0?'Surplus':'Deficit'}</div></div>
       </div>`;
-    Object.entries(routes).forEach(([rc,items])=>{
-      const rCoin=items.reduce((s,h)=>s+(parseFloat(h.net_collectible)||0),0);
-      const rTg=items.reduce((s,h)=>s+rcTgAmt(h.tg_name,h.harvest_window_start,date),0);
+    Object.entries(routes).forEach(([rc,rItems])=>{
+      const rCoin=rItems.reduce((s,h)=>s+(parseFloat(h.net_collectible)||0),0);
+      const rTg=rItems.reduce((s,h)=>s+_rcTgAmt(h.tg_name,h.harvest_window_start,date),0);
       const rDiff=rCoin-rTg;
       const isAdm=!rc||rc==='No route'||rc.toUpperCase()==='ADMIN';
-      const srcBadge=isAdm?'<span style="font-size:8px;font-weight:700;padding:1px 6px;border-radius:4px;background:#fef3c7;color:#92400e;">🔧 Admin</span>':'<span style="font-size:8px;font-weight:700;padding:1px 6px;border-radius:4px;background:#eff6ff;color:#1d4ed8;">📱 PWA</span>';
-      html+=`<div style="background:#f8faff;border:1px solid #dde3f5;border-radius:8px;padding:10px 12px;margin-bottom:8px;">
-        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;">
-          <span style="display:flex;align-items:center;gap:6px;"><span style="font-size:12px;font-weight:700;color:#1e3cb8;">🧾 ${rc}</span>${srcBadge}</span>
-          <span style="font-size:11px;font-weight:700;${dCls(rDiff)}">${dTxt(rDiff)}</span>
+      const badge=isAdm?'<span style="font-size:8px;font-weight:700;padding:1px 6px;border-radius:4px;background:#fef3c7;color:#92400e">🔧 Admin</span>':'<span style="font-size:8px;font-weight:700;padding:1px 6px;border-radius:4px;background:#eff6ff;color:#1d4ed8">📱 PWA</span>';
+      html+=`<div style="margin:0 14px 10px;background:#f8faff;border:1px solid #dde3f5;border-radius:8px;overflow:hidden;">
+        <div style="padding:8px 12px;display:flex;justify-content:space-between;align-items:center;background:#eef2ff;">
+          <div style="display:flex;align-items:center;gap:6px"><span style="font-size:12px;font-weight:700;color:#1e3cb8">🧾 ${rc}</span>${badge}</div>
+          <span style="font-size:11px;font-weight:700;color:${dCls(rDiff)}">${dTxt(rDiff)}</span>
         </div>
-        <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:5px;margin-bottom:8px;">
-          <div class="rc-box" style="background:#f0fdf4;"><div class="rv" style="color:#16a34a;font-size:13px;">${fP(rCoin)}</div><div class="rl">Coin net</div></div>
-          <div class="rc-box" style="background:#eef2ff;"><div class="rv" style="color:#1e3cb8;font-size:13px;">${fP(rTg)}</div><div class="rl">TG income</div></div>
-          <div class="rc-box" style="background:#fafbff;"><div class="rv" style="${dCls(rDiff)};font-size:13px;">${fP(Math.abs(rDiff))}</div><div class="rl">${rDiff>=0?'Surplus':'Deficit'}</div></div>
-        </div>
-        <table style="width:100%;border-collapse:collapse;font-size:11px;">
-          <thead><tr style="background:#eef2ff;">
-            <th style="padding:5px 8px;text-align:left;font-size:9px;color:#6b7280;font-weight:700;">Vendo</th>
-            <th style="padding:5px 8px;text-align:left;font-size:9px;color:#6b7280;font-weight:700;">Window</th>
-            <th style="padding:5px 8px;text-align:left;font-size:9px;color:#6b7280;font-weight:700;">Coin Net</th>
-            <th style="padding:5px 8px;text-align:left;font-size:9px;color:#6b7280;font-weight:700;">TG Income</th>
-            <th style="padding:5px 8px;text-align:left;font-size:9px;color:#6b7280;font-weight:700;">Diff</th>
-            <th style="padding:5px 8px;text-align:left;font-size:9px;color:#6b7280;font-weight:700;">Actions</th>
+        <table style="width:100%;border-collapse:collapse;font-size:11px">
+          <thead><tr style="background:#fff">
+            <th style="padding:6px 10px;text-align:left;font-size:9px;color:#6b7280;font-weight:700;border-bottom:1px solid #e5e7eb">Vendo</th>
+            <th style="padding:6px 10px;text-align:left;font-size:9px;color:#6b7280;font-weight:700;border-bottom:1px solid #e5e7eb">Window</th>
+            <th style="padding:6px 10px;text-align:right;font-size:9px;color:#6b7280;font-weight:700;border-bottom:1px solid #e5e7eb">Coin Net</th>
+            <th style="padding:6px 10px;text-align:right;font-size:9px;color:#6b7280;font-weight:700;border-bottom:1px solid #e5e7eb">TG Income</th>
+            <th style="padding:6px 10px;text-align:right;font-size:9px;color:#6b7280;font-weight:700;border-bottom:1px solid #e5e7eb">Diff</th>
           </tr></thead>
-          <tbody>${items.map(h=>{
-            const coin=parseFloat(h.net_collectible||0),tg=rcTgAmt(h.tg_name,h.harvest_window_start,date),gap=coin-tg;
-            const note=h.admin_notes?`<div style="font-size:9px;color:#92400e;margin-top:2px;">📝 ${h.admin_notes}</div>`:'';
-            return `<tr style="${Math.abs(gap)<50?'':gap>0?'background:#fffbeb':'background:#fef2f2'}">
-              <td style="padding:6px 8px;"><b>${h.vendo_name||h.tg_name||'—'}</b><div style="font-size:9px;color:#6b7280;">${h.tg_name||'—'}</div>${note}</td>
-              <td style="padding:6px 8px;color:#6b7280;font-size:10px;">${h.harvest_window_start||_RC_DEF}→${date}</td>
-              <td style="padding:6px 8px;font-weight:700;color:#16a34a;">${fP(coin)}</td>
-              <td style="padding:6px 8px;color:${tg>0?'#374151':'#9ca3af'};">${fP(tg)}</td>
-              <td style="padding:6px 8px;font-weight:700;${dCls(gap)};">${Math.abs(gap)<50?'✅':fP(Math.abs(gap))+(gap>0?' surplus':' deficit')}</td>
-              <td style="padding:6px 8px;">
-                <button data-hid="${h.id}" data-note="${(h.admin_notes||'').replace(/"/g,'&quot;')}" onclick="hvRecNote(parseInt(this.dataset.hid),this.dataset.note)" style="font-size:9px;padding:2px 6px;border-radius:4px;border:1px solid #d1d5db;background:#f9fafb;cursor:pointer;margin-right:3px;">📝</button>
-                <button data-tg="${(h.tg_name||'').replace(/"/g,'&quot;')}" data-win="${h.harvest_window_start||''}" data-date="${date}" data-tgamt="${tg}" data-vname="${(h.vendo_name||'').replace(/"/g,'&quot;')}" data-hid="${h.id}" onclick="hvVerifyTG(this)" style="font-size:9px;padding:2px 6px;border-radius:4px;border:1px solid #93c5fd;background:#eff6ff;cursor:pointer;color:#1d4ed8;font-weight:700;">🔍</button>
-              </td>
+          <tbody>${rItems.map(h=>{
+            const coin=parseFloat(h.net_collectible||0),tg=_rcTgAmt(h.tg_name,h.harvest_window_start,date),gap=coin-tg;
+            const rowBg=Math.abs(gap)<50?'':'background:'+(gap>0?'#fffbeb':'#fef2f2');
+            return `<tr style="${rowBg}">
+              <td style="padding:7px 10px"><b style="color:#1e3cb8">${h.vendo_name||h.tg_name||'—'}</b><div style="font-size:9px;color:#6b7280">${h.tg_name||'—'}</div></td>
+              <td style="padding:7px 10px;font-size:10px;color:#6b7280">${h.harvest_window_start||_RC_DEF} → ${date}</td>
+              <td style="padding:7px 10px;text-align:right;font-weight:700;color:#16a34a">${_fP(coin)}</td>
+              <td style="padding:7px 10px;text-align:right;color:${tg>0?'#374151':'#9ca3af'}">${_fP(tg)}</td>
+              <td style="padding:7px 10px;text-align:right;font-weight:700;color:${dCls(gap)}">${Math.abs(gap)<50?'✅':_fP(Math.abs(gap))+(gap>0?' ↑':' ↓')}</td>
             </tr>`;
           }).join('')}</tbody>
         </table>
-        <div style="margin-top:8px;">
-          <button onclick="hvAhOpen('${col.replace(/'/g,"\\'")}');setTimeout(()=>{var d=document.getElementById('hv-ah-date');if(d)d.value='${date}';},50)" style="padding:4px 10px;background:#f0fdf4;border:1.5px dashed #86efac;border-radius:6px;color:#15803d;font-size:10px;font-weight:700;cursor:pointer;font-family:inherit;">➕ Add record</button>
+        <div style="padding:8px 12px;">
+          <button onclick="hvAhOpen('${col.replace(/'/g,"\\'")}');setTimeout(()=>{var d=document.getElementById('hv-ah-date');if(d)d.value='${date}';},50)" style="padding:4px 12px;background:#f0fdf4;border:1.5px dashed #86efac;border-radius:6px;color:#15803d;font-size:10px;font-weight:700;cursor:pointer;font-family:inherit">➕ Add record</button>
         </div>
       </div>`;
     });
@@ -3273,9 +3297,11 @@ function rcRenderDate(date){
   });
   ct.innerHTML=html;
 }
+
+/* backward compat stubs */
 async function hvLoadReconDates(){await rcLoad();}
 function hvReconSelectDate(d,b){rcSelDate(d,b);}
-async function hvLoadRecon(){if(_rcReady){const b=document.querySelector('.rc-dtab.on');if(b)rcRenderDate(b.dataset.date||'');}}
+async function hvLoadRecon(){}
 
 
 /* ─── ADMIN HARVEST ENTRY ─── */
@@ -5630,32 +5656,30 @@ async function loadVendoAnalytics(vendo, area) {
   document.getElementById("analytics-vendo-placeholder").style.display="none";
   document.getElementById("analytics-vendo-chart-wrap").style.display="block";
   document.getElementById("analytics-vendo-name").textContent=`${vendo} — ${area}`;
-  try {
-    // Fast single fetch — per-vendo is always under 50k rows
-    const r = await fetch(
+  try{
+    const r=await fetch(
       `${SB_URL}/rest/v1/transactions?select=date,amount&vendo=eq.${encodeURIComponent(vendo)}&is_skipped=eq.false&order=date.asc`,
-      { headers: { ...HDR, 'Range': '0-49999', 'Prefer': 'count=none' } }
+      {headers:{...HDR,'Range':'0-49999','Prefer':'count=none'}}
     );
-    const rows = r.ok ? await r.json() : [];
+    const rows=r.ok?await r.json():[];
     const mmap={};
-    rows.forEach(r=>{ const m=(r.date||"").slice(0,7); if(m) mmap[m]=(mmap[m]||0)+parseFloat(r.amount||0); });
-    const labels=Object.keys(mmap).sort(), data=labels.map(m=>mmap[m]);
-    const total=data.reduce((s,v)=>s+v,0), avg=data.length?total/data.length:0, max=data.length?Math.max(...data):0;
+    rows.forEach(r=>{const m=(r.date||'').slice(0,7);if(m)mmap[m]=(mmap[m]||0)+parseFloat(r.amount||0);});
+    const labels=Object.keys(mmap).sort(),data=labels.map(m=>mmap[m]);
+    const total=data.reduce((s,v)=>s+v,0),avg=data.length?total/data.length:0,max=data.length?Math.max(...data):0;
     document.getElementById("analytics-vendo-stats").innerHTML=`
       <div class="stat"><div class="sl">All-Time Sales</div><div class="sv blue">${fmt(total)}</div></div>
       <div class="stat"><div class="sl">Total Txns</div><div class="sv pur">${rows.length.toLocaleString()}</div></div>
       <div class="stat"><div class="sl">Avg/Month</div><div class="sv amber">${fmt(Math.round(avg))}</div></div>
-      <div class="stat"><div class="sl">Best Month</div><div class="sv green">${fmt(max)}</div></div>
-    `;
+      <div class="stat"><div class="sl">Best Month</div><div class="sv green">${fmt(max)}</div></div>`;
     const colors=labels.map(l=>l.startsWith('2026')?'#16a34a':l.startsWith('2025')?'#1565c0':'#94a3b8');
-    if(vendoAnalyticsChart) vendoAnalyticsChart.destroy();
+    if(vendoAnalyticsChart)vendoAnalyticsChart.destroy();
     vendoAnalyticsChart=new Chart(document.getElementById("vendo-analytics-chart"),{
-      type:"bar", data:{labels,datasets:[{label:"Monthly Sales",data,backgroundColor:colors,borderRadius:4}]},
+      type:"bar",data:{labels,datasets:[{label:"Monthly Sales",data,backgroundColor:colors,borderRadius:4}]},
       options:{responsive:true,maintainAspectRatio:false,
         plugins:{legend:{display:false},tooltip:{callbacks:{label:c=>"₱"+c.raw.toLocaleString()}}},
-        scales:{y:{ticks:{callback:v=>"₱"+v.toLocaleString()}}}}
+        scales:{y:{ticks:{callback:v=>"₱"+(v>=1000000?(v/1000000).toFixed(1)+"M":v>=1000?(v/1000).toFixed(0)+"K":v)}}}}
     });
-  } catch(e) { console.error('loadVendoAnalytics error:', e); }
+  }catch(e){console.error('loadVendoAnalytics:',e);}
 }
 
 function clearAnalyticsVendo() {
@@ -5675,47 +5699,50 @@ refreshRecentTxns();
 
 // ── Auto-load dashboard on first open ────────────────────
 
-/* ─── ANALYTICS TAB (fast + cached) ─── */
-let _analyticsCache = null;
-async function loadAnalytics() {
-  if (_analyticsCache) { _renderAnalyticsCharts(_analyticsCache); return; }
-  const tEl = document.getElementById('monthly-table');
-  if (tEl) tEl.innerHTML = '<div style="padding:8px;color:var(--mu);font-size:11px;">Loading…</div>';
-  try {
-    const [txnResp, areaData] = await Promise.all([
+/* ─── ANALYTICS TAB ─── */
+let _anlCache=null;
+async function loadAnalytics(){
+  if(_anlCache){_anlRender(_anlCache);return;}
+  try{
+    // Parallel: monthly txns (2025+2026, date+amount only) + area summary
+    const [tr,areaData]=await Promise.all([
       fetch(`${SB_URL}/rest/v1/transactions?select=date,amount&is_skipped=eq.false&date=gte.2025-01-01&order=date.asc`,
-        { headers: { ...HDR, 'Range': '0-49999', 'Prefer': 'count=none' } }),
+        {headers:{...HDR,'Range':'0-49999','Prefer':'count=none'}}),
       sb('area_summary','',20)
     ]);
-    const rows = txnResp.ok ? await txnResp.json() : [];
+    const rows=tr.ok?await tr.json():[];
     const mmap={};
-    rows.forEach(r=>{ const m=(r.date||'').slice(0,7); if(m) mmap[m]=(mmap[m]||0)+parseFloat(r.amount||0); });
-    _analyticsCache = { mmap, areaData };
-    _renderAnalyticsCharts(_analyticsCache);
-  } catch(e) { console.error('Analytics error:', e); }
+    rows.forEach(r=>{const m=(r.date||'').slice(0,7);if(m)mmap[m]=(mmap[m]||0)+parseFloat(r.amount||0);});
+    _anlCache={mmap,areaData};
+    _anlRender(_anlCache);
+  }catch(e){console.error('loadAnalytics:',e);}
 }
-function _renderAnalyticsCharts({ mmap, areaData }) {
-  const labels=Object.keys(mmap).sort(), data=labels.map(m=>mmap[m]);
+function _anlRender({mmap,areaData}){
+  const labels=Object.keys(mmap).sort(),data=labels.map(m=>mmap[m]);
   const colors=labels.map(l=>l.startsWith('2026')?'#16a34a':'#1565c0');
-  const dl=labels.map(k=>{ try{return new Date(k+'-01').toLocaleDateString('en-PH',{month:'short',year:'2-digit'});}catch{return k;} });
-  if(monthlyChart) monthlyChart.destroy();
-  const mCtx=document.getElementById('monthly-chart');
-  if(mCtx) monthlyChart=new Chart(mCtx,{type:'bar',data:{labels:dl,datasets:[{label:'Sales',data,backgroundColor:colors,borderRadius:3}]},
+  const dl=labels.map(k=>{try{return new Date(k+'-01').toLocaleDateString('en-PH',{month:'short',year:'2-digit'});}catch{return k;}});
+  if(monthlyChart)monthlyChart.destroy();
+  const mc=document.getElementById('monthly-chart');
+  if(mc)monthlyChart=new Chart(mc,{type:'bar',
+    data:{labels:dl,datasets:[{label:'Sales',data,backgroundColor:colors,borderRadius:3}]},
     options:{responsive:true,maintainAspectRatio:false,
       plugins:{legend:{display:false},tooltip:{callbacks:{label:c=>'₱'+c.raw.toLocaleString()}}},
-      scales:{y:{ticks:{callback:v=>'₱'+(v>=1000000?(v/1000000).toFixed(1)+'M':v>=1000?(v/1000).toFixed(0)+'K':v)}}}}});
-  const tEl=document.getElementById('monthly-table');
-  if(tEl) tEl.innerHTML=[...labels].sort((a,b)=>b.localeCompare(a)).map(m=>{
+      scales:{y:{ticks:{callback:v=>'₱'+(v>=1000000?(v/1000000).toFixed(1)+'M':v>=1000?(v/1000).toFixed(0)+'K':v)}}}}
+  });
+  const te=document.getElementById('monthly-table');
+  if(te)te.innerHTML=[...labels].sort((a,b)=>b.localeCompare(a)).map(m=>{
     const disp=(()=>{try{return new Date(m+'-01').toLocaleDateString('en-PH',{month:'long',year:'numeric'});}catch{return m;}})();
-    return `<div style="display:flex;justify-content:space-between;padding:5px 8px;border-bottom:1px solid var(--bd);font-size:12px;"><span style="color:var(--mu)">${disp}</span><span style="font-weight:700;color:#1565c0;">₱${mmap[m].toLocaleString('en-PH',{minimumFractionDigits:2})}</span></div>`;
+    return `<div style="display:flex;justify-content:space-between;padding:5px 8px;border-bottom:1px solid var(--bd);font-size:12px"><span style="color:var(--mu)">${disp}</span><span style="font-weight:700;color:#1565c0">₱${mmap[m].toLocaleString('en-PH',{minimumFractionDigits:2})}</span></div>`;
   }).join('');
-  if(analyticsAreaChart) analyticsAreaChart.destroy();
-  const aCtx=document.getElementById('analytics-area-chart');
-  if(aCtx&&areaData&&areaData.length){
+  if(analyticsAreaChart)analyticsAreaChart.destroy();
+  const ac=document.getElementById('analytics-area-chart');
+  if(ac&&areaData&&areaData.length){
     const c8=['#1565c0','#1D9E75','#F5C518','#7B5EA7','#E85D24','#4A90D9','#d97706','#dc2626'];
-    analyticsAreaChart=new Chart(aCtx,{type:'doughnut',
+    analyticsAreaChart=new Chart(ac,{type:'doughnut',
       data:{labels:areaData.map(a=>a.area),datasets:[{data:areaData.map(a=>parseFloat(a.total_sales||0)),backgroundColor:c8}]},
-      options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'right',labels:{font:{size:10}}},tooltip:{callbacks:{label:c=>c.label+': ₱'+c.raw.toLocaleString()}}}}});
+      options:{responsive:true,maintainAspectRatio:false,
+        plugins:{legend:{position:'right',labels:{font:{size:10}}},tooltip:{callbacks:{label:c=>c.label+': ₱'+c.raw.toLocaleString()}}}}
+    });
   }
 }
 window.addEventListener('load', () => { setTimeout(() => loadDashboard(), 500); });
