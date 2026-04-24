@@ -466,13 +466,13 @@ tr:hover td{background:#f8f9ff;cursor:pointer}
 <div id="panel-harvest" class="panel">
 <style>
 /* ══ HARVEST PANEL v6 ══ */
-#panel-harvest.active{display:block!important;min-height:100vh;position:relative;}
+#panel-harvest.active{display:flex!important;flex-direction:column;min-height:100vh;position:relative;}
 
 /* HEAD */
 .hv-head{background:#fff;border-bottom:1px solid var(--bd);flex-shrink:0;}
-.hv-toprow{padding:5px 12px;display:flex;align-items:center;justify-content:space-between;gap:8px;border-bottom:1px solid var(--bd);}
+.hv-toprow{padding:5px 12px;display:flex;align-items:center;justify-content:space-between;gap:8px;border-bottom:1px solid var(--bd);overflow:hidden;}
 .hv-title{font-size:13px;font-weight:700;color:var(--blue);}
-.hv-tabs{display:flex;gap:4px;align-items:center;overflow-x:auto;scrollbar-width:none;flex-wrap:nowrap;}
+.hv-tabs{display:flex;gap:4px;align-items:center;overflow-x:auto;scrollbar-width:none;flex-wrap:nowrap;min-width:0;}
 .hv-tabs::-webkit-scrollbar{display:none;}
 .hv-hvtab{padding:5px 14px;border-radius:6px;border:2px solid var(--bd);background:#fff;font-size:12px;font-weight:700;color:var(--mu);cursor:pointer;font-family:inherit;transition:.12s;}
 .hv-hvtab:hover{background:var(--bg);border-color:var(--blue);color:var(--blue);}
@@ -513,7 +513,7 @@ tr:hover td{background:#f8f9ff;cursor:pointer}
 .hv-search:focus{border-color:var(--blue);}
 
 /* 3-COL LAYOUT */
-.hv-page{display:grid;grid-template-columns:210px 1fr 195px;height:calc(100vh - 156px);min-height:400px;overflow:hidden;}
+.hv-page{display:grid;grid-template-columns:210px 1fr 195px;flex:1;min-height:0;height:calc(100vh - 156px);min-height:400px;overflow:hidden;}
 
 /* COL 1 — ROUTE BUILDER */
 .hv-rc{display:flex;flex-direction:column;overflow:hidden;background:#fff;border-right:1px solid var(--bd);}
