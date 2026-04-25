@@ -239,7 +239,7 @@ tr:hover td{background:#f8f9ff;cursor:pointer}
       <span class="nl">Vendos</span>
     </button>
     <!-- Harvest -->
-    <button data-panel="harvest" onclick="showP('harvest',this);setTimeout(function(){if(typeof hvShowTab==='function')hvShowTab('route',document.getElementById('hbtn-route'));window._hvLoading=false;if(typeof hvLoadVendos==='function')hvLoadVendos();setTimeout(()=>{if(typeof hvRefreshPendingRoutes==='function')hvRefreshPendingRoutes();},800);var fab=document.getElementById('hv-refresh-fab');if(fab)fab.classList.add('visible');},300)">
+    <button data-panel="harvest" onclick="showP('harvest',this)">
       <div class="ni" style="background:#d1fae5">
         <svg width="13" height="13" viewBox="0 0 24 24" fill="none"><path d="M12 3 C8 3 4 7 4 12 C4 16 8 20 12 20 C16 20 20 16 20 12" stroke="#16a34a" stroke-width="2" fill="none" stroke-linecap="round"/><path d="M12 3 C14 6 18 6 20 3" stroke="#16a34a" stroke-width="2" fill="none" stroke-linecap="round"/><path d="M12 8 L12 16 M9 13 L12 16 L15 13" stroke="#16a34a" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" fill="none"/></svg>
       </div>
@@ -5304,8 +5304,19 @@ function closeVendo() {
 // HARVEST
 // ══════════════════════════════════════════════════════════
 async function loadHarvests() {
-  // Harvest tab now uses the new route builder UI — no separate load needed
-  // Records sub-tab will load from new harvests table with correct columns
+  // Ensure harvest panel initialises on showP — trigger vendos load if not yet loaded
+  window._hvLoading = false;
+  if (typeof hvShowTab === 'function') {
+    hvShowTab('route', document.getElementById('hbtn-route'));
+  }
+  if (typeof hvLoadVendos === 'function') {
+    hvLoadVendos();
+  }
+  setTimeout(() => {
+    if (typeof hvRefreshPendingRoutes === 'function') hvRefreshPendingRoutes();
+    const fab = document.getElementById('hv-refresh-fab');
+    if (fab) fab.classList.add('visible');
+  }, 600);
 }
 function filterHarvests(){ }
 function renderHarvests(rows){ }
