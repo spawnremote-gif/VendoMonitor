@@ -792,6 +792,7 @@ tr:hover td{background:#f8f9ff;cursor:pointer}
 <div class="hv-head">
   <div class="hv-toprow">
     <div class="hv-title">🌾 Harvest</div>
+    <button onclick="loadHarvests()" style="padding:3px 10px;font-size:10px;border:1px solid #1e3cb8;border-radius:5px;background:#1e3cb8;color:#fff;cursor:pointer;font-family:inherit;font-weight:700;">⟳ Force show</button>
     <div class="hv-tabs">
       <button class="hv-hvtab on" id="hbtn-route" onclick="hvShowTab('route',this)">📋 Route builder</button>
       <button class="hv-hvtab" id="hbtn-schedule" onclick="hvShowTab('schedule',this)">⏰ Schedule</button>
@@ -5304,35 +5305,46 @@ function closeVendo() {
 // HARVEST
 // ══════════════════════════════════════════════════════════
 async function loadHarvests() {
-  // Reset loading guard so vendos always reload when switching to Harvest tab
   window._hvLoading = false;
-  // Explicitly ensure route-tab elements are visible (they should be by default,
-  // but guard against any prior hvShowTab call having hidden them)
-  const elArea = document.getElementById('hv-area-tabs');
-  const elFilt = document.getElementById('hv-filters');
-  const elPage = document.getElementById('hv-route-page');
-  const elGuide = document.getElementById('hv-guide-bar');
-  const elFab  = document.getElementById('hv-refresh-fab');
-  if (elArea)  { elArea.classList.remove('hv-hidden');  elArea.style.setProperty('display','flex','important'); }
-  if (elFilt)  { elFilt.classList.remove('hv-hidden');  elFilt.style.setProperty('display','flex','important'); }
-  if (elPage)  { elPage.classList.remove('hv-hidden');  elPage.style.setProperty('display','grid','important'); }
-  if (elGuide) { elGuide.classList.remove('hv-hidden'); }
-  if (elFab)   elFab.classList.add('visible');
-  // Mark hbtn-route as active tab
+
+  // NUCLEAR: force every element visible with direct cssText — bypasses all class/cascade issues
+  const forceShow = (id, display) => {
+    const el = document.getElementById(id);
+    if (!el) return;
+    el.classList.remove('hv-hidden');
+    el.style.cssText = el.style.cssText
+      .replace(/display\s*:[^;]+;?/gi, '')
+      + ';display:' + display + '!important';
+  };
+
+  forceShow('hv-area-tabs',  'flex');
+  forceShow('hv-filters',    'flex');
+  forceShow('hv-route-page', 'grid');
+
+  // Hide all non-route sub-tabs
+  ['hv-tab-schedule','hv-tab-records','hv-tab-recon',
+   'hv-tab-vnames','hv-tab-addharvest','hv-tab-audited'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) { el.classList.add('hv-hidden'); el.style.display = 'none'; }
+  });
+
+  // Mark route button active
+  document.querySelectorAll('#panel-harvest .hv-hvtab').forEach(b => b.classList.remove('on'));
   const hbtnRoute = document.getElementById('hbtn-route');
-  if (hbtnRoute) {
-    document.querySelectorAll('#panel-harvest .hv-hvtab').forEach(b => b.classList.remove('on'));
-    hbtnRoute.classList.add('on');
-  }
-  // Load vendos after a short paint delay
+  if (hbtnRoute) hbtnRoute.classList.add('on');
+
+  const elFab = document.getElementById('hv-refresh-fab');
+  if (elFab) elFab.classList.add('visible');
+
+  // Load vendos
   setTimeout(() => {
     if (typeof hvLoadVendos === 'function') hvLoadVendos();
     setTimeout(() => {
       if (typeof hvRefreshPendingRoutes === 'function') hvRefreshPendingRoutes();
     }, 800);
-  }, 100);
+  }, 50);
 }
-function filterHarvests(){ }
+
 function renderHarvests(rows){ }
 function hPage(d){ }
 
