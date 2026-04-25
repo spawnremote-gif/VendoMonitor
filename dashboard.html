@@ -1913,51 +1913,63 @@ async function hvLoadVendos() {
 /* ─── DETAIL POPUP ─── */
 /* ─── DETAIL POPUP EDIT FUNCTIONS ─── */
 
-// Sheet names loaded from Supabase for search
-var _hvSheetNames = []; // { sheet_name, area, vlan }
+// Sheet names from subscriber Excel — loaded from repo JSON
+var _EXCEL_NAMES = [];
+var _hvSheetNames = [];
 var _hvSelectedSheetName = '';
 var _hvSelectedTGName = '';
 
 async function hvLoadSheetNamesCache() {
-  if (_hvSheetNames.length) return;
+  if (_EXCEL_NAMES.length) return;
   try {
-    const r = await fetch(`${_SB}/rest/v1/vendos?select=sheet_name,area,vlan,tg_name&sheet_name=not.is.null&limit=2000`, {
-      headers: { 'apikey': _KEY, 'Authorization': 'Bearer ' + _KEY }
-    });
-    const data = await r.json();
-    _hvSheetNames = data || [];
-  } catch(e) { console.error('Sheet names cache error:', e); }
+    const r = await fetch('https://spawninternet.github.io/VendoMonitor/excel_names.json');
+    _EXCEL_NAMES = await r.json();
+    _hvSheetNames = _EXCEL_NAMES.map(e => ({sheet_name:e.name,area:e.area,vlan:e.vlan,address:e.address,lat:e.lat,lng:e.lng,contact:e.contact}));
+  } catch(e) { console.error('Excel names load error:', e); }
 }
 
 function hvSearchSheetName(q) {
   const box = document.getElementById('hv-dp-sheet-results');
   if (!box) return;
-  if (!q || q.length < 2) { box.style.display = 'none'; return; }
+  if (!q || q.length < 2) { box.style.display='none'; return; }
   const ql = q.toLowerCase();
-  // Search in cache
-  const matches = _hvSheetNames
-    .filter(v => v.sheet_name && v.sheet_name.toLowerCase().includes(ql))
-    .slice(0, 15);
-  if (!matches.length) { box.innerHTML = '<div style="padding:8px 10px;font-size:11px;color:#9ca3af;">No matches found</div>'; box.style.display = ''; return; }
-  box.innerHTML = matches.map(v => `
-    <div onclick="hvSelectSheetName('${v.sheet_name.replace(/'/g,"\'")}','${v.area||''}')"
-      style="padding:8px 10px;cursor:pointer;border-bottom:1px solid #f0f0f0;font-size:11px;"
-      onmouseover="this.style.background='#eef2ff'" onmouseout="this.style.background=''">
-      <div style="font-weight:600;color:#1e3cb8;">${v.sheet_name}</div>
-      <div style="font-size:9px;color:#6b7280;">${v.area||'—'} · VLAN ${v.vlan||'?'}</div>
-    </div>`).join('');
+  const matches = _EXCEL_NAMES.filter(e => e.name && e.name.toLowerCase().includes(ql)).slice(0,15);
+  if (!matches.length) {
+    box.innerHTML = '<div style="padding:8px 10px;font-size:11px;color:#9ca3af;">No matches found</div>';
+    box.style.display = '';
+    return;
+  }
+  box.innerHTML = matches.map((e,i) => {
+    const gps = (e.lat && e.lng) ? '<span style="color:#0284c7;font-size:9px;margin-left:4px;">\u{1F4CD} GPS</span>' : '';
+    const sub = (e.area||'\u2014') + ' \u00b7 VLAN ' + (e.vlan||'?') + (e.address ? ' \u00b7 ' + e.address : '') + (e.contact ? ' \u00b7 ' + e.contact : '');
+    return '<div class="hv-sn-item" data-snidx="' + i + '" style="padding:8px 10px;cursor:pointer;border-bottom:1px solid #f0f0f0;font-size:11px;">'
+      + '<div style="font-weight:600;color:#1e3cb8;">' + e.name + gps + '</div>'
+      + '<div style="font-size:9px;color:#6b7280;">' + sub + '</div>'
+      + '</div>';
+  }).join('');
   box.style.display = '';
+  box._matches = matches;
 }
 
-function hvSelectSheetName(name, area) {
+document.addEventListener('click', function(e) {
+  const item = e.target.closest('.hv-sn-item');
+  if (!item) return;
+  const box = document.getElementById('hv-dp-sheet-results');
+  if (!box || !box._matches) return;
+  const en = box._matches[parseInt(item.dataset.snidx)];
+  if (!en) return;
+  hvSelectSheetName(en.name, en.area, en.address, en.lat, en.lng);
+});
+
+function hvSelectSheetName(name, area, address, lat, lng) {
   _hvSelectedSheetName = name;
-  document.getElementById('hv-dp-sheet-inp').value = name;
-  document.getElementById('hv-dp-sheet-results').style.display = 'none';
-  // Auto-set area if currently empty
+  const inp = document.getElementById('hv-dp-sheet-inp');
+  if (inp) inp.value = name;
+  const box = document.getElementById('hv-dp-sheet-results');
+  if (box) box.style.display = 'none';
   const areaSel = document.getElementById('hv-dp-area-sel');
-  if (areaSel && (!areaSel.value || areaSel.value === '') && area) {
-    areaSel.value = area;
-  }
+  if (areaSel && (!areaSel.value || areaSel.value === '') && area) areaSel.value = area;
+  window._hvSelectedExcelData = {address: address||null, lat: lat||null, lng: lng||null};
 }
 
 async function hvSearchTGName(q) {
@@ -2030,7 +2042,16 @@ async function hvSaveDetailEdits() {
 
   const updates = {};
   if (areaSel)  updates.area       = areaSel;
-  if (sheetInp) updates.sheet_name = sheetInp;
+  if (sheetInp) {
+    updates.sheet_name = sheetInp;
+    if (window._hvSelectedExcelData) {
+      const ed = window._hvSelectedExcelData;
+      if (ed.address) updates.address = ed.address;
+      if (ed.lat)     updates.lat     = ed.lat;
+      if (ed.lng)     updates.lng     = ed.lng;
+      window._hvSelectedExcelData = null;
+    }
+  }
   if (tgInp)    updates.tg_name    = tgInp;
   // Mark as confirmed by admin whenever names are saved
   updates.name_confirmed = true;
