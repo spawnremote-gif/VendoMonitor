@@ -3362,7 +3362,7 @@ async function ahSubmit() {
 (function() {
   const ov = document.createElement('div');
   ov.id = 'hv-overlay-records';
-  ov.style.cssText = 'display:none;position:fixed;top:132px;left:0;width:100%;height:calc(100vh - 132px);background:#f0f4ff;z-index:9999;box-sizing:border-box;font-family:system-ui,sans-serif;font-size:13px;color:#1a1d2e;display:none;flex-direction:column;';
+  ov.style.cssText = 'display:none;position:fixed;top:132px;left:0;width:100%;height:calc(100vh - 132px);background:#f0f4ff;z-index:9999;box-sizing:border-box;font-family:system-ui,sans-serif;font-size:13px;color:#1a1d2e;overflow:hidden;';
   ov.innerHTML = `
     <div style="background:#1e3cb8;color:#fff;padding:8px 16px;display:flex;align-items:center;justify-content:space-between;gap:10px;flex-shrink:0;position:sticky;top:0;z-index:10;">
       <div style="display:flex;align-items:center;gap:12px;">
@@ -3785,8 +3785,10 @@ var H_hvo;
 let hvoHarvests = [], hvoRoutes = [], hvoRouteItems = [];
 
 async function hvoSbGet(path) {
-  if (!H_hvo) H_hvo = { 'apikey': SB_KEY, 'Authorization': 'Bearer ' + SB_KEY };
-  const r = await fetch(SB_URL + path, { headers: H_hvo });
+  const _SBU = 'https://cviraqfhphhsonjmrtvu.supabase.co';
+  const _SBK = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImN2aXJhcWZocGhoc29uam1ydHZ1Iiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc3NTY5NjYxOSwiZXhwIjoyMDkxMjcyNjE5fQ.qLPX_TW2U6W51nbOiotRdjUoofXnoWHi3oNfcIDmsek';
+  if (!H_hvo) H_hvo = { 'apikey': _SBK, 'Authorization': 'Bearer ' + _SBK };
+  const r = await fetch(_SBU + path, { headers: H_hvo });
   if (!r.ok) throw new Error('HTTP ' + r.status);
   return r.json();
 }
