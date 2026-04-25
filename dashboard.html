@@ -133,6 +133,35 @@ tr:hover td{background:#f8f9ff;cursor:pointer}
 .todo-text.done{text-decoration:line-through;color:var(--mu)}
 .note-input{border:1px solid var(--bd);border-radius:5px;padding:4px 8px;font-size:11px;width:200px;outline:none;color:var(--t);font-family:inherit}
 .note-input:focus{border-color:#1565c0}
+
+/* ── RECONCILIATION PANEL (panel-devices) ── */
+.rc-stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:8px;margin-bottom:14px;}
+.rc-stat{background:#fff;border:1px solid var(--bd);border-radius:8px;padding:10px 12px;}
+.rc-stat .sl{font-size:9px;color:var(--mu);text-transform:uppercase;letter-spacing:.05em;margin-bottom:2px;}
+.rc-stat .sv{font-size:18px;font-weight:700;}
+.rc-date-block{background:#fff;border:2px solid var(--bd);border-radius:12px;padding:14px 16px;margin-bottom:16px;}
+.rc-date-hdr{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;flex-wrap:wrap;gap:8px;}
+.rc-collector-block{background:#f8faff;border:1.5px solid #e5e7eb;border-radius:10px;padding:12px;margin-bottom:8px;}
+.rc-collector-hdr{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;padding-bottom:8px;border-bottom:2px solid var(--bd);}
+.rc-collector-name{font-size:14px;font-weight:700;color:var(--t);}
+.rc-route-block{background:#f0f4ff;border:1px solid #dde3f5;border-radius:8px;padding:12px;margin-bottom:8px;}
+.rc-route-hdr{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;}
+.rc-route-code{font-size:13px;font-weight:700;color:#1e3cb8;letter-spacing:.1em;}
+.rc-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px;margin-bottom:8px;}
+.rc-box{border-radius:6px;padding:8px;text-align:center;}
+.rc-box .val{font-size:14px;font-weight:700;}
+.rc-box .lbl{font-size:9px;color:var(--mu);margin-top:2px;}
+.rc-pill{display:inline-block;padding:2px 8px;border-radius:10px;font-size:9px;font-weight:700;}
+.rc-pill.green{background:#dcfce7;color:#15803d;}
+.rc-pill.amber{background:#fef3c7;color:#92400e;}
+.rc-pill.blue{background:#dbeafe;color:#1e3cb8;}
+.rc-pill.gray{background:#f3f4f6;color:#6b7280;}
+.diff-ok{color:#15803d;}.diff-warn{color:#d97706;}.diff-bad{color:#dc2626;}
+.rc-filter-row{display:flex;gap:8px;align-items:center;margin-bottom:12px;flex-wrap:wrap;}
+.rc-filter-row input,.rc-filter-row select{padding:6px 10px;border:1.5px solid var(--bd);border-radius:7px;font-size:11px;font-family:inherit;outline:none;background:#fff;}
+.rc-filter-row input:focus,.rc-filter-row select:focus{border-color:#1e3cb8;}
+.rc-summary-bar{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:12px;}
+.rc-chip{padding:4px 12px;border-radius:20px;background:#eef2ff;color:#1e3cb8;font-size:11px;font-weight:700;display:flex;align-items:center;gap:4px;}
 </style>
 </head>
 <body>
@@ -210,14 +239,14 @@ tr:hover td{background:#f8f9ff;cursor:pointer}
       <span class="nl">Vendos</span>
     </button>
     <!-- Harvest -->
-    <button onclick="showP('harvest',this);setTimeout(function(){if(typeof hvShowTab==='function')hvShowTab('route',document.getElementById('hbtn-route'));window._hvLoading=false;if(typeof hvLoadVendos==='function')hvLoadVendos();setTimeout(()=>{if(typeof hvRefreshPendingRoutes==='function')hvRefreshPendingRoutes();},800);var fab=document.getElementById('hv-refresh-fab');if(fab)fab.classList.add('visible');},300)">
+    <button data-panel="harvest" onclick="showP('harvest',this);setTimeout(function(){if(typeof hvShowTab==='function')hvShowTab('route',document.getElementById('hbtn-route'));window._hvLoading=false;if(typeof hvLoadVendos==='function')hvLoadVendos();setTimeout(()=>{if(typeof hvRefreshPendingRoutes==='function')hvRefreshPendingRoutes();},800);var fab=document.getElementById('hv-refresh-fab');if(fab)fab.classList.add('visible');},300)">
       <div class="ni" style="background:#d1fae5">
         <svg width="13" height="13" viewBox="0 0 24 24" fill="none"><path d="M12 3 C8 3 4 7 4 12 C4 16 8 20 12 20 C16 20 20 16 20 12" stroke="#16a34a" stroke-width="2" fill="none" stroke-linecap="round"/><path d="M12 3 C14 6 18 6 20 3" stroke="#16a34a" stroke-width="2" fill="none" stroke-linecap="round"/><path d="M12 8 L12 16 M9 13 L12 16 L15 13" stroke="#16a34a" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" fill="none"/></svg>
       </div>
       <span class="nl">Harvest</span>
     </button>
     <!-- Suspicious -->
-    <button onclick="showP('suspicious',this);loadSuspicious()">
+    <button data-panel="suspicious" onclick="showP('suspicious',this);loadSuspicious()">
       <span class="nbadge r" id="nav-sus-badge"></span>
       <div class="ni" style="background:#fee2e2">
         <svg width="13" height="13" viewBox="0 0 24 24" fill="none"><path d="M12 3 L22 20 H2 Z" fill="#fee2e2" stroke="#dc2626" stroke-width="2" stroke-linejoin="round"/><line x1="12" y1="9" x2="12" y2="14" stroke="#dc2626" stroke-width="2" stroke-linecap="round"/><circle cx="12" cy="17.5" r="1" fill="#dc2626"/></svg>
@@ -4194,13 +4223,18 @@ async function hvLoadRecords() { hvLoadRecordDates(); }
   </div>
 </div>
 
-<!-- ══ DEVICES ══ -->
+<!-- ══ DEVICES / RECONCILIATION ══ -->
 <div id="panel-devices" class="panel">
-  <div style="display:flex;align-items:center;justify-content:center;height:300px;flex-direction:column;gap:10px;">
-    <div style="font-size:32px;">🔧</div>
-    <div style="font-size:14px;font-weight:600;color:#374151;">Devices panel</div>
-    <div style="font-size:12px;color:#9ca3af;">Coming soon</div>
+  <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;flex-wrap:wrap;gap:8px;">
+    <div>
+      <div style="font-size:16px;font-weight:700;color:#1565c0;">⚖️ Harvest Reconciliation</div>
+      <div style="font-size:11px;color:#6b7280;margin-top:3px;">Coin net vs Telegram income · by harvest date · skipped excluded</div>
+    </div>
+    <button class="btn p" onclick="loadReconciliation()" style="font-size:11px;">⟳ Refresh</button>
   </div>
+  <div id="dev-rc-status" style="margin-bottom:10px;"></div>
+  <div class="rc-stats" id="dev-rc-stats"></div>
+  <div id="dev-rc-content"><div style="text-align:center;padding:40px;color:#9ca3af;">⏳ Loading reconciliation…</div></div>
 </div>
 
 <!-- ══ ANALYTICS ══ -->
@@ -5382,126 +5416,200 @@ function closeSuspiciousDetail() {
 }
 
 // ══════════════════════════════════════════════════════════
-// DEVICES
+// DEVICES / RECONCILIATION
 // ══════════════════════════════════════════════════════════
 async function loadDevices() { loadReconciliation(); }
 
+const RC_DEFAULT_START = '2026-03-01';
+
 async function loadReconciliation() {
-  const list = document.getElementById('hrc-routes-list');
-  if (!list) return;
-  list.innerHTML = '<div class="hrc-empty">Loading...</div>';
+  const content = document.getElementById('dev-rc-content');
+  const grandStats = document.getElementById('dev-rc-stats');
+  const statusBar = document.getElementById('dev-rc-status');
+  if (!content) return;
+  content.innerHTML = '<div style="text-align:center;padding:40px;color:#9ca3af;">⏳ Loading harvest records…</div>';
+  if (grandStats) grandStats.innerHTML = '';
+  if (statusBar) statusBar.innerHTML = '';
   try {
-    const rr = await fetch('https://cviraqfhphhsonjmrtvu.supabase.co/rest/v1/routes?order=created_at.desc&limit=30', {
-      headers: { 'apikey': 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImN2aXJhcWZocGhoc29uam1ydHZ1Iiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc3NTY5NjYxOSwiZXhwIjoyMDkxMjcyNjE5fQ.qLPX_TW2U6W51nbOiotRdjUoofXnoWHi3oNfcIDmsek', 'Authorization': 'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImN2aXJhcWZocGhoc29uam1ydHZ1Iiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc3NTY5NjYxOSwiZXhwIjoyMDkxMjcyNjE5fQ.qLPX_TW2U6W51nbOiotRdjUoofXnoWHi3oNfcIDmsek' }
-    });
-    const routes = await rr.json();
-    if (!routes || !routes.length) {
-      list.innerHTML = '<div class="hrc-empty">No routes yet.<br>Create one in Harvest tab.</div>';
+    // 1. Load all harvests
+    const rh = await fetch(SB_URL + '/rest/v1/harvests?select=*&order=harvest_date.desc,created_at.desc&limit=1000', { headers: HDR });
+    const allHarvests = await rh.json() || [];
+    if (!allHarvests.length) {
+      content.innerHTML = '<div style="text-align:center;padding:40px;color:#9ca3af;">No harvest records yet. Complete a harvest route first.</div>';
       return;
     }
-    list.innerHTML = '';
-    for (const rt of routes) {
-      const card = await buildReconCard(rt);
-      list.appendChild(card);
-    }
+
+    // 2. Build window map (tg_name → harvest_window_start)
+    const windowMap = {};
+    allHarvests.forEach(h => { if (h.tg_name && h.harvest_window_start) windowMap[h.tg_name] = h.harvest_window_start; });
+
+    // 3. Fetch TG income per vendo (paginated)
+    const allTgNames = [...new Set(allHarvests.map(h => h.tg_name).filter(Boolean))];
+    content.innerHTML = `<div style="text-align:center;padding:40px;color:#9ca3af;">⏳ Fetching TG income for ${allTgNames.length} vendos…</div>`;
+    const tgMap = {};
+
+    await Promise.all(allTgNames.map(async tgName => {
+      const start = windowMap[tgName] || RC_DEFAULT_START;
+      const vendoHarvests = allHarvests.filter(h => h.tg_name === tgName);
+      const latestDate = vendoHarvests.map(h => h.harvest_date).sort().pop();
+      if (!latestDate) return;
+      let allRows = [], page = 0, pageSize = 1000;
+      while (true) {
+        try {
+          const r = await fetch(
+            `${SB_URL}/rest/v1/transactions?vendo=eq.${encodeURIComponent(tgName)}&date=gte.${start}&date=lte.${latestDate}&is_skipped=eq.false&select=amount,date`,
+            { headers: { ...HDR, 'Range': `${page*pageSize}-${(page+1)*pageSize-1}`, 'Prefer': 'count=none' } }
+          );
+          const rows = await r.json() || [];
+          allRows = allRows.concat(rows);
+          if (rows.length < pageSize) break;
+          page++;
+        } catch(e) { break; }
+      }
+      tgMap[tgName] = {};
+      allRows.forEach(tx => {
+        if (!tgMap[tgName][tx.date]) tgMap[tgName][tx.date] = 0;
+        tgMap[tgName][tx.date] += parseFloat(tx.amount) || 0;
+      });
+      tgMap[tgName]._total = allRows.reduce((s, tx) => s + (parseFloat(tx.amount) || 0), 0);
+    }));
+
+    // 4. Group by harvest_date → collector → route_code
+    const byDate = {};
+    allHarvests.forEach(h => {
+      const d = h.harvest_date;
+      if (!byDate[d]) byDate[d] = [];
+      byDate[d].push(h);
+    });
+    const dates = Object.keys(byDate).sort((a,b) => b.localeCompare(a));
+
+    // 5. Render
+    const fmtP = v => '₱' + Number(v||0).toLocaleString('en-PH', {minimumFractionDigits:2});
+    let html = '';
+    let grandCoinNet = 0, grandTgTotal = 0;
+
+    dates.forEach(date => {
+      const harvests = byDate[date];
+      const byCollector = {};
+      harvests.forEach(h => {
+        const col = h.collector || '—';
+        if (!byCollector[col]) byCollector[col] = {};
+        const rc = h.route_code || 'No route';
+        if (!byCollector[col][rc]) byCollector[col][rc] = [];
+        byCollector[col][rc].push(h);
+      });
+
+      const getTgAmt = (h) => {
+        if (!h.tg_name || !tgMap[h.tg_name]) return 0;
+        const win = windowMap[h.tg_name] || RC_DEFAULT_START;
+        let amt = 0;
+        Object.entries(tgMap[h.tg_name]).forEach(([d, v]) => { if (d >= win && d <= date) amt += v; });
+        return amt;
+      };
+
+      const dateCoinNet = harvests.reduce((s,h) => s + (parseFloat(h.net_collectible)||0), 0);
+      const dateTgTotal = harvests.reduce((s,h) => s + getTgAmt(h), 0);
+      grandCoinNet += dateCoinNet;
+      grandTgTotal += dateTgTotal;
+
+      const diff = dateCoinNet - dateTgTotal;
+      const diffCls = Math.abs(diff)<200 ? 'diff-ok' : diff>0 ? 'diff-warn' : 'diff-bad';
+      const diffTxt = Math.abs(diff)<200 ? '✅ Match' : diff>0 ? `⚠ Coins +${fmtP(Math.abs(diff))}` : `🔴 TG +${fmtP(Math.abs(diff))}`;
+
+      html += `<div class="rc-date-block">
+        <div class="rc-date-hdr">
+          <div>
+            <div style="font-size:16px;font-weight:700;color:#1a1d2e;">📅 ${date}</div>
+            <div style="font-size:10px;color:#6b7280;margin-top:2px;">${harvests.length} record${harvests.length!==1?'s':''} · ${Object.keys(byCollector).length} collector${Object.keys(byCollector).length!==1?'s':''}</div>
+          </div>
+          <div style="text-align:right;">
+            <div class="${diffCls}" style="font-size:14px;font-weight:700;">${diffTxt}</div>
+            <div style="font-size:10px;color:#6b7280;">Coin ${fmtP(dateCoinNet)} vs TG ${fmtP(dateTgTotal)}</div>
+          </div>
+        </div>`;
+
+      Object.entries(byCollector).forEach(([collector, routes]) => {
+        const allItems = Object.values(routes).flat();
+        const colCoin = allItems.reduce((s,h) => s + (parseFloat(h.net_collectible)||0), 0);
+        const colTg   = allItems.reduce((s,h) => s + getTgAmt(h), 0);
+        const colDiff = colCoin - colTg;
+        const colDiffCls = Math.abs(colDiff)<200 ? 'diff-ok' : colDiff>0 ? 'diff-warn' : 'diff-bad';
+
+        html += `<div class="rc-collector-block">
+          <div class="rc-collector-hdr">
+            <div class="rc-collector-name">👤 ${collector}</div>
+            <div class="${colDiffCls}" style="font-weight:700;font-size:13px;">Coin ${fmtP(colCoin)} · TG ${fmtP(colTg)} · ${Math.abs(colDiff)<200?'✅ Match':colDiff>0?'⚠ +'+fmtP(Math.abs(colDiff)):'🔴 -'+fmtP(Math.abs(colDiff))}</div>
+          </div>`;
+
+        Object.entries(routes).forEach(([rc, items]) => {
+          const routeCoin = items.reduce((s,h) => s + (parseFloat(h.net_collectible)||0), 0);
+          const routeTg   = items.reduce((s,h) => s + getTgAmt(h), 0);
+          const routeDiff = routeCoin - routeTg;
+          const rdCls = Math.abs(routeDiff)<100 ? 'diff-ok' : routeDiff>0 ? 'diff-warn' : 'diff-bad';
+          const isAdmin = !rc || rc === 'No route' || rc.toUpperCase() === 'ADMIN';
+          const srcBadge = isAdmin
+            ? '<span class="rc-pill amber" style="font-size:8px;">🔧 Admin</span>'
+            : '<span class="rc-pill blue" style="font-size:8px;">📱 PWA</span>';
+
+          html += `<div class="rc-route-block">
+            <div class="rc-route-hdr">
+              <div style="display:flex;align-items:center;gap:8px;">
+                <span class="rc-route-code">🧾 ${rc}</span>${srcBadge}
+              </div>
+              <div class="${rdCls}" style="font-weight:700;font-size:12px;">${Math.abs(routeDiff)<100?'✅ Match':routeDiff>0?'⚠ Coins +'+fmtP(Math.abs(routeDiff)):'🔴 TG +'+fmtP(Math.abs(routeDiff))}</div>
+            </div>
+            <div class="rc-grid">
+              <div class="rc-box" style="background:#f0fdf4;"><div class="val" style="color:#15803d;">${fmtP(routeCoin)}</div><div class="lbl">Coin net</div></div>
+              <div class="rc-box" style="background:#eef2ff;"><div class="val" style="color:#1e3cb8;">${fmtP(routeTg)}</div><div class="lbl">TG income</div></div>
+              <div class="rc-box" style="background:#fafbff;"><div class="val ${rdCls}">${fmtP(Math.abs(routeDiff))}</div><div class="lbl">${routeDiff>=0?'Surplus':'Deficit'}</div></div>
+            </div>
+            <div style="overflow-x:auto;">
+            <table>
+              <thead><tr>
+                <th>Vendo</th><th>TG Name</th><th>Window</th>
+                <th>Coin Net</th><th>TG Income</th><th>Diff</th>
+              </tr></thead>
+              <tbody>${items.map(h => {
+                const coin = parseFloat(h.net_collectible||0);
+                const tgAmt = getTgAmt(h);
+                const gap = coin - tgAmt;
+                const gapCls = Math.abs(gap)<50 ? 'diff-ok' : gap>0 ? 'diff-warn' : 'diff-bad';
+                const rowBg = Math.abs(gap)<50 ? '' : gap>0 ? 'background:#fffbeb;' : 'background:#fef2f2;';
+                const win = windowMap[h.tg_name] || RC_DEFAULT_START;
+                return `<tr style="${rowBg}">
+                  <td><b>${h.vendo_name||h.tg_name||'—'}</b>${h.admin_notes?`<div style="font-size:9px;color:#92400e;">📝 ${h.admin_notes}</div>`:''}</td>
+                  <td style="color:#6b7280;font-size:10px;">${h.tg_name||'—'}</td>
+                  <td style="color:#6b7280;font-size:10px;">${win} → ${date}</td>
+                  <td style="font-weight:700;color:#15803d;">${fmtP(coin)}</td>
+                  <td style="color:${tgAmt>0?'#1a1d2e':'#9ca3af'};">${fmtP(tgAmt)}</td>
+                  <td class="${gapCls}" style="font-weight:700;">${Math.abs(gap)<50?'✅':gap>0?'+'+fmtP(Math.abs(gap)):'-'+fmtP(Math.abs(gap))}</td>
+                </tr>`;
+              }).join('')}</tbody>
+            </table>
+            </div>
+          </div>`;
+        });
+        html += '</div>';
+      });
+      html += '</div>';
+    });
+
+    // Grand stats
+    const grandDiff = grandCoinNet - grandTgTotal;
+    const grandCls = Math.abs(grandDiff)<500 ? 'diff-ok' : grandDiff>0 ? 'diff-warn' : 'diff-bad';
+    if (grandStats) grandStats.innerHTML = `
+      <div class="rc-stat"><div class="sl">Harvest Dates</div><div class="sv" style="color:#1565c0;">${dates.length}</div></div>
+      <div class="rc-stat"><div class="sl">Total Records</div><div class="sv" style="color:#1565c0;">${allHarvests.length}</div></div>
+      <div class="rc-stat"><div class="sl">Grand Coin Net</div><div class="sv" style="color:#15803d;">${fmtP(grandCoinNet)}</div></div>
+      <div class="rc-stat"><div class="sl">Grand TG Total</div><div class="sv" style="color:#1565c0;">${fmtP(grandTgTotal)}</div></div>
+      <div class="rc-stat"><div class="sl">Net Difference</div><div class="sv ${grandCls}">${fmtP(Math.abs(grandDiff))}</div></div>
+    `;
+    if (statusBar) statusBar.innerHTML = `<div style="font-size:10px;color:#6b7280;">✅ Loaded ${allHarvests.length} harvests · ${allTgNames.length} vendos fetched</div>`;
+    content.innerHTML = html;
+
   } catch(e) {
-    if (list) list.innerHTML = '<div class="hrc-empty" style="color:#dc2626;">Error: ' + e.message + '</div>';
+    if (content) content.innerHTML = `<div style="text-align:center;padding:40px;color:#dc2626;">❌ Error: ${e.message}</div>`;
   }
-}
-
-async function buildReconCard(rt) {
-  const div = document.createElement('div');
-  div.className = 'hrc-route-card';
-  let harvests = [], coinNet = 0, tgTotal = 0;
-  try {
-    const rh = await fetch('https://cviraqfhphhsonjmrtvu.supabase.co/rest/v1/harvests?route_code=eq.' + rt.route_code + '&select=vendo_name,tg_name,net_collectible,coins_total,coins_free,coins_old', {
-      headers: { 'apikey': 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImN2aXJhcWZocGhoc29uam1ydHZ1Iiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc3NTY5NjYxOSwiZXhwIjoyMDkxMjcyNjE5fQ.qLPX_TW2U6W51nbOiotRdjUoofXnoWHi3oNfcIDmsek', 'Authorization': 'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImN2aXJhcWZocGhoc29uam1ydHZ1Iiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc3NTY5NjYxOSwiZXhwIjoyMDkxMjcyNjE5fQ.qLPX_TW2U6W51nbOiotRdjUoofXnoWHi3oNfcIDmsek' }
-    });
-    harvests = await rh.json() || [];
-    coinNet = harvests.reduce(function(s,h){ return s+(parseFloat(h.net_collectible)||0); }, 0);
-    if (rt.route_date && harvests.length) {
-      const tgNames = harvests.map(function(h){ return h.tg_name; }).filter(Boolean);
-      const rTG = await fetch('https://cviraqfhphhsonjmrtvu.supabase.co/rest/v1/transactions?date=eq.' + rt.route_date + '&select=amount,vendo&limit=5000', {
-        headers: { 'apikey': 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImN2aXJhcWZocGhoc29uam1ydHZ1Iiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc3NTY5NjYxOSwiZXhwIjoyMDkxMjcyNjE5fQ.qLPX_TW2U6W51nbOiotRdjUoofXnoWHi3oNfcIDmsek', 'Authorization': 'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImN2aXJhcWZocGhoc29uam1ydHZ1Iiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc3NTY5NjYxOSwiZXhwIjoyMDkxMjcyNjE5fQ.qLPX_TW2U6W51nbOiotRdjUoofXnoWHi3oNfcIDmsek' }
-      });
-      const txData = await rTG.json() || [];
-      txData.forEach(function(tx) {
-        if (tgNames.indexOf(tx.vendo) >= 0) tgTotal += (parseFloat(tx.amount)||0);
-      });
-    }
-  } catch(e) { console.error(e); }
-
-  const diff = coinNet - tgTotal;
-  const matchCls = Math.abs(diff) < 100 ? 'ok' : Math.abs(diff) < 500 ? 'warn' : 'bad';
-  const matchTxt = Math.abs(diff) < 100 ? '✅ Match' : diff > 0 ? '⚠ Coins higher +₱' + Math.abs(diff).toLocaleString() : '🔴 TG higher +₱' + Math.abs(diff).toLocaleString();
-  const badgeCls = rt.status === 'completed' ? 'completed' : 'active';
-  const created  = rt.created_at ? new Date(rt.created_at).toLocaleString('en-PH',{month:'short',day:'numeric',hour:'2-digit',minute:'2-digit',hour12:true}) : '';
-
-  div.innerHTML = '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px;">'
-    + '<span class="hrc-rc">' + rt.route_code + '</span>'
-    + '<span class="hrc-badge ' + badgeCls + '">' + (rt.status||'active') + '</span></div>'
-    + '<div style="font-size:10px;color:#6b7280;margin-bottom:8px;">'
-      + '<b>' + rt.collector + '</b> · ' + (rt.route_date||'—') + ' · ' + (rt.area||'all') + ' · ' + created
-    + '</div>'
-    + (harvests.length ? '<div class="hrc-grid">'
-        + '<div class="hrc-stat"><div class="hrc-stat-val">₱' + coinNet.toLocaleString('en-PH',{minimumFractionDigits:2}) + '</div><div class="hrc-stat-lbl">Coin net</div></div>'
-        + '<div class="hrc-stat"><div class="hrc-stat-val" style="color:' + (tgTotal>0?'#16a34a':'#9ca3af') + '">₱' + tgTotal.toLocaleString('en-PH',{minimumFractionDigits:2}) + '</div><div class="hrc-stat-lbl">TG income</div></div>'
-        + '<div class="hrc-stat"><div class="hrc-stat-val" style="color:' + (Math.abs(diff)<100?'#16a34a':diff>0?'#d97706':'#dc2626') + '">₱' + Math.abs(diff).toLocaleString('en-PH',{minimumFractionDigits:2}) + '</div><div class="hrc-stat-lbl">' + (diff>=0?'Surplus':'Deficit') + '</div></div>'
-      + '</div>'
-      + '<div class="hrc-match ' + matchCls + '">' + matchTxt + '</div>'
-      + '<div style="margin-top:8px;border-top:1px solid #f0f0f0;padding-top:6px;">'
-        + harvests.map(function(h){
-            return '<div class="hrc-row"><span style="color:#374151;">' + (h.vendo_name||h.tg_name||'—') + '</span><span style="font-weight:700;color:#16a34a;">₱' + parseFloat(h.net_collectible||0).toLocaleString('en-PH',{minimumFractionDigits:2}) + '</span></div>';
-          }).join('')
-      + '</div>'
-    : '<div style="font-size:10px;color:#9ca3af;margin-bottom:8px;">No harvest records yet for this route.</div>')
-    + '<div class="hrc-actions">'
-      + '<button class="hrc-btn green" onclick="markRouteDone(' + JSON.stringify(rt.route_code) + ',this)">✅ Mark done</button>'
-      + '<button class="hrc-btn red" onclick="deleteRoute(' + JSON.stringify(rt.id) + ',this)">🗑 Delete</button>'
-    + '</div>';
-  return div;
-}
-
-async function markRouteDone(code, btn) {
-  if (!confirm('Mark route ' + code + ' as completed?')) return;
-  btn.textContent = 'Saving...'; btn.disabled = true;
-  try {
-    await fetch('https://cviraqfhphhsonjmrtvu.supabase.co/rest/v1/routes?route_code=eq.' + code, {
-      method: 'PATCH',
-      headers: { 'apikey': 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImN2aXJhcWZocGhoc29uam1ydHZ1Iiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc3NTY5NjYxOSwiZXhwIjoyMDkxMjcyNjE5fQ.qLPX_TW2U6W51nbOiotRdjUoofXnoWHi3oNfcIDmsek', 'Authorization': 'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImN2aXJhcWZocGhoc29uam1ydHZ1Iiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc3NTY5NjYxOSwiZXhwIjoyMDkxMjcyNjE5fQ.qLPX_TW2U6W51nbOiotRdjUoofXnoWHi3oNfcIDmsek', 'Content-Type': 'application/json', 'Prefer': 'return=minimal' },
-      body: JSON.stringify({ status: 'completed' })
-    });
-    loadReconciliation();
-  } catch(e) { alert('Error: ' + e.message); btn.textContent = '✅ Mark done'; btn.disabled = false; }
-}
-
-async function deleteRoute(routeId, btn) {
-  if (!confirm('Delete this route? This cannot be undone.')) return;
-  btn.textContent = 'Deleting...'; btn.disabled = true;
-  try {
-    await fetch('https://cviraqfhphhsonjmrtvu.supabase.co/rest/v1/route_items?route_id=eq.' + routeId, {
-      method: 'DELETE',
-      headers: { 'apikey': 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImN2aXJhcWZocGhoc29uam1ydHZ1Iiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc3NTY5NjYxOSwiZXhwIjoyMDkxMjcyNjE5fQ.qLPX_TW2U6W51nbOiotRdjUoofXnoWHi3oNfcIDmsek', 'Authorization': 'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImN2aXJhcWZocGhoc29uam1ydHZ1Iiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc3NTY5NjYxOSwiZXhwIjoyMDkxMjcyNjE5fQ.qLPX_TW2U6W51nbOiotRdjUoofXnoWHi3oNfcIDmsek' }
-    });
-    await fetch('https://cviraqfhphhsonjmrtvu.supabase.co/rest/v1/routes?id=eq.' + routeId, {
-      method: 'DELETE',
-      headers: { 'apikey': 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImN2aXJhcWZocGhoc29uam1ydHZ1Iiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc3NTY5NjYxOSwiZXhwIjoyMDkxMjcyNjE5fQ.qLPX_TW2U6W51nbOiotRdjUoofXnoWHi3oNfcIDmsek', 'Authorization': 'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImN2aXJhcWZocGhoc29uam1ydHZ1Iiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc3NTY5NjYxOSwiZXhwIjoyMDkxMjcyNjE5fQ.qLPX_TW2U6W51nbOiotRdjUoofXnoWHi3oNfcIDmsek' }
-    });
-    btn.closest('.hrc-route-card').remove();
-  } catch(e) { alert('Error: ' + e.message); btn.textContent = '🗑 Delete'; btn.disabled = false; }
-}
-
-
-async function markRouteComplete(code) {
-  if (!confirm('Mark route ' + code + ' as completed?')) return;
-  try {
-    await fetch('https://cviraqfhphhsonjmrtvu.supabase.co/rest/v1/routes?route_code=eq.' + code, {
-      method: 'PATCH',
-      headers: { 'apikey': 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImN2aXJhcWZocGhoc29uam1ydHZ1Iiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc3NTY5NjYxOSwiZXhwIjoyMDkxMjcyNjE5fQ.qLPX_TW2U6W51nbOiotRdjUoofXnoWHi3oNfcIDmsek', 'Authorization': 'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImN2aXJhcWZocGhoc29uam1ydHZ1Iiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc3NTY5NjYxOSwiZXhwIjoyMDkxMjcyNjE5fQ.qLPX_TW2U6W51nbOiotRdjUoofXnoWHi3oNfcIDmsek', 'Content-Type': 'application/json', 'Prefer': 'return=minimal' },
-      body: JSON.stringify({ status: 'completed' })
-    });
-    loadRoutes();
-  } catch(e) { alert('Error: ' + e.message); }
 }
 
 
@@ -5962,6 +6070,22 @@ async function checkWebhookHealth() {
   // Railway Telethon replaced the webhook — nothing to check
   const btn = document.getElementById("webhook-btn");
   if (btn) { btn.style.display = "none"; }
+}
+
+function showAlert(msg, type) {
+  let el = document.getElementById('_global-alert');
+  if (!el) {
+    el = document.createElement('div');
+    el.id = '_global-alert';
+    el.style.cssText = 'position:fixed;top:60px;left:50%;transform:translateX(-50%);z-index:9999;padding:9px 20px;border-radius:8px;font-size:13px;font-weight:700;font-family:system-ui,sans-serif;box-shadow:0 4px 16px rgba(0,0,0,.2);pointer-events:none;transition:opacity .3s;';
+    document.body.appendChild(el);
+  }
+  el.style.background = type === 'ok' ? '#16a34a' : type === 'err' ? '#dc2626' : '#1565c0';
+  el.style.color = '#fff';
+  el.style.opacity = '1';
+  el.textContent = msg;
+  clearTimeout(el._t);
+  el._t = setTimeout(() => { el.style.opacity = '0'; }, 2500);
 }
 
 function showWebhookAlert(type, msg="") {
