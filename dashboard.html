@@ -3362,7 +3362,7 @@ async function ahSubmit() {
 (function() {
   const ov = document.createElement('div');
   ov.id = 'hv-overlay-records';
-  ov.style.cssText = 'display:none;position:fixed;top:132px;left:0;width:100%;height:calc(100vh - 132px);background:#f0f4ff;z-index:9999;box-sizing:border-box;font-family:system-ui,sans-serif;font-size:13px;color:#1a1d2e;overflow:hidden;';
+  ov.style.cssText = 'display:none;position:fixed;top:132px;left:0;width:100%;height:calc(100vh - 132px);background:#f0f4ff;z-index:9999;box-sizing:border-box;font-family:system-ui,sans-serif;font-size:13px;color:#1a1d2e;overflow:hidden;display:flex;flex-direction:column;';
   ov.innerHTML = `
     <div style="background:#1e3cb8;color:#fff;padding:8px 16px;display:flex;align-items:center;justify-content:space-between;gap:10px;flex-shrink:0;position:sticky;top:0;z-index:10;">
       <div style="display:flex;align-items:center;gap:12px;">
@@ -3381,7 +3381,7 @@ async function ahSubmit() {
     </div>
     <div style="flex:1;overflow-y:auto;">
       <!-- HARVESTS PANEL -->
-      <div class="hvo-panel on" id="hvo-panel-harvests" style="padding:14px;">
+      <div class="hvo-panel on" id="hvo-panel-harvests" style="padding:14px;min-height:0;">
         <div id="hvo-harvest-stats" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:8px;margin-bottom:14px;"></div>
         <div style="display:flex;gap:8px;align-items:center;margin-bottom:12px;flex-wrap:wrap;">
           <input type="date" id="hvo-hf-from" onchange="hvoRenderHarvests()" style="padding:6px 10px;border:1.5px solid rgba(30,60,200,.12);border-radius:7px;font-size:11px;font-family:inherit;outline:none;">
@@ -3495,7 +3495,9 @@ function _showOverlay(id) {
   var top = _getOverlayTop();
   el.style.top = top;
   el.style.height = 'calc(100vh - ' + top + ')';
-  el.style.display = 'block';
+  // Records overlay uses flex column for scroll; others use block
+  el.style.display = (id === 'hv-overlay-records') ? 'flex' : 'block';
+  if (id === 'hv-overlay-records') el.style.flexDirection = 'column';
 }
 
 async function hvoRenderReconOverlay(force) {
