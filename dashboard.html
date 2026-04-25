@@ -3357,6 +3357,64 @@ async function ahSubmit() {
 }
 
 
+
+/* ─── RECORDS OVERLAY ─── */
+(function() {
+  const ov = document.createElement('div');
+  ov.id = 'hv-overlay-records';
+  ov.style.cssText = 'display:none;position:fixed;top:132px;left:0;width:100%;height:calc(100vh - 132px);background:#f0f4ff;z-index:9999;box-sizing:border-box;font-family:system-ui,sans-serif;font-size:13px;color:#1a1d2e;display:none;flex-direction:column;';
+  ov.innerHTML = `
+    <div style="background:#1e3cb8;color:#fff;padding:8px 16px;display:flex;align-items:center;justify-content:space-between;gap:10px;flex-shrink:0;position:sticky;top:0;z-index:10;">
+      <div style="display:flex;align-items:center;gap:12px;">
+        <span style="font-size:13px;font-weight:700;">📋 Records &amp; Reconciliation</span>
+        <div style="display:flex;gap:3px;background:rgba(255,255,255,.15);border-radius:8px;padding:3px;">
+          <button class="hvo-tab on" onclick="hvoSwitchTab('harvests',this)" style="padding:5px 14px;border:none;border-radius:6px;background:#fff;color:#1e3cb8;font-size:11px;font-weight:700;cursor:pointer;font-family:inherit;">📋 Harvest Records</button>
+          <button class="hvo-tab" onclick="hvoSwitchTab('recon',this)" style="padding:5px 14px;border:none;border-radius:6px;background:transparent;color:rgba(255,255,255,.85);font-size:11px;font-weight:600;cursor:pointer;font-family:inherit;">⚖️ Reconciliation</button>
+          <button class="hvo-tab" onclick="hvoSwitchTab('routes',this)" style="padding:5px 14px;border:none;border-radius:6px;background:transparent;color:rgba(255,255,255,.85);font-size:11px;font-weight:600;cursor:pointer;font-family:inherit;">🗺 Routes</button>
+        </div>
+      </div>
+      <div style="display:flex;gap:8px;align-items:center;">
+        <span id="hvo-status-pill" style="font-size:10px;padding:3px 10px;border-radius:10px;background:rgba(255,255,255,.2);">Loading…</span>
+        <button onclick="hvoLoadAll()" style="padding:5px 12px;border:1.5px solid rgba(255,255,255,.4);border-radius:7px;background:rgba(255,255,255,.15);color:#fff;font-size:11px;font-weight:700;cursor:pointer;font-family:inherit;">⟳ Refresh</button>
+        <button data-closepop-overlay="hv-overlay-records" style="padding:5px 10px;border:1.5px solid rgba(255,255,255,.4);border-radius:7px;background:rgba(255,255,255,.15);color:#fff;font-size:11px;font-weight:700;cursor:pointer;font-family:inherit;">✕ Close</button>
+      </div>
+    </div>
+    <div style="flex:1;overflow-y:auto;">
+      <!-- HARVESTS PANEL -->
+      <div class="hvo-panel on" id="hvo-panel-harvests" style="padding:14px;">
+        <div id="hvo-harvest-stats" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:8px;margin-bottom:14px;"></div>
+        <div style="display:flex;gap:8px;align-items:center;margin-bottom:12px;flex-wrap:wrap;">
+          <input type="date" id="hvo-hf-from" onchange="hvoRenderHarvests()" style="padding:6px 10px;border:1.5px solid rgba(30,60,200,.12);border-radius:7px;font-size:11px;font-family:inherit;outline:none;">
+          <input type="date" id="hvo-hf-to" onchange="hvoRenderHarvests()" style="padding:6px 10px;border:1.5px solid rgba(30,60,200,.12);border-radius:7px;font-size:11px;font-family:inherit;outline:none;">
+          <input type="text" id="hvo-hf-q" placeholder="🔍 Search vendo, collector..." oninput="hvoRenderHarvests()" style="flex:1;min-width:180px;padding:6px 10px;border:1.5px solid rgba(30,60,200,.12);border-radius:7px;font-size:11px;font-family:inherit;outline:none;">
+          <select id="hvo-hf-collector" onchange="hvoRenderHarvests()" style="padding:6px 10px;border:1.5px solid rgba(30,60,200,.12);border-radius:7px;font-size:11px;font-family:inherit;outline:none;background:#fff;"><option value="">All collectors</option></select>
+          <button onclick="hvoClearFilters()" style="padding:6px 12px;border:1.5px solid rgba(30,60,200,.12);border-radius:7px;background:#fff;font-size:11px;font-weight:700;cursor:pointer;font-family:inherit;">✕ Clear</button>
+        </div>
+        <div id="hvo-harvest-table"><div style="text-align:center;padding:40px;color:#9ca3af;">Loading…</div></div>
+      </div>
+      <!-- RECON PANEL -->
+      <div class="hvo-panel" id="hvo-panel-recon" style="padding:14px;display:none;">
+        <div id="hvo-recon-content"><div style="text-align:center;padding:40px;color:#9ca3af;">⏳ Loading…</div></div>
+      </div>
+      <!-- ROUTES PANEL -->
+      <div class="hvo-panel" id="hvo-panel-routes" style="padding:14px;display:none;">
+        <div id="hvo-route-stats" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:8px;margin-bottom:14px;"></div>
+        <div id="hvo-route-table"><div style="text-align:center;padding:40px;color:#9ca3af;">Loading…</div></div>
+      </div>
+    </div>
+  `;
+  // Close button via delegation
+  ov.addEventListener('click', function(e) {
+    if (e.target.closest('[data-closepop-overlay]')) {
+      ov.style.display = 'none';
+      document.querySelectorAll('#panel-harvest .hv-hvtab').forEach(b=>b.classList.remove('on'));
+      const rb = document.getElementById('hbtn-route');
+      if (rb) rb.classList.add('on');
+    }
+  });
+  document.body.appendChild(ov);
+})();
+
 /* ─── AUDITED VENDOS TAB ─── */
 (function() {
   const div = document.createElement('div');
@@ -3712,9 +3770,9 @@ function hvorOpenPopup(id) {
 }
 
 
-let _hvoLoaded = false;
 function hvRecordsLoad() {
-  if (!_hvoLoaded) { hvoLoadAll(); _hvoLoaded = true; }
+  // Always reload to get fresh data
+  hvoLoadAll();
 }
 
 
@@ -3748,6 +3806,13 @@ async function hvoLoadAll() {
     hvoRenderStats();
     hvoRenderRoutes();
     hvoRenderRecon();
+    // Ensure first tab panel is visible
+    document.querySelectorAll('#hv-overlay-records .hvo-panel').forEach(p=>p.classList.remove('on'));
+    const firstPanel = document.getElementById('hvo-panel-harvests');
+    if (firstPanel) firstPanel.classList.add('on');
+    document.querySelectorAll('#hv-overlay-records .hvo-tab').forEach(b=>b.classList.remove('on'));
+    const firstTab = document.querySelector('#hv-overlay-records .hvo-tab');
+    if (firstTab) firstTab.classList.add('on');
   } catch(e) {
     document.getElementById('hvo-status-pill').textContent = '❌ Error: ' + e.message;
     document.getElementById('hvo-status-pill').style.background = 'rgba(220,38,38,.3)';
@@ -3755,10 +3820,21 @@ async function hvoLoadAll() {
 }
 
 function hvoSwitchTab(tab, btn) {
-  document.querySelectorAll('#hv-overlay-records .hvo-tab').forEach(b => b.classList.remove('on'));
-  document.querySelectorAll('#hv-overlay-records .hvo-panel').forEach(p => p.classList.remove('on'));
+  // Update tab styles
+  document.querySelectorAll('#hv-overlay-records .hvo-tab').forEach(b => {
+    b.style.background = 'transparent';
+    b.style.color = 'rgba(255,255,255,.85)';
+    b.classList.remove('on');
+  });
+  btn.style.background = '#fff';
+  btn.style.color = '#1e3cb8';
   btn.classList.add('on');
-  document.getElementById('hvo-panel-' + tab).classList.add('on');
+  // Show/hide panels
+  document.querySelectorAll('#hv-overlay-records .hvo-panel').forEach(p => p.style.display = 'none');
+  const panel = document.getElementById('hvo-panel-' + tab);
+  if (panel) panel.style.display = 'block';
+  // Load recon if needed
+  if (tab === 'recon') hvoRenderRecon();
 }
 
 function hvoPopCollector() {
