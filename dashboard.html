@@ -3508,8 +3508,8 @@ async function hvoRenderReconOverlay(force) {
   const DS  = RC_DEFAULT_START;
 
   // Collector avatar helper
-  const CICONS = {tandoy:'🧑',enym:'👩',admin:'🔧',pwa:'📱'};
-  function cIcon(n) { const l=(n||'').toLowerCase(); for(const[k,v] of Object.entries(CICONS)) if(l.includes(k)) return v; return '👤'; }
+
+  const cIcon = (n) => collSvg(n);
 
   try {
     const rh = await fetch(SB_URL + '/rest/v1/harvests?select=*&order=harvest_date.desc,created_at.desc&limit=1000', { headers: H2 });
@@ -3599,7 +3599,7 @@ async function hvoRenderReconOverlay(force) {
         _hvrReconData = _hvrReconData || {};
         _hvrReconData[popId] = {col, date, cItems, cCoin, cTg, cDiff, routes, winMap, DS};
         html += '<div data-reconpop="' + popId + '" style="background:#fff;border:1.5px solid #dde3f5;border-radius:12px;padding:14px;cursor:pointer;transition:.15s;text-align:center;" onmouseover="this.style.borderColor=\'#1e3cb8\';this.style.background=\'#f0f4ff\'" onmouseout="this.style.borderColor=\'#dde3f5\';this.style.background=\'#fff\'">' 
-          + '<div style="font-size:36px;margin-bottom:6px;">' + icon + '</div>'
+          + '<div style="margin-bottom:8px;">' + icon + '</div>'
           + '<div style="font-size:13px;font-weight:700;color:#1a1d2e;margin-bottom:2px;">' + col + '</div>'
           + '<div style="font-size:10px;color:#6b7280;margin-bottom:8px;">' + cItems.length + ' vendo' + (cItems.length!==1?'s':'') + '</div>'
           + '<div style="margin-bottom:4px;">'
@@ -3895,12 +3895,18 @@ function hvoRenderHarvests() {
   rows.forEach(h => { const d = h.harvest_date; if (!byDate[d]) byDate[d]=[]; byDate[d].push(h); });
   const dates = Object.keys(byDate).sort((a,b)=>b.localeCompare(a));
 
-  function collIcon(name) {
-    const m = {tandoy:'🧑',enym:'👩',admin:'🔧',pwa:'📱'};
-    const l = (name||'').toLowerCase();
-    for (const [k,v] of Object.entries(m)) if (l.includes(k)) return v;
-    return '👤';
-  }
+function collSvg(name) {
+  const l = (name||'').toLowerCase();
+  if (l.includes('tandoy')) return '<svg width="64" height="64" viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg"><circle cx="32" cy="32" r="30" fill="#dbeafe" stroke="#1e40af" stroke-width="1.5"/><rect x="20" y="10" width="24" height="6" rx="3" fill="#1e3a8a"/><rect x="18" y="13" width="28" height="4" rx="2" fill="#1d4ed8"/><circle cx="32" cy="27" r="11" fill="#93c5fd" stroke="#1d4ed8" stroke-width="1.5"/><circle cx="28" cy="26" r="1.8" fill="#1e3a8a"/><circle cx="36" cy="26" r="1.8" fill="#1e3a8a"/><path d="M28 31 Q32 34 36 31" stroke="#1e3a8a" stroke-width="1.5" fill="none" stroke-linecap="round"/><path d="M12 56 Q12 42 32 42 Q52 42 52 56Z" fill="#1d4ed8"/></svg>';
+  if (l.includes('enym')) return '<svg width="64" height="64" viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg"><circle cx="32" cy="32" r="30" fill="#fce7f3" stroke="#9d174d" stroke-width="1.5"/><path d="M20 16 Q32 6 44 16 Q44 10 32 10 Q20 10 20 16Z" fill="#9d174d"/><ellipse cx="23" cy="15" rx="3" ry="3.5" fill="#fbbf24"/><ellipse cx="41" cy="15" rx="3" ry="3.5" fill="#fbbf24"/><circle cx="32" cy="27" r="11" fill="#fda4af" stroke="#e11d48" stroke-width="1.5"/><circle cx="28" cy="26" r="1.8" fill="#9d174d"/><circle cx="36" cy="26" r="1.8" fill="#9d174d"/><path d="M28 31 Q32 34 36 31" stroke="#9d174d" stroke-width="1.5" fill="none" stroke-linecap="round"/><path d="M12 56 Q12 42 32 42 Q52 42 52 56Z" fill="#be185d"/></svg>';
+  if (l.includes('admin')) return '<svg width="64" height="64" viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg"><circle cx="32" cy="32" r="30" fill="#f0fdf4" stroke="#166534" stroke-width="1.5"/><rect x="16" y="19" width="32" height="24" rx="5" fill="#15803d"/><rect x="19" y="22" width="26" height="18" rx="3" fill="#bbf7d0"/><rect x="22" y="25" width="8" height="5" rx="1" fill="#15803d"/><rect x="22" y="32" width="16" height="2" rx="1" fill="#86efac"/><rect x="22" y="36" width="12" height="2" rx="1" fill="#86efac"/><circle cx="38" cy="27" r="4" fill="#16a34a"/><path d="M36 27 L38 29 L41 25" stroke="#fff" stroke-width="1.5" fill="none" stroke-linecap="round" stroke-linejoin="round"/><rect x="29" y="43" width="6" height="5" fill="#15803d"/><rect x="22" y="48" width="20" height="3" rx="1.5" fill="#15803d"/></svg>';
+  if (l.includes('pwa')) return '<svg width="64" height="64" viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg"><circle cx="32" cy="32" r="30" fill="#f5f3ff" stroke="#5b21b6" stroke-width="1.5"/><rect x="22" y="12" width="20" height="36" rx="5" fill="#7c3aed"/><rect x="25" y="16" width="14" height="22" rx="3" fill="#ddd6fe"/><circle cx="32" cy="44" r="2.5" fill="#ede9fe"/><rect x="30" y="9" width="4" height="4" rx="1.5" fill="#4c1d95"/><rect x="26" y="19" width="5" height="2" rx="1" fill="#a78bfa"/><rect x="26" y="23" width="12" height="2" rx="1" fill="#a78bfa"/><rect x="26" y="27" width="9" height="2" rx="1" fill="#a78bfa"/><circle cx="38" cy="33" r="6" fill="#7c3aed" stroke="#ddd6fe" stroke-width="1.5"/></svg>';
+  const colors = ['#1e3cb8','#15803d','#be185d','#7c3aed','#c2410c','#0369a1'];
+  const clr = colors[(name||'').charCodeAt(0)%colors.length];
+  const ini = (name||'?').substring(0,2).toUpperCase();
+  return '<svg width="64" height="64" viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg"><circle cx="32" cy="32" r="30" fill="' + clr + '22" stroke="' + clr + '" stroke-width="1.5"/><circle cx="32" cy="25" r="10" fill="' + clr + '55" stroke="' + clr + '" stroke-width="1.5"/><path d="M12 56 Q12 42 32 42 Q52 42 52 56Z" fill="' + clr + '"/><text x="32" y="29" text-anchor="middle" font-size="10" font-weight="700" fill="' + clr + '" font-family="system-ui">' + ini + '</text></svg>';
+}
+
 
   const totalNet = rows.reduce((s,h)=>s+(parseFloat(h.net_collectible)||0),0);
 
@@ -3929,11 +3935,11 @@ function hvoRenderHarvests() {
 
     Object.entries(byColl).forEach(([coll, items]) => {
       const cNet = items.reduce((s,h)=>s+(parseFloat(h.net_collectible)||0),0);
-      const icon = collIcon(coll);
+      const icon = collSvg(coll);
       const collId = 'hvc_' + date.replace(/-/g,'') + '_' + coll.replace(/[^a-z0-9]/gi,'');
       _hvoPopData[collId] = items;
       html += '<div data-collpop="' + collId + '" style="background:#fafbff;border:1.5px solid #e5e7eb;border-radius:14px;padding:14px 10px;cursor:pointer;text-align:center;transition:.15s;" onmouseover="this.style.borderColor=\'#1e3cb8\';this.style.background=\'#f0f4ff\'" onmouseout="this.style.borderColor=\'#e5e7eb\';this.style.background=\'#fafbff\'">'
-        + '<div style="font-size:32px;margin-bottom:6px;">' + icon + '</div>'
+        + '<div style="margin-bottom:8px;">' + icon + '</div>'
         + '<div style="font-size:12px;font-weight:700;color:#1a1d2e;margin-bottom:4px;">' + coll + '</div>'
         + '<div style="font-size:10px;color:#6b7280;margin-bottom:8px;">' + items.length + ' vendo' + (items.length!==1?'s':'') + '</div>'
         + '<div style="font-size:14px;font-weight:800;color:#15803d;">' + fmt(cNet) + '</div>'
