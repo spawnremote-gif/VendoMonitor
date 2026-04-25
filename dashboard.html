@@ -497,7 +497,7 @@ tr:hover td{background:#f8f9ff;cursor:pointer}
 <!-- ══ HARVEST ══ -->
 <style>
 /* ══ HARVEST PANEL v6 ══ */
-#panel-harvest.active{display:block!important;position:fixed!important;top:88px;left:0;width:100%;height:calc(100vh - 88px);overflow:hidden;z-index:40;}
+#panel-harvest.active{display:block!important;}
 
 /* HEAD */
 .hv-head{background:#fff;border-bottom:1px solid var(--bd);flex-shrink:0;}
@@ -544,7 +544,7 @@ tr:hover td{background:#f8f9ff;cursor:pointer}
 .hv-search:focus{border-color:var(--blue);}
 
 /* 3-COL LAYOUT */
-.hv-page{display:grid;grid-template-columns:210px 1fr 195px;height:calc(100vh - 88px - 44px - 32px - 30px);overflow:hidden;}
+.hv-page{display:grid;grid-template-columns:210px 1fr 195px;height:calc(100vh - 200px);overflow:hidden;}
 
 /* COL 1 — ROUTE BUILDER */
 .hv-rc{display:flex;flex-direction:column;overflow:hidden;background:#fff;border-right:1px solid var(--bd);}
@@ -1848,7 +1848,7 @@ async function hvLoadVendos() {
   const _ef = document.getElementById('hv-filter-empty'); if (_ef) _ef.style.display='none';
 
   const headers = { 'apikey': _KEY, 'Authorization': 'Bearer ' + _KEY };
-  const base = `${_SB}/rest/v1/vendos?select=id,tg_name,sheet_name,excel_name,address,area,vlan,last_harvest_date,admin_notes&order=area.asc,sheet_name.asc,tg_name.asc`;
+  const base = `${_SB}/rest/v1/vendos?select=id,tg_name,sheet_name,area,vlan,last_harvest_date,admin_notes&order=area.asc,sheet_name.asc,tg_name.asc`;
   const allData = [];
 
   try {
@@ -3670,19 +3670,21 @@ function hvRecordsLoad() {
 
 // SB from dashboard
 // KEY from dashboard
-const H_hvo = { 'apikey': SB_KEY, 'Authorization': 'Bearer ' + SB_KEY };
+var H_hvo;
 // fmt from dashboard
 // RC_DEFAULT_START from dashboard (RC_RC_DEFAULT_START)
 
 let hvoHarvests = [], hvoRoutes = [], hvoRouteItems = [];
 
 async function hvoSbGet(path) {
+  if (!H_hvo) H_hvo = { 'apikey': SB_KEY, 'Authorization': 'Bearer ' + SB_KEY };
   const r = await fetch(SB_URL + path, { headers: H_hvo });
   if (!r.ok) throw new Error('HTTP ' + r.status);
   return r.json();
 }
 
 async function hvoLoadAll() {
+  if (!H_hvo) H_hvo = { 'apikey': SB_KEY, 'Authorization': 'Bearer ' + SB_KEY };
   document.getElementById('hvo-status-pill').textContent = 'Loading…';
   try {
     [hvoHarvests, hvoRoutes, hvoRouteItems] = await Promise.all([
@@ -4680,7 +4682,7 @@ async function hvShowHarvestHistory() {
 
 
 /* ─── VENDO NAMES TAB ─── */
-let _vnAll = [], _vnFiltered = [];
+var _vnAll = [], _vnFiltered = [];
 
 async function vnLoad() {
   const list  = document.getElementById('vn-list');
@@ -5421,6 +5423,10 @@ function gUpdateBackBtn(id) {
 }
 
 function showP(id, btn) {
+  // Hide all fixed overlays when switching panels
+  ['hv-tab-audited','hv-overlay-recon','hv-overlay-records'].forEach(function(oid){
+    var oel=document.getElementById(oid); if(oel) oel.style.display='none';
+  });
   document.querySelectorAll(".panel").forEach(p=>p.classList.remove("active"));
   document.querySelectorAll(".nav-bar button").forEach(b=>b.classList.remove("active"));
   const panel = document.getElementById("panel-"+id);
@@ -5432,7 +5438,8 @@ function showP(id, btn) {
   if (_navHistory.length > 10) _navHistory.shift();
   gUpdateBackBtn(id);
   hideBread();
-  if(id==="harvest")   loadHarvests();
+  console.log('[showP] id='+id);
+  if(id==="harvest") { console.log('[showP] calling loadHarvests'); try { loadHarvests(); } catch(e) { console.error('[loadHarvests ERROR]', e); } }
   if(id==="devices")   loadReconciliation();
   if(id==="analytics") loadAnalytics();
   if(id==="vendos")    loadVendos();
@@ -6042,21 +6049,19 @@ function closeVendo() {
 })();
 
 async function loadHarvests() {
+  console.log('[loadHarvests] STARTED');
   window._hvLoading = false;
 
-  // NUCLEAR: force every element visible with direct cssText — bypasses all class/cascade issues
-  const forceShow = (id, display) => {
-    const el = document.getElementById(id);
+  // Ensure route-tab elements are visible — remove any hv-hidden class and set display directly
+  [['hv-area-tabs','flex'],['hv-filters','flex'],['hv-route-page','grid']].forEach(function(pair) {
+    var el = document.getElementById(pair[0]);
+    console.log('[HARVEST] forceShow', pair[0], 'found:', !!el, 'display before:', el ? el.style.display : 'N/A');
     if (!el) return;
     el.classList.remove('hv-hidden');
-    el.style.cssText = el.style.cssText
-      .replace(/display\s*:[^;]+;?/gi, '')
-      + ';display:' + display + '!important';
-  };
-
-  forceShow('hv-area-tabs',  'flex');
-  forceShow('hv-filters',    'flex');
-  forceShow('hv-route-page', 'grid');
+    el.style.removeProperty('display');
+    el.style.setProperty('display', pair[1], 'important');
+    console.log('[HARVEST] display after:', el.style.display, 'computed:', window.getComputedStyle(el).display);
+  });
 
   // Hide all non-route sub-tabs
   ['hv-tab-schedule','hv-tab-recon',
