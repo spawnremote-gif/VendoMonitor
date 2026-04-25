@@ -495,7 +495,7 @@ tr:hover td{background:#f8f9ff;cursor:pointer}
 <div id="panel-harvest" class="panel">
 <style>
 /* ══ HARVEST PANEL v6 ══ */
-#panel-harvest.active{display:flex!important;flex-direction:column;min-height:100vh;position:relative;}
+#panel-harvest.active{display:flex!important;flex-direction:column;height:calc(100vh - 88px);position:relative;overflow:hidden;}
 
 /* HEAD */
 .hv-head{background:#fff;border-bottom:1px solid var(--bd);flex-shrink:0;}
@@ -518,7 +518,7 @@ tr:hover td{background:#f8f9ff;cursor:pointer}
 .hv-step-arr{color:#93c5fd;font-size:11px;}
 
 /* AREA TABS */
-.hv-areas{background:#fafbff;border-bottom:1px solid var(--bd);padding:0 6px;display:flex;align-items:stretch;overflow-x:auto;gap:0;scrollbar-width:none;}
+.hv-areas{background:#fafbff;border-bottom:1px solid var(--bd);padding:0 6px;display:flex;align-items:stretch;overflow-x:auto;gap:0;scrollbar-width:none;flex-shrink:0;}
 .hv-areas::-webkit-scrollbar{display:none;}
 .area-tab{padding:0 9px;border:none;border-bottom:2px solid transparent;background:none;font-size:11px;color:var(--mu);cursor:pointer;font-family:inherit;white-space:nowrap;font-weight:500;transition:.12s;min-height:28px;}
 .area-tab:hover{color:var(--blue);background:rgba(30,60,200,.04);}
@@ -528,7 +528,7 @@ tr:hover td{background:#f8f9ff;cursor:pointer}
 .hv-area-search:focus{border-color:var(--blue);}
 
 /* FILTER ROW */
-.hv-filters{background:#fff;border-bottom:1px solid var(--bd);padding:3px 8px;display:flex;align-items:center;gap:3px;overflow-x:auto;scrollbar-width:none;flex-wrap:nowrap;}
+.hv-filters{background:#fff;border-bottom:1px solid var(--bd);padding:3px 8px;display:flex;align-items:center;gap:3px;overflow-x:auto;scrollbar-width:none;flex-wrap:nowrap;flex-shrink:0;}
 .hv-filters::-webkit-scrollbar{display:none;}
 .hff{padding:2px 8px;border-radius:9px;border:1px solid var(--bd);background:#fff;font-size:10px;color:var(--mu);cursor:pointer;font-family:inherit;white-space:nowrap;transition:.12s;}
 .hff:hover{border-color:var(--blue);color:var(--blue);}
@@ -939,7 +939,7 @@ tr:hover td{background:#f8f9ff;cursor:pointer}
 </div><!-- end hv-page -->
 
 <!-- SCHEDULE TAB -->
-<div class="hv-hidden" id="hv-tab-schedule" style="padding:12px;overflow-y:auto;height:calc(100vh - 72px);">
+<div class="hv-hidden" id="hv-tab-schedule" style="padding:12px;overflow-y:auto;flex:1;min-height:0;">
   <div class="hv-section">
     <div class="hv-section-title">Global thresholds <span class="hv-stag">applies to all vendos without a custom schedule</span></div>
     <div class="hv-thresh-grid">
@@ -993,7 +993,7 @@ tr:hover td{background:#f8f9ff;cursor:pointer}
 </div>
 
 <!-- RECORDS TAB -->
-<div class="hv-hidden" id="hv-tab-records" style="padding:12px;overflow-y:auto;height:calc(100vh - 72px);">
+<div class="hv-hidden" id="hv-tab-records" style="padding:12px;overflow-y:auto;flex:1;min-height:0;">
 <style>.hv-rec-empty{text-align:center;padding:40px;color:#9ca3af;font-size:12px;line-height:1.8;}.hrd-bg{display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:400;align-items:center;justify-content:center;}.hrd-bg.open{display:flex!important;}.hrd-pop{background:#fff;border-radius:12px;width:min(480px,95vw);max-height:88vh;overflow-y:auto;box-shadow:0 20px 60px rgba(0,0,0,.25);}</style>
 <div id="hv-rec-content"><div class="hv-rec-empty">Loading…</div></div>
 <div class="hrd-bg" id="hrd-bg" onclick="if(event.target===this)this.classList.remove('open')"><div class="hrd-pop">
@@ -1474,7 +1474,7 @@ tr:hover td{background:#f8f9ff;cursor:pointer}
 </div>
 
 <!-- RECONCILIATION TAB -->
-<div class="hv-hidden" id="hv-tab-recon" style="padding:12px;overflow-y:auto;height:calc(100vh - 72px);">
+<div class="hv-hidden" id="hv-tab-recon" style="padding:12px;overflow-y:auto;flex:1;min-height:0;">
 <style>.rc-dtab{padding:5px 14px;border-radius:20px;border:1.5px solid #e5e7eb;background:#fff;color:#374151;font-size:11px;font-weight:700;cursor:pointer;font-family:inherit;white-space:nowrap;transition:.15s;}.rc-dtab.on{background:#1e3cb8;border-color:#1e3cb8;color:#fff;}.rc-dtab:hover:not(.on){border-color:#1e3cb8;color:#1e3cb8;}.rc-st{border-radius:8px;padding:10px 12px;text-align:center;}.rc-st .rv{font-size:15px;font-weight:700;}.rc-st .rl{font-size:9px;color:#6b7280;margin-top:3px;}</style>
 <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;gap:8px;flex-wrap:wrap;">
   <div><div style="font-size:14px;font-weight:700;color:#1e3cb8;">⚖️ Harvest Reconciliation</div><div style="font-size:10px;color:#6b7280;margin-top:2px;">Coin net vs Telegram income · skipped excluded</div></div>
@@ -5304,19 +5304,33 @@ function closeVendo() {
 // HARVEST
 // ══════════════════════════════════════════════════════════
 async function loadHarvests() {
-  // Ensure harvest panel initialises on showP — trigger vendos load if not yet loaded
+  // Reset loading guard so vendos always reload when switching to Harvest tab
   window._hvLoading = false;
-  if (typeof hvShowTab === 'function') {
-    hvShowTab('route', document.getElementById('hbtn-route'));
+  // Explicitly ensure route-tab elements are visible (they should be by default,
+  // but guard against any prior hvShowTab call having hidden them)
+  const elArea = document.getElementById('hv-area-tabs');
+  const elFilt = document.getElementById('hv-filters');
+  const elPage = document.getElementById('hv-route-page');
+  const elGuide = document.getElementById('hv-guide-bar');
+  const elFab  = document.getElementById('hv-refresh-fab');
+  if (elArea)  { elArea.classList.remove('hv-hidden');  elArea.style.setProperty('display','flex','important'); }
+  if (elFilt)  { elFilt.classList.remove('hv-hidden');  elFilt.style.setProperty('display','flex','important'); }
+  if (elPage)  { elPage.classList.remove('hv-hidden');  elPage.style.setProperty('display','grid','important'); }
+  if (elGuide) { elGuide.classList.remove('hv-hidden'); }
+  if (elFab)   elFab.classList.add('visible');
+  // Mark hbtn-route as active tab
+  const hbtnRoute = document.getElementById('hbtn-route');
+  if (hbtnRoute) {
+    document.querySelectorAll('#panel-harvest .hv-hvtab').forEach(b => b.classList.remove('on'));
+    hbtnRoute.classList.add('on');
   }
-  if (typeof hvLoadVendos === 'function') {
-    hvLoadVendos();
-  }
+  // Load vendos after a short paint delay
   setTimeout(() => {
-    if (typeof hvRefreshPendingRoutes === 'function') hvRefreshPendingRoutes();
-    const fab = document.getElementById('hv-refresh-fab');
-    if (fab) fab.classList.add('visible');
-  }, 600);
+    if (typeof hvLoadVendos === 'function') hvLoadVendos();
+    setTimeout(() => {
+      if (typeof hvRefreshPendingRoutes === 'function') hvRefreshPendingRoutes();
+    }, 800);
+  }, 100);
 }
 function filterHarvests(){ }
 function renderHarvests(rows){ }
