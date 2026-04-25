@@ -3362,7 +3362,7 @@ async function ahSubmit() {
 (function() {
   const ov = document.createElement('div');
   ov.id = 'hv-overlay-records';
-  ov.style.cssText = 'display:none;position:fixed;top:132px;left:0;width:100%;height:calc(100vh - 132px);background:#f0f4ff;z-index:9999;box-sizing:border-box;font-family:system-ui,sans-serif;font-size:13px;color:#1a1d2e;overflow:hidden;display:flex;flex-direction:column;';
+  ov.style.cssText = 'display:none;position:fixed;top:132px;left:0;width:100%;height:calc(100vh - 132px);background:#f0f4ff;z-index:9999;box-sizing:border-box;font-family:system-ui,sans-serif;font-size:13px;color:#1a1d2e;overflow:hidden;flex-direction:column;';
   ov.innerHTML = `
     <div style="background:#1e3cb8;color:#fff;padding:8px 16px;display:flex;align-items:center;justify-content:space-between;gap:10px;flex-shrink:0;position:sticky;top:0;z-index:10;">
       <div style="display:flex;align-items:center;gap:12px;">
@@ -5552,6 +5552,10 @@ async function openVendoFromSearch(vendo, area) {
 // DASHBOARD
 // ══════════════════════════════════════════════════════════
 async function loadDashboard() {
+  // Always hide harvest overlays when loading dashboard
+  ['hv-tab-audited','hv-overlay-recon','hv-overlay-records'].forEach(function(oid){
+    var el=document.getElementById(oid); if(el) el.style.display='none';
+  });
   document.getElementById("dash-stats").innerHTML = '<div style="padding:20px;color:var(--mu)">Loading...</div>';
   try {
     const [areas, trend, hacked, recent, vendos] = await Promise.all([
@@ -6481,7 +6485,7 @@ function _anlR({mm,aD}){
   if(ac&&aD&&aD.length){const c8=['#1565c0','#1D9E75','#F5C518','#7B5EA7','#E85D24','#4A90D9','#d97706','#dc2626'];analyticsAreaChart=new Chart(ac,{type:'doughnut',data:{labels:aD.map(a=>a.area),datasets:[{data:aD.map(a=>parseFloat(a.total_sales||0)),backgroundColor:c8}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'right',labels:{font:{size:10}}},tooltip:{callbacks:{label:c=>c.label+': ₱'+c.raw.toLocaleString()}}}}});}
 }
 
-window.addEventListener('load', () => { setTimeout(() => loadDashboard(), 500); });
+window.addEventListener('load', () => { setTimeout(() => loadDashboard(), 500); ['hv-tab-audited','hv-overlay-recon','hv-overlay-records'].forEach(function(oid){ var el=document.getElementById(oid); if(el) el.style.display='none'; }); });
 
 // Full dashboard refresh every 5 min
 setInterval(()=>{
