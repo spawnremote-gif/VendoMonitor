@@ -2287,9 +2287,10 @@ function hvNoteFromDetail() {
 
 function hvAddFromDetail() {
   document.getElementById('hv-detail-pop').classList.remove('show');
-  // Find the row for this vendo and trigger add
   const row = document.querySelector(`#vc-scroll .hv-vr[data-vid="${hvCurrentDetail.id}"]`);
   if (row) {
+    // Sync last harvest date from detail into row dataset before adding
+    if (hvCurrentDetail.last) row.dataset.last = hvCurrentDetail.last;
     const addBtn = row.querySelector('[data-action="add"]');
     if (addBtn) hvToggleAdd(addBtn, row);
   }
@@ -2537,6 +2538,7 @@ function hvToggleAdd(btn, row) {
   const area    = row.dataset.area  || '';
   const excel   = row.dataset.excel || '';
   const addr    = row.dataset.addr  || '';
+  const last    = row.dataset.last  || '';
   const matched = row.dataset.matched === 'true';
   const display = excel || sheet || tg || 'Unknown';
 
@@ -2547,18 +2549,18 @@ function hvToggleAdd(btn, row) {
   } else {
     btn.classList.add('dn');
     btn.textContent = '✓ added';
-    hvAddToRoutePanel(row.dataset.vid, display, sheet, tg, area, matched, excel, addr);
+    hvAddToRoutePanel(row.dataset.vid, display, sheet, tg, area, matched, excel, addr, last);
   }
 }
 
-function hvAddToRoutePanel(vid, display, sheet, tg, area, matched, excel, addr) {
+function hvAddToRoutePanel(vid, display, sheet, tg, area, matched, excel, addr, last) {
   const scroll = document.getElementById('hv-rv-scroll');
   const empty  = document.getElementById('hv-rv-empty');
   if (empty) empty.style.display = 'none';
   const num = scroll.querySelectorAll('.hv-rv').length + 1;
 
   const div = document.createElement('div');
-  div.className   = 'hv-rv';
+  div.className    = 'hv-rv';
   div.dataset.rvid = vid;
   const primaryName = excel || sheet || tg || display;
   const tgLine = matched
@@ -2567,13 +2569,28 @@ function hvAddToRoutePanel(vid, display, sheet, tg, area, matched, excel, addr) 
   const addrLine = addr
     ? `<div style="font-size:8px;margin-top:2px;">📍 <a href="https://maps.google.com/?q=${encodeURIComponent(addr + ', Zamboanga del Norte, Philippines')}" target="_blank" style="color:#1e3cb8;text-decoration:none;">${addr}</a></div>`
     : '';
+  // Format last harvest for display
+  const lastFmt = last
+    ? new Date(last + 'T12:00:00').toLocaleDateString('en-PH',{month:'short',day:'numeric',year:'numeric'})
+    : 'No harvest yet';
+  const lastColor = last ? '#15803d' : '#dc2626';
+
   div.innerHTML = `
     <span class="hv-rv-num">${num}</span>
-    <div>
+    <div style="flex:1;min-width:0;">
       <div class="hv-rv-sheet">${primaryName}</div>
       ${tgLine}
       <div class="hv-rv-area">${area}</div>
       ${addrLine}
+      <div style="margin-top:4px;background:#f0f9ff;border-radius:5px;padding:4px 6px;border:1px solid #bae6fd;">
+        <div style="font-size:8px;font-weight:700;color:#0369a1;margin-bottom:2px;">📅 Last harvest date</div>
+        <div style="display:flex;align-items:center;gap:4px;">
+          <input type="date" class="hv-rv-last-date" value="${last||''}"
+            style="font-size:10px;border:1px solid #bae6fd;border-radius:4px;padding:2px 4px;font-family:inherit;outline:none;color:#0369a1;background:#fff;flex:1;"
+            onchange="hvUpdateLastHarvest(this, '${vid}')">
+          <span class="hv-rv-last-lbl" style="font-size:9px;color:${lastColor};font-weight:600;white-space:nowrap;">${lastFmt}</span>
+        </div>
+      </div>
       <div class="hv-rv-btns">
         <button class="hv-done-btn" onclick="hvMarkDone(this)">Mark done</button>
         <button class="hv-del-btn" data-rvid="${vid}" onclick="hvRemoveRv(this)">×</button>
@@ -2582,6 +2599,35 @@ function hvAddToRoutePanel(vid, display, sheet, tg, area, matched, excel, addr) 
   scroll.appendChild(div);
   hvUpdateRouteCnt();
   if (!matched && tg) { const w = document.getElementById('hv-warn'); if (w) w.style.display = 'block'; }
+}
+
+// Update last_harvest_date in Supabase from route builder
+async function hvUpdateLastHarvest(input, vid) {
+  const newDate = input.value;
+  if (!newDate) return;
+  const lbl = input.closest('div').querySelector('.hv-rv-last-lbl');
+  if (lbl) { lbl.textContent = 'Saving...'; lbl.style.color = '#6b7280'; }
+  try {
+    const r = await fetch(`${_SB}/rest/v1/vendos?id=eq.${vid}`, {
+      method: 'PATCH',
+      headers: { 'apikey': _KEY, 'Authorization': 'Bearer ' + _KEY, 'Content-Type': 'application/json', 'Prefer': 'return=minimal' },
+      body: JSON.stringify({ last_harvest_date: newDate })
+    });
+    if (r.ok) {
+      const fmt = new Date(newDate + 'T12:00:00').toLocaleDateString('en-PH',{month:'short',day:'numeric',year:'numeric'});
+      if (lbl) { lbl.textContent = '✅ ' + fmt; lbl.style.color = '#15803d'; }
+      // Also update the vendo row dataset in the main list
+      const mainRow = document.querySelector('#vc-scroll .hv-vr[data-vid="' + vid + '"]');
+      if (mainRow) mainRow.dataset.last = newDate;
+      // Show toast
+      const toast = document.getElementById('hv-refresh-toast');
+      if (toast) { toast.textContent = '✅ Last harvest updated'; toast.classList.add('show'); setTimeout(()=>toast.classList.remove('show'), 2000); }
+    } else {
+      if (lbl) { lbl.textContent = '❌ Failed'; lbl.style.color = '#dc2626'; }
+    }
+  } catch(e) {
+    if (lbl) { lbl.textContent = '❌ Error'; lbl.style.color = '#dc2626'; }
+  }
 }
 
 function hvRemoveRv(btn) {
