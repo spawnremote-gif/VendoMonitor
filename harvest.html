@@ -178,6 +178,16 @@ textarea:focus{border-color:var(--red);}
         oninput="this.value=this.value.toUpperCase()">
     </div>
     <button class="btn btn-blue" onclick="loadRoute()">Load route →</button>
+
+    <!-- Resume banner — shown when previous session detected -->
+    <div id="resume-banner" style="display:none;margin-top:14px;background:#f0fdf4;border:2px solid #bbf7d0;border-radius:10px;padding:12px 14px;">
+      <div style="font-size:11px;font-weight:700;color:#15803d;margin-bottom:6px;">⚡ Resume previous session?</div>
+      <div style="font-size:12px;color:#374151;margin-bottom:10px;">
+        <b id="resume-name"></b> — Route <b id="resume-code"></b>
+      </div>
+      <button class="btn btn-green" onclick="loadRoute()" style="margin-bottom:6px;">▶ Resume route</button>
+      <button class="btn" style="background:#f3f4f6;color:#6b7280;" onclick="clearResume()">✕ Start fresh</button>
+    </div>
   </div>
 </div>
 
@@ -352,7 +362,20 @@ window.addEventListener('DOMContentLoaded', () => {
   } else if (vendo) {
     loadVendoByTG(vendo);
   } else {
-    localStorage.removeItem('last_route_code');
+    // Auto-fill saved name + route code
+    const savedName = localStorage.getItem('harvest_collector_name') || '';
+    const savedCode = localStorage.getItem('harvest_last_code') || '';
+    if (savedName) document.getElementById('collector-name').value = savedName;
+    if (savedCode) document.getElementById('route-code-inp').value = savedCode;
+    // If both saved, show a resume banner
+    if (savedName && savedCode) {
+      const resumeEl = document.getElementById('resume-banner');
+      if (resumeEl) {
+        resumeEl.style.display = 'block';
+        document.getElementById('resume-name').textContent = savedName;
+        document.getElementById('resume-code').textContent = savedCode;
+      }
+    }
   }
 });
 
@@ -386,6 +409,9 @@ async function loadRoute() {
 
     currentRoute = route;
     currentRoute.collectorName = name;
+    // Save for next session
+    localStorage.setItem('harvest_collector_name', name);
+    localStorage.setItem('harvest_last_code', code);
 
     const r2 = await fetch(`${SB}/rest/v1/route_items?route_id=eq.${currentRoute.id}&order=id.asc`, { headers: HDR });
     currentRoute.items = await r2.json();
@@ -855,13 +881,27 @@ async function loadDailySummary() {
   } catch(e) { console.error('Summary error:', e); }
 }
 
+function clearResume() {
+  localStorage.removeItem('harvest_last_code');
+  localStorage.removeItem('harvest_collector_name');
+  document.getElementById('route-code-inp').value = '';
+  document.getElementById('collector-name').value = '';
+  document.getElementById('resume-banner').style.display = 'none';
+}
+
 function goHome() {
   currentRoute = null;
   currentVendo = null;
   currentItem  = null;
+  // Clear route code but keep name for next route
+  localStorage.removeItem('harvest_last_code');
+  const savedName = localStorage.getItem('harvest_collector_name') || '';
   document.getElementById('route-code-inp').value = '';
-  document.getElementById('collector-name').value = '';
+  document.getElementById('collector-name').value = savedName;
   document.getElementById('topbar-sub').textContent = 'Collector PWA';
+  // Hide resume banner
+  const resumeEl = document.getElementById('resume-banner');
+  if (resumeEl) resumeEl.style.display = 'none';
   showScreen('screen-entry');
 }
 
