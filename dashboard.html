@@ -4417,6 +4417,30 @@ async function hvoRenderRecon() {
 
 // ── ROUTE TAB: ADD/REMOVE VENDO HELPERS ──
 function hvoBindBodyEvents(body, routeId) {
+  // Mark done buttons
+  body.querySelectorAll('[data-markdone]').forEach(btn => {
+    btn.onclick = async function() {
+      const itemId = this.dataset.markdone;
+      if (!confirm('Mark this vendo as harvested?')) return;
+      this.textContent = '...'; this.disabled = true;
+      const today = new Date().toISOString().split('T')[0];
+      try {
+        const r = await fetch(`${_SB}/rest/v1/route_items?id=eq.${itemId}`, {
+          method: 'PATCH',
+          headers: { 'apikey': _KEY, 'Authorization': 'Bearer ' + _KEY, 'Content-Type': 'application/json', 'Prefer': 'return=minimal' },
+          body: JSON.stringify({ status: 'harvested', harvested_at: new Date().toISOString() })
+        });
+        if (r.ok) {
+          const item = hvoRouteItems.find(x => String(x.id) === String(itemId));
+          if (item) { item.status = 'harvested'; item.harvested_at = new Date().toISOString(); }
+          if (body._refresh) body._refresh();
+          const toast = document.getElementById('hv-refresh-toast');
+          if (toast) { toast.textContent = '✅ Marked as done'; toast.classList.add('show'); setTimeout(()=>toast.classList.remove('show'),2000); }
+        } else { this.textContent = '✅ Mark done'; this.disabled = false; }
+      } catch(e) { this.textContent = '✅ Mark done'; this.disabled = false; }
+    };
+  });
+
   // Remove buttons
   body.querySelectorAll('[data-rmitem]').forEach(btn => {
     btn.onclick = async function() {
@@ -4428,7 +4452,6 @@ function hvoBindBodyEvents(body, routeId) {
           method: 'DELETE', headers: { 'apikey': _KEY, 'Authorization': 'Bearer ' + _KEY }
         });
         if (r.ok) {
-          // Remove from local cache
           const idx = hvoRouteItems.findIndex(x => String(x.id) === String(itemId));
           if (idx > -1) hvoRouteItems.splice(idx, 1);
           if (body._refresh) body._refresh();
@@ -4461,31 +4484,76 @@ function hvoRouteSearch(inp, routeId) {
   box.querySelectorAll('[data-addvid]').forEach(el => {
     el.onmouseover = function() { this.style.background = '#f0fdf4'; };
     el.onmouseout  = function() { this.style.background = ''; };
-    el.onclick = async function() {
+    el.onclick = function() {
       const vid = this.dataset.addvid;
       const v = (_vnAll||[]).find(x => String(x.id) === String(vid));
       if (!v) return;
       inp.value = ''; box.style.display = 'none'; box.innerHTML = '';
-      this.textContent = 'Adding...';
-      try {
-        const r = await fetch(`${_SB}/rest/v1/route_items`, {
-          method: 'POST',
-          headers: { 'apikey': _KEY, 'Authorization': 'Bearer ' + _KEY, 'Content-Type': 'application/json', 'Prefer': 'return=representation' },
-          body: JSON.stringify({ route_id: routeId, tg_name: v.tg_name||null, sheet_name: v.sheet_name||null, area: v.area||null, status: 'pending' })
-        });
-        if (r.ok) {
-          const newItems = await r.json();
-          if (newItems && newItems[0]) hvoRouteItems.push(newItems[0]);
-          // Find the body and refresh
-          const bodyEl = document.querySelector('[data-addsearch="' + routeId + '"]')?.closest('div[style*="background:#f0fdf4"]')?.previousElementSibling?.previousElementSibling;
-          // Simpler: re-render whole routes tab
-          hvoRenderRoutes();
-          const toast = document.getElementById('hv-refresh-toast');
-          if (toast) { toast.textContent = '✅ Vendo added to route'; toast.classList.add('show'); setTimeout(()=>toast.classList.remove('show'),2000); }
-        }
-      } catch(e) { console.error(e); }
+
+      // Show selected vendo with editable last harvest date before confirming add
+      const confirmEl = document.getElementById('hvo-add-confirm-' + routeId);
+      if (!confirmEl) return;
+      const lastDate = v.last_harvest_date || '';
+      const lastFmt  = lastDate
+        ? new Date(lastDate + 'T12:00:00').toLocaleDateString('en-PH',{month:'short',day:'numeric',year:'numeric'})
+        : 'No harvest yet';
+      confirmEl.style.display = 'block';
+      confirmEl.innerHTML =
+        '<div style="background:#e0f2fe;border:1.5px solid #bae6fd;border-radius:8px;padding:10px 12px;margin-top:6px;">' +
+          '<div style="font-size:12px;font-weight:700;color:#0369a1;margin-bottom:6px;">📋 ' + (v.sheet_name||v.tg_name||'—') + '</div>' +
+          '<div style="font-size:10px;color:#6b7280;margin-bottom:8px;">' + (v.tg_name||'—') + ' · ' + (v.area||'—') + ' · VLAN ' + (v.vlan||'—') + '</div>' +
+          '<div style="font-size:10px;font-weight:700;color:#0369a1;margin-bottom:4px;">📅 Last harvest date</div>' +
+          '<input type="date" id="hvo-confirm-date-' + routeId + '" value="' + lastDate + '"' +
+            ' style="width:100%;padding:6px 10px;border:1.5px solid #bae6fd;border-radius:6px;font-size:12px;font-family:inherit;outline:none;box-sizing:border-box;margin-bottom:8px;">' +
+          '<div style="display:flex;gap:6px;">' +
+            '<button onclick="hvoConfirmAddVendo(' + vid + ',' + routeId + ')" style="flex:1;padding:7px;background:#0284c7;color:#fff;border:none;border-radius:6px;font-size:12px;font-weight:700;cursor:pointer;font-family:inherit;">✅ Add to route</button>' +
+            '<button onclick="this.closest(&apos;[id^=hvo-add-confirm]&apos;).style.display=&apos;none&apos;" style="padding:7px 12px;background:#f1f5f9;color:#374151;border:none;border-radius:6px;font-size:12px;cursor:pointer;font-family:inherit;">Cancel</button>' +
+          '</div>' +
+        '</div>';
     };
   });
+}
+
+async function hvoConfirmAddVendo(vid, routeId) {
+  const v = (_vnAll||[]).find(x => String(x.id) === String(vid));
+  if (!v) return;
+  const dateInp = document.getElementById('hvo-confirm-date-' + routeId);
+  const newDate = dateInp ? dateInp.value : '';
+  const confirmEl = document.getElementById('hvo-add-confirm-' + routeId);
+
+  // Show loading
+  const btn = confirmEl ? confirmEl.querySelector('button') : null;
+  if (btn) { btn.textContent = 'Adding...'; btn.disabled = true; }
+
+  try {
+    // Save last_harvest_date to vendos table if changed
+    if (newDate && newDate !== (v.last_harvest_date||'')) {
+      await fetch(`${_SB}/rest/v1/vendos?id=eq.${v.id}`, {
+        method: 'PATCH',
+        headers: { 'apikey': _KEY, 'Authorization': 'Bearer ' + _KEY, 'Content-Type': 'application/json', 'Prefer': 'return=minimal' },
+        body: JSON.stringify({ last_harvest_date: newDate })
+      });
+      // Update local cache
+      if (v) v.last_harvest_date = newDate;
+    }
+
+    // Add to route_items
+    const r = await fetch(`${_SB}/rest/v1/route_items`, {
+      method: 'POST',
+      headers: { 'apikey': _KEY, 'Authorization': 'Bearer ' + _KEY, 'Content-Type': 'application/json', 'Prefer': 'return=representation' },
+      body: JSON.stringify({ route_id: routeId, tg_name: v.tg_name||null, sheet_name: v.sheet_name||null, area: v.area||null, status: 'pending' })
+    });
+    if (r.ok) {
+      const newItems = await r.json();
+      if (newItems && newItems[0]) hvoRouteItems.push(newItems[0]);
+      hvoRenderRoutes();
+      const toast = document.getElementById('hv-refresh-toast');
+      if (toast) { toast.textContent = '✅ Vendo added' + (newDate ? ' · Last harvest: ' + newDate : ''); toast.classList.add('show'); setTimeout(()=>toast.classList.remove('show'),2500); }
+    }
+  } catch(e) {
+    if (btn) { btn.textContent = '✅ Add to route'; btn.disabled = false; }
+    console.error(e);
+  }
 }
 
 function hvoRenderRoutes() {
@@ -4581,6 +4649,7 @@ function hvoRenderRoutes() {
                 (isDone
                   ? '<span style="font-size:11px;font-weight:700;color:#15803d;">₱' + net.toLocaleString('en-PH',{minimumFractionDigits:2}) + '</span>'
                   : '<span style="font-size:11px;color:#d97706;">Pending</span>') +
+                (!isDone ? '<button data-markdone="' + item.id + '" style="padding:3px 8px;border:1px solid #bbf7d0;border-radius:4px;background:#f0fdf4;color:#15803d;font-size:10px;font-weight:700;cursor:pointer;font-family:inherit;margin-bottom:3px;">✅ Mark done</button>' : '') +
                 (!isDone ? '<button data-rmitem="' + item.id + '" data-routeid="' + routeId + '" style="padding:2px 7px;border:1px solid #fca5a5;border-radius:4px;background:#fff;color:#dc2626;font-size:9px;cursor:pointer;font-family:inherit;">✕ Remove</button>' : '') +
               '</div>' +
             '</div>';
@@ -4593,6 +4662,7 @@ function hvoRenderRoutes() {
           '<input type="text" placeholder="Search vendo name..." data-addsearch="' + routeId + '" style="flex:1;padding:6px 10px;border:1.5px solid #bbf7d0;border-radius:7px;font-size:12px;font-family:inherit;outline:none;" oninput="hvoRouteSearch(this,' + routeId + ')">' +
         '</div>' +
         '<div id="hvo-add-results-' + routeId + '" style="border:1px solid #e5e7eb;border-radius:6px;max-height:140px;overflow-y:auto;background:#fff;margin-top:4px;display:none;"></div>' +
+        '<div id="hvo-add-confirm-' + routeId + '" style="display:none;"></div>' +
       '</div>' +
       '<div style="display:flex;justify-content:space-between;align-items:center;padding:10px 16px;background:#f8faff;border-top:1px solid #e5e7eb;font-size:12px;">' +
         '<span style="color:#6b7280;">' + curDone + ' harvested · ' + curPend + ' pending</span>' +
