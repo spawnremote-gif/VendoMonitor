@@ -7349,17 +7349,36 @@ async function loadSystemStatus() {
     const skTotal = parseInt(skRange.split("/")[1] || "0");
     const active = total - skTotal;
 
-    // Estimate MB: 175MB baseline at 332,930 rows
-    const estMB  = total > 0 ? Math.round((total / 332930) * 175) : 0;
-    const limitMB = 500;
-    const usedPct = Math.round((estMB / limitMB) * 100);
+    // Get real DB size from get_db_size() RPC function
+    let realDbSize = '—';
+    let realDbMB = 0;
+    try {
+      const dbSizeR = await fetch(`${SB_URL}/rest/v1/rpc/get_db_size`, {
+        method: 'POST',
+        headers: { ...HDR, 'Content-Type': 'application/json' },
+        body: '{}'
+      });
+      if (dbSizeR.ok) {
+        realDbSize = await dbSizeR.json(); // returns e.g. "221 MB"
+        // Parse MB number from string like "221 MB" or "1.2 GB"
+        const sizeMatch = String(realDbSize).match(/([\d.]+)\s*(MB|GB|KB)/i);
+        if (sizeMatch) {
+          const num = parseFloat(sizeMatch[1]);
+          const unit = sizeMatch[2].toUpperCase();
+          realDbMB = unit === 'GB' ? Math.round(num * 1024) : unit === 'KB' ? Math.round(num / 1024) : Math.round(num);
+        }
+      }
+    } catch(e) { realDbSize = '—'; }
+
+    const limitMB = 8192; // 8 GB pro plan
+    const usedPct = realDbMB > 0 ? Math.round((realDbMB / limitMB) * 100) : 0;
 
     // Color based on usage
     const storColor = usedPct >= 90 ? "var(--red)" : usedPct >= 75 ? "var(--amber)" : "var(--ok)";
     const barColor  = usedPct >= 90 ? "#dc2626"    : usedPct >= 75 ? "#d97706"    : "#16a34a";
 
     document.getElementById("sys-storage").innerHTML =
-      `<span style="font-size:14px;color:${storColor};font-weight:700">~${estMB}MB / 500MB</span>
+      `<span style="font-size:14px;color:${storColor};font-weight:700">${realDbSize} / 8 GB</span>
        <div style="background:#f0f4ff;border-radius:4px;height:6px;margin:4px 0;overflow:hidden;">
          <div style="background:${barColor};height:6px;width:${Math.min(usedPct,100)}%;border-radius:4px;transition:width .5s;"></div>
        </div>
@@ -7377,27 +7396,27 @@ async function loadSystemStatus() {
         storAlert.style.borderColor = "#dc2626";
         document.getElementById("storage-alert-icon").textContent = "🔴";
         document.getElementById("storage-alert-msg").innerHTML =
-          `<b>CRITICAL: Storage at ${usedPct}% (${estMB}MB / 500MB)!</b><br>
-           You will hit the Supabase free limit soon. Do a Full Backup NOW, then archive 2025 data.`;
+          `<b>CRITICAL: Storage at ${usedPct}% (${realDbSize} / 8 GB)!</b><br>
+           Approaching limit. Do a Full Backup NOW and consider archiving old data.`;
         document.getElementById("storage-alert-msg").style.color = "#dc2626";
-        warnings.push(`🔴 CRITICAL: Supabase storage at ${usedPct}% — ${estMB}MB of 500MB used!`);
+        warnings.push(`🔴 CRITICAL: Supabase storage at ${usedPct}% — ${realDbSize} of 8 GB used!`);
       } else if (usedPct >= 75) {
         storAlert.style.display = "flex";
         storAlert.style.background = "#fef3c7";
         storAlert.style.borderColor = "#d97706";
         document.getElementById("storage-alert-icon").textContent = "🟡";
         document.getElementById("storage-alert-msg").innerHTML =
-          `<b>Warning: Storage at ${usedPct}% (${estMB}MB / 500MB)</b><br>
-           Getting full. Consider doing a backup and archiving old 2025 data soon.`;
+          `<b>Warning: Storage at ${usedPct}% (${realDbSize} / 8 GB)</b><br>
+           Getting full. Consider doing a backup and archiving old data soon.`;
         document.getElementById("storage-alert-msg").style.color = "#92400e";
-        warnings.push(`⚠️ Storage at ${usedPct}% — ${estMB}MB of 500MB used`);
-      } else if (usedPct >= 60) {
+        warnings.push(`⚠️ Storage at ${usedPct}% — ${realDbSize} of 8 GB used`);
+      } else if (usedPct >= 50) {
         storAlert.style.display = "flex";
         storAlert.style.background = "#f0f9ff";
         storAlert.style.borderColor = "#0284c7";
         document.getElementById("storage-alert-icon").textContent = "🔵";
         document.getElementById("storage-alert-msg").innerHTML =
-          `Storage at ${usedPct}% (${estMB}MB / 500MB) — healthy, keep monitoring.`;
+          `Storage at ${usedPct}% (${realDbSize} / 8 GB) — healthy, keep monitoring.`;
         document.getElementById("storage-alert-msg").style.color = "#0369a1";
       } else {
         storAlert.style.display = "none";
