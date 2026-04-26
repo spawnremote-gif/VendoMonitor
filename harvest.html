@@ -186,6 +186,10 @@ textarea:focus{border-color:var(--red);}
   <div class="route-header">
     <div class="route-code" id="rt-code">—</div>
     <div class="route-meta" id="rt-meta">—</div>
+    <div id="rt-admin-notes" style="display:none;margin-top:6px;background:rgba(255,255,255,.15);border-radius:6px;padding:6px 10px;font-size:11px;color:#fff;">
+      <span style="font-size:9px;font-weight:700;opacity:.75;text-transform:uppercase;letter-spacing:.04em;">📝 Admin note</span>
+      <div id="rt-admin-notes-text" style="margin-top:2px;line-height:1.5;"></div>
+    </div>
     <div class="route-progress">
       <div class="progress-bar"><div class="progress-fill" id="rt-progress" style="width:0%"></div></div>
       <div class="progress-labels">
@@ -395,6 +399,16 @@ async function loadRoute() {
     document.getElementById('rt-meta').textContent =
       `${currentRoute.collector} · ${currentRoute.route_date||currentRoute.harvest_date||''} · ${currentRoute.area || 'all areas'}`;
     document.getElementById('topbar-sub').textContent = `Route ${code}`;
+    // Show admin notes if any
+    const adminNotes = currentRoute.admin_notes || '';
+    const notesEl = document.getElementById('rt-admin-notes');
+    const notesText = document.getElementById('rt-admin-notes-text');
+    if (notesEl && notesText && adminNotes) {
+      notesEl.style.display = 'block';
+      notesText.textContent = adminNotes;
+    } else if (notesEl) {
+      notesEl.style.display = 'none';
+    }
 
     localStorage.setItem('cached_route_' + code, JSON.stringify(currentRoute));
     renderVendoList();
