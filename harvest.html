@@ -21,6 +21,7 @@
   --purple:#7c3aed;
   --gray:#6b7280;--border:#e5e7eb;--bg:#f8fafc;
   --text:#111827;--muted:#6b7280;
+  --orange:#ea580c;--orange-light:#fff7ed;
 }
 body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:var(--bg);min-height:100vh;color:var(--text);font-size:16px;-webkit-text-size-adjust:100%;}
 
@@ -90,6 +91,8 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
 .coin-label span{font-size:10px;color:var(--muted);font-weight:400;}
 .coin-input{width:100%;padding:12px 14px;border:1.5px solid var(--border);border-radius:8px;font-size:18px;font-weight:700;font-family:inherit;outline:none;color:var(--text);text-align:right;}
 .coin-input:focus{border-color:var(--blue);}
+.coin-input.saloy-input{border-color:#fed7aa;background:#fff7ed;color:var(--orange);}
+.coin-input.saloy-input:focus{border-color:var(--orange);}
 
 /* SUMMARY BOX */
 .summary{background:var(--blue-light);border:1.5px solid var(--blue-mid);border-radius:10px;padding:14px;}
@@ -104,6 +107,8 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
 .summary-row.spawn .summary-val{color:var(--green);font-size:15px;}
 .summary-row.customer .summary-label{font-size:12px;color:var(--purple);}
 .summary-row.customer .summary-val{color:var(--purple);font-size:15px;}
+.summary-row.saloy-row .summary-label{font-size:12px;color:var(--orange);}
+.summary-row.saloy-row .summary-val{color:var(--orange);font-size:14px;}
 
 /* PENDING FORM */
 .pending-form{background:var(--red-light);border:1.5px solid #fca5a5;border-radius:10px;padding:14px;margin-bottom:12px;}
@@ -215,9 +220,17 @@ textarea:focus{border-color:var(--red);}
       <div class="coin-label">Old coins <span>Leftover from last harvest</span></div>
       <input type="number" class="coin-input" id="coin-old" placeholder="0" min="0" oninput="calcNet()">
     </div>
+    <div class="coin-field">
+      <div class="coin-label" style="color:var(--orange);">Saloy <span style="color:var(--muted);">Refund returned to customer</span></div>
+      <input type="number" class="coin-input saloy-input" id="coin-saloy" placeholder="0" min="0" oninput="calcNet()">
+    </div>
   </div>
 
   <div class="summary" id="summary-box">
+    <div class="summary-row saloy-row" id="saloy-summary-row" style="display:none;">
+      <span class="summary-label">Saloy deduction</span>
+      <span class="summary-val" id="sum-saloy">-₱0</span>
+    </div>
     <div class="summary-row net">
       <span class="summary-label">Net collectible</span>
       <span class="summary-val" id="sum-net">₱0</span>
@@ -286,13 +299,10 @@ let currentVendo = null;
 let currentItem  = null;
 let offlineQueue = JSON.parse(localStorage.getItem('harvest_queue') || '[]');
 
-// ── SERVICE WORKER ──
-
 if ('serviceWorker' in navigator) {
   navigator.serviceWorker.register('sw.js').catch(() => {});
 }
 
-// ── ONLINE/OFFLINE ──
 function updateOnlineStatus() {
   const online = navigator.onLine;
   document.getElementById('sync-dot').className  = 'sync-dot' + (online ? '' : ' off');
@@ -304,14 +314,12 @@ window.addEventListener('online',  updateOnlineStatus);
 window.addEventListener('offline', updateOnlineStatus);
 updateOnlineStatus();
 
-// ── SCREENS ──
 function showScreen(id) {
   document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
   document.getElementById(id).classList.add('active');
   window.scrollTo(0, 0);
 }
 
-// ── TOAST ──
 function toast(msg, dur=2500) {
   const t = document.getElementById('toast');
   t.textContent = msg;
@@ -319,7 +327,6 @@ function toast(msg, dur=2500) {
   setTimeout(() => t.classList.remove('show'), dur);
 }
 
-// ── CHECK URL PARAMS ──
 window.addEventListener('DOMContentLoaded', () => {
   const p = new URLSearchParams(location.search);
   const code  = p.get('code');
@@ -330,21 +337,10 @@ window.addEventListener('DOMContentLoaded', () => {
   } else if (vendo) {
     loadVendoByTG(vendo);
   } else {
-    // No pre-fill — collector must enter route code manually as passkey
-    // Clear any cached route code to prevent confusion
     localStorage.removeItem('last_route_code');
   }
 });
 
-
-
-
-
-
-
-
-
-// ── LOAD ROUTE ──
 async function loadRoute() {
   const code = document.getElementById('route-code-inp').value.trim().toUpperCase();
   const name = document.getElementById('collector-name').value.trim();
@@ -355,22 +351,17 @@ async function loadRoute() {
   document.getElementById('vendo-list').innerHTML = '<div class="loading"><div class="spinner"></div><span>Loading route…</span></div>';
 
   try {
-    // Fetch route
     const r = await fetch(`${SB}/rest/v1/routes?route_code=eq.${code}&limit=1`, { headers: HDR });
     const routes = await r.json();
     if (!routes.length) throw new Error('Invalid route code. Please check and try again.');
 
     const route = routes[0];
-
-    // Validate route is still active
     if (route.status === 'completed') throw new Error('This route has already been completed.');
 
-    // Validate route is not expired (older than 7 days)
     const created = new Date(route.created_at);
     const daysDiff = (new Date() - created) / (1000 * 60 * 60 * 24);
     if (daysDiff > 7) throw new Error('This route code has expired. Ask admin for a new route.');
 
-    // Validate collector name matches (case-insensitive, partial match)
     const routeCollector = (route.collector || '').toLowerCase().trim();
     const enteredName    = name.toLowerCase().trim();
     const nameMatch = routeCollector.includes(enteredName) || enteredName.includes(routeCollector);
@@ -381,11 +372,9 @@ async function loadRoute() {
     currentRoute = route;
     currentRoute.collectorName = name;
 
-    // Fetch route items
     const r2 = await fetch(`${SB}/rest/v1/route_items?route_id=eq.${currentRoute.id}&order=id.asc`, { headers: HDR });
     currentRoute.items = await r2.json();
 
-    // Enrich items with last_harvest_date + vlan from vendos table
     const tgNamesForEnrich = currentRoute.items.map(i => i.tg_name).filter(Boolean);
     if (tgNamesForEnrich.length) {
       try {
@@ -407,13 +396,9 @@ async function loadRoute() {
       `${currentRoute.collector} · ${currentRoute.route_date||currentRoute.harvest_date||''} · ${currentRoute.area || 'all areas'}`;
     document.getElementById('topbar-sub').textContent = `Route ${code}`;
 
-    // Save route to localStorage for offline use
     localStorage.setItem('cached_route_' + code, JSON.stringify(currentRoute));
-    // Not saving last route code — collectors must enter manually
-
     renderVendoList();
   } catch(e) {
-    // Try loading from localStorage cache if offline
     const cached = localStorage.getItem('cached_route_' + code);
     if (cached) {
       currentRoute = JSON.parse(cached);
@@ -431,7 +416,6 @@ async function loadRoute() {
   }
 }
 
-// ── RENDER VENDO LIST ──
 function renderVendoList() {
   const items = currentRoute.items || [];
   const done  = items.filter(i => i.status === 'harvested').length;
@@ -477,7 +461,6 @@ function renderVendoList() {
   }).join('');
 }
 
-// ── OPEN VENDO HARVEST FORM ──
 function openVendo(idx) {
   currentItem  = currentRoute.items[idx];
   currentVendo = { idx };
@@ -487,17 +470,16 @@ function openVendo(idx) {
   document.getElementById('form-vmeta').textContent =
     `${currentItem.area || '—'} · TG: ${currentItem.tg_name || '—'}`;
 
-  // Reset form
-  ['coin-total','coin-free','coin-old'].forEach(id => document.getElementById(id).value = '');
+  ['coin-total','coin-free','coin-old','coin-saloy'].forEach(id => document.getElementById(id).value = '');
   document.getElementById('pending-note').value = '';
   document.getElementById('pending-form').style.display = 'none';
   calcNet();
 
-  // Pre-fill if already harvested
   if (currentItem.status === 'harvested') {
     if (currentItem.coins_total) document.getElementById('coin-total').value = currentItem.coins_total;
     if (currentItem.coins_free)  document.getElementById('coin-free').value  = currentItem.coins_free;
     if (currentItem.coins_old)   document.getElementById('coin-old').value   = currentItem.coins_old;
+    if (currentItem.coins_saloy) document.getElementById('coin-saloy').value = currentItem.coins_saloy;
     calcNet();
     toast('Already harvested — tap Submit to update');
   }
@@ -505,7 +487,6 @@ function openVendo(idx) {
   showScreen('screen-form');
 }
 
-// ── LOAD VENDO BY TG NAME (QR scan) ──
 async function loadVendoByTG(tgName) {
   showScreen('screen-form');
   document.getElementById('form-vname').textContent = 'Loading…';
@@ -529,30 +510,40 @@ async function loadVendoByTG(tgName) {
   }
 }
 
-// ── CALCULATE NET ──
+// ── CALCULATE NET (updated with saloy) ──
 function calcNet() {
-  const total    = parseFloat(document.getElementById('coin-total').value) || 0;
-  const free     = parseFloat(document.getElementById('coin-free').value)  || 0;
-  const old      = parseFloat(document.getElementById('coin-old').value)   || 0;
-  const net      = Math.max(0, total - free - old);
+  const total  = parseFloat(document.getElementById('coin-total').value) || 0;
+  const free   = parseFloat(document.getElementById('coin-free').value)  || 0;
+  const old    = parseFloat(document.getElementById('coin-old').value)   || 0;
+  const saloy  = parseFloat(document.getElementById('coin-saloy').value) || 0;
+  const net    = Math.max(0, total - free - old - saloy);
   const spawn    = net * 0.75;
   const customer = net * 0.25;
+
+  // Show/hide saloy row in summary
+  const saloyRow = document.getElementById('saloy-summary-row');
+  if (saloy > 0) {
+    saloyRow.style.display = '';
+    document.getElementById('sum-saloy').textContent = '-₱' + saloy.toLocaleString('en-PH', {minimumFractionDigits:2, maximumFractionDigits:2});
+  } else {
+    saloyRow.style.display = 'none';
+  }
 
   document.getElementById('sum-net').textContent      = '₱' + net.toLocaleString('en-PH', {minimumFractionDigits:2, maximumFractionDigits:2});
   document.getElementById('sum-spawn').textContent    = '₱' + spawn.toLocaleString('en-PH', {minimumFractionDigits:2, maximumFractionDigits:2});
   document.getElementById('sum-customer').textContent = '₱' + customer.toLocaleString('en-PH', {minimumFractionDigits:2, maximumFractionDigits:2});
 }
 
-// ── SUBMIT HARVEST ──
+// ── SUBMIT HARVEST (updated with saloy) ──
 async function submitHarvest() {
-  // Prevent double submission
   const submitBtns = document.querySelectorAll('.action-row .btn-green');
   submitBtns.forEach(function(b){ b.disabled = true; b.textContent = 'Saving...'; });
-  // Re-enable after save attempt (success or fail) handled in finally block
-  const total    = parseFloat(document.getElementById('coin-total').value) || 0;
-  const free     = parseFloat(document.getElementById('coin-free').value)  || 0;
-  const old      = parseFloat(document.getElementById('coin-old').value)   || 0;
-  const net      = Math.max(0, total - free - old);
+
+  const total  = parseFloat(document.getElementById('coin-total').value) || 0;
+  const free   = parseFloat(document.getElementById('coin-free').value)  || 0;
+  const old    = parseFloat(document.getElementById('coin-old').value)   || 0;
+  const saloy  = parseFloat(document.getElementById('coin-saloy').value) || 0;
+  const net    = Math.max(0, total - free - old - saloy);
   const spawn    = net * 0.75;
   const customer = net * 0.25;
 
@@ -565,9 +556,6 @@ async function submitHarvest() {
   const now = new Date().toISOString();
   const today = now.split('T')[0];
   const collector = currentRoute?.collectorName || currentRoute?.collector || 'Collector';
-
-  // Store window start = last_harvest_date BEFORE this harvest updates it
-  // This is used by reconciliation to know the correct TG income window
   const windowStart = currentItem.last_harvest_date || '2026-03-01';
 
   const harvestRecord = {
@@ -582,6 +570,7 @@ async function submitHarvest() {
     coins_total:          total,
     coins_free:           free,
     coins_old:            old,
+    coins_saloy:          saloy,
     net_collectible:      net,
     spawn_share:          spawn,
     customer_share:       customer
@@ -589,7 +578,6 @@ async function submitHarvest() {
 
   try {
     if (navigator.onLine) {
-      // Save to harvests table
       const r1 = await fetch(`${SB}/rest/v1/harvests`, {
         method: 'POST',
         headers: { ...HDR, 'Prefer': 'return=minimal' },
@@ -600,7 +588,6 @@ async function submitHarvest() {
         throw new Error('Save failed ' + r1.status + ': ' + errText.substring(0,300));
       }
 
-      // Update route_item status
       if (currentItem.id) {
         await fetch(`${SB}/rest/v1/route_items?id=eq.${currentItem.id}`, {
           method: 'PATCH',
@@ -613,7 +600,6 @@ async function submitHarvest() {
         });
       }
 
-      // Update vendos last_harvest_date
       if (currentItem.vendo_id || currentItem.tg_name) {
         const filter = currentItem.vendo_id
           ? `id=eq.${currentItem.vendo_id}`
@@ -625,23 +611,20 @@ async function submitHarvest() {
         });
       }
     } else {
-      // Queue for later
       offlineQueue.push({ type: 'harvest', data: harvestRecord, item: currentItem, timestamp: Date.now() });
       localStorage.setItem('harvest_queue', JSON.stringify(offlineQueue));
       toast('⚡ Saved offline — will sync when connected', 3000);
     }
 
-    // Update local item status
     if (currentItem) {
       currentItem.status          = 'harvested';
       currentItem.coins_total     = total;
       currentItem.coins_free      = free;
       currentItem.coins_old       = old;
+      currentItem.coins_saloy     = saloy;
       currentItem.net_collectible = net;
     }
-    // Re-enable submit button for next vendo
     document.querySelectorAll('.action-row .btn-green').forEach(function(b){ b.disabled = false; b.textContent = '✅ Submit harvest'; });
-    // Save updated route to localStorage cache
     if (currentRoute?.route_code) {
       localStorage.setItem('cached_route_' + currentRoute.route_code, JSON.stringify(currentRoute));
     }
@@ -650,13 +633,11 @@ async function submitHarvest() {
     setTimeout(() => { backToRoute(); }, 1000);
   } catch(e) {
     toast('❌ ' + e.message, 4000);
-    // Re-enable button on error
     const btns = document.querySelectorAll('.action-row .btn-green');
     btns.forEach(function(b){ b.disabled = false; b.textContent = '✅ Submit harvest'; });
   }
 }
 
-// ── PENDING FORM ──
 function showPendingForm() {
   const pf = document.getElementById('pending-form');
   pf.style.display = pf.style.display === 'none' ? '' : 'none';
@@ -691,9 +672,7 @@ async function submitPending() {
       currentItem.collector_note = note;
       currentItem.status = 'pending';
     }
-    // Re-enable submit buttons for next vendo
     document.querySelectorAll('.action-row .btn-green').forEach(function(b){ b.disabled = false; b.textContent = '✅ Submit harvest'; });
-    // Save updated route to localStorage cache
     if (currentRoute?.route_code) {
       localStorage.setItem('cached_route_' + currentRoute.route_code, JSON.stringify(currentRoute));
     }
@@ -705,13 +684,11 @@ async function submitPending() {
   }
 }
 
-// ── BACK TO ROUTE ──
 function backToRoute() {
   renderVendoList();
   showScreen('screen-route');
 }
 
-// ── SHOW RECEIPT ──
 function showReceipt() {
   const items    = currentRoute?.items || [];
   const harvested = items.filter(i => i.status === 'harvested');
@@ -724,7 +701,6 @@ function showReceipt() {
   document.getElementById('receipt-sub').textContent   =
     `Route ${currentRoute.route_code} · ${currentRoute.collector} · ${currentRoute.harvest_date}`;
 
-  // Mark route as completed
   if (navigator.onLine && currentRoute.id) {
     fetch(`${SB}/rest/v1/routes?id=eq.${currentRoute.id}`, {
       method: 'PATCH',
@@ -733,17 +709,14 @@ function showReceipt() {
     }).catch(() => {});
   }
 
-  // Load daily summary
   loadDailySummary();
   showScreen('screen-receipt');
 }
 
 async function loadDailySummary() {
-  const today = new Date().toISOString().split('T')[0];
-  const collector = currentRoute?.collector || '';
   const routeCode = currentRoute?.route_code || '';
   try {
-    const r = await fetch(`${SB}/rest/v1/harvests?route_code=eq.${routeCode}&select=vendo_name,coins_total,coins_free,coins_old,net_collectible,spawn_share,customer_share,collector`, {
+    const r = await fetch(`${SB}/rest/v1/harvests?route_code=eq.${routeCode}&select=vendo_name,coins_total,coins_free,coins_old,coins_saloy,net_collectible,spawn_share,customer_share,collector`, {
       headers: HDR
     });
     const data = await r.json();
@@ -752,11 +725,9 @@ async function loadDailySummary() {
     const totalCust  = data.reduce((s,h) => s + (parseFloat(h.customer_share)||0), 0);
     const harvested  = data.length;
 
-    // Update receipt
     document.getElementById('rec-harvested').textContent = harvested;
     document.getElementById('rec-total').textContent = '₱' + totalNet.toLocaleString('en-PH',{minimumFractionDigits:2});
 
-    // Add breakdown table
     const existingTable = document.getElementById('summary-breakdown');
     if (!existingTable && data.length) {
       const card = document.querySelector('.receipt-card');
@@ -765,10 +736,15 @@ async function loadDailySummary() {
         table.id = 'summary-breakdown';
         table.style.cssText = 'margin-top:14px;text-align:left;font-size:11px;';
         table.innerHTML = '<div style="font-weight:700;color:#1e3cb8;margin-bottom:6px;font-size:12px;">Route summary</div>' +
-          data.map(h => '<div style="display:flex;justify-content:space-between;padding:4px 0;border-bottom:1px solid #f0f0f0;">' +
-            '<span style="color:#374151;">' + (h.vendo_name||'—') + '</span>' +
-            '<span style="font-weight:700;color:#16a34a;">₱' + parseFloat(h.net_collectible||0).toLocaleString('en-PH',{minimumFractionDigits:2}) + '</span>' +
-          '</div>').join('') +
+          data.map(h => {
+            const saloyLine = h.coins_saloy > 0
+              ? '<div style="font-size:9px;color:#ea580c;">Saloy: -₱' + parseFloat(h.coins_saloy||0).toLocaleString('en-PH',{minimumFractionDigits:2}) + '</div>'
+              : '';
+            return '<div style="display:flex;justify-content:space-between;padding:4px 0;border-bottom:1px solid #f0f0f0;">' +
+              '<div><span style="color:#374151;">' + (h.vendo_name||'—') + '</span>' + saloyLine + '</div>' +
+              '<span style="font-weight:700;color:#16a34a;">₱' + parseFloat(h.net_collectible||0).toLocaleString('en-PH',{minimumFractionDigits:2}) + '</span>' +
+            '</div>';
+          }).join('') +
           '<div style="display:flex;justify-content:space-between;padding:8px 0;margin-top:4px;border-top:2px solid #1e3cb8;">' +
             '<span style="font-weight:700;">Spawn total (75%)</span>' +
             '<span style="font-weight:700;color:#16a34a;">₱' + totalSpawn.toLocaleString('en-PH',{minimumFractionDigits:2}) + '</span>' +
@@ -783,7 +759,6 @@ async function loadDailySummary() {
   } catch(e) { console.error('Summary error:', e); }
 }
 
-// ── GO HOME ──
 function goHome() {
   currentRoute = null;
   currentVendo = null;
@@ -794,13 +769,11 @@ function goHome() {
   showScreen('screen-entry');
 }
 
-// ── QR SCAN (placeholder) ──
 function startQR() {
   const tg = prompt('Enter vendo TG name (QR scanner coming soon):');
   if (tg) loadVendoByTG(tg.trim());
 }
 
-// ── FLUSH OFFLINE QUEUE ──
 async function flushQueue() {
   if (!offlineQueue.length) return;
   const remaining = [];
