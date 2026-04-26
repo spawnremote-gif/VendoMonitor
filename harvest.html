@@ -255,6 +255,13 @@ textarea:focus{border-color:var(--red);}
 
   <div style="height:12px;"></div>
 
+  <!-- Collector note field -->
+  <div style="background:#fff;border:1.5px solid #e5e7eb;border-radius:10px;padding:12px 14px;margin-bottom:12px;">
+    <div style="font-size:11px;font-weight:700;color:#374151;margin-bottom:6px;">📝 Collector note <span style="font-weight:400;color:#9ca3af;font-size:10px;">(optional)</span></div>
+    <textarea id="collector-note-inp" rows="2" placeholder="e.g. Coin slot loose, owner not around, extra coins found..."
+      style="width:100%;padding:9px 12px;border:1.5px solid #e5e7eb;border-radius:8px;font-size:13px;font-family:inherit;resize:none;outline:none;color:#374151;box-sizing:border-box;"></textarea>
+  </div>
+
   <div class="action-row">
     <button class="btn btn-green" onclick="submitHarvest()">✅ Submit harvest</button>
     <button class="btn btn-outline" onclick="showPendingForm()">⏳ Mark pending</button>
@@ -554,6 +561,7 @@ function openVendo(idx) {
 
   ['coin-total','coin-free','coin-old','coin-saloy'].forEach(id => document.getElementById(id).value = '');
   document.getElementById('pending-note').value = '';
+  const _cnInp = document.getElementById('collector-note-inp'); if (_cnInp) _cnInp.value = '';
   document.getElementById('pending-form').style.display = 'none';
   calcNet();
 
@@ -562,6 +570,7 @@ function openVendo(idx) {
     if (currentItem.coins_free)  document.getElementById('coin-free').value  = currentItem.coins_free;
     if (currentItem.coins_old)   document.getElementById('coin-old').value   = currentItem.coins_old;
     if (currentItem.coins_saloy) document.getElementById('coin-saloy').value = currentItem.coins_saloy;
+    const _cnPre = document.getElementById('collector-note-inp'); if (_cnPre && currentItem.collector_note) _cnPre.value = currentItem.collector_note;
     calcNet();
     toast('Already harvested — tap Submit to update');
   }
@@ -671,15 +680,18 @@ async function submitHarvest() {
       }
 
       if (currentItem.id) {
+        const _collNote = (document.getElementById('collector-note-inp')?.value || '').trim() || null;
         await fetch(`${SB}/rest/v1/route_items?id=eq.${currentItem.id}`, {
           method: 'PATCH',
           headers: { ...HDR, 'Prefer': 'return=minimal' },
           body: JSON.stringify({
             status: 'harvested', harvested_at: now,
             total_coins: total, free_coins: free, old_coins: old,
-            net_collectible: net, spawn_share: spawn, customer_share: customer
+            net_collectible: net, spawn_share: spawn, customer_share: customer,
+            collector_note: _collNote
           })
         });
+        if (currentItem) currentItem.collector_note = _collNote;
       }
 
       if (currentItem.vendo_id || currentItem.tg_name) {
