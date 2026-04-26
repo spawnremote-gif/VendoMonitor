@@ -1123,7 +1123,7 @@ tr:hover td{background:#f8f9ff;cursor:pointer}
   <!-- Sub-tabs: All vendos / Saved by me -->
   <div style="display:flex;gap:0;margin-bottom:10px;border-bottom:2px solid #e5e7eb;">
     <button id="vn-subtab-all" onclick="vnSubTab('all',this)" style="padding:7px 18px;font-size:12px;font-weight:700;border:none;background:none;cursor:pointer;font-family:inherit;color:#0f766e;border-bottom:2px solid #0f766e;margin-bottom:-2px;">All vendos</button>
-    <button id="vn-subtab-saved" onclick="vnSubTab('saved',this)" style="padding:7px 18px;font-size:12px;font-weight:700;border:none;background:none;cursor:pointer;font-family:inherit;color:#6b7280;border-bottom:2px solid transparent;margin-bottom:-2px;">✅ Saved by me &nbsp;<span id="vn-saved-count" style="font-size:10px;background:#dcfce7;color:#15803d;padding:1px 6px;border-radius:10px;">0</span></button>
+    <button id="vn-subtab-saved" onclick="vnSubTab('saved',this)" style="padding:7px 18px;font-size:12px;font-weight:700;border:none;background:none;cursor:pointer;font-family:inherit;color:#6b7280;border-bottom:2px solid transparent;margin-bottom:-2px;">📋 Final Confirmed Names &nbsp;<span id="vn-saved-count" style="font-size:10px;background:#dcfce7;color:#15803d;padding:1px 6px;border-radius:10px;">0</span></button>
   </div>
 
   <!-- Area tabs -->
@@ -4795,7 +4795,7 @@ async function vnLoad() {
     stats.innerHTML = [
       ['Total', _vnAll.length, '#1e3cb8'],
       ['Matched', matched, '#16a34a'],
-      ['Saved by me', confirmed, '#0f766e'],
+      ['Final Confirmed', confirmed, '#0f766e'],
       ['Have harvest date', withDate, '#7c3aed']
     ].map(([lbl,val,clr]) =>
       `<div style="background:#f8faff;border-radius:8px;padding:10px 12px;border-left:3px solid ${clr};">
@@ -4841,41 +4841,59 @@ function vnApplyFilter() {
     const start    = v.last_harvest_date || '2026-03-01';
     const days     = Math.floor((new Date(today) - new Date(start)) / 86400000);
     const daysLbl  = v.last_harvest_date
-      ? `${days}d since last harvest`
-      : `${days}d since default start`;
+      ? days + 'd since last harvest'
+      : days + 'd since default start';
 
-    return `<div data-vnid="${v.id}"
-      style="background:#fff;border:1.5px solid #e5e7eb;border-radius:10px;padding:11px 14px;display:flex;align-items:center;gap:10px;cursor:pointer;transition:border-color .15s,background .15s;"
-      onmouseover="this.style.borderColor='#93c5fd';this.style.background='#f8faff'"
-      onmouseout="this.style.borderColor='#e5e7eb';this.style.background='#fff'"
-      onclick="vnClickRow(this)">
-      <div style="width:9px;height:9px;border-radius:50%;background:${dotClr};flex-shrink:0;"></div>
-      <div style="flex:1;min-width:0;">
-        <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;">
-          <span style="font-size:13px;font-weight:700;color:#1e3cb8;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:210px;" title="${v.sheet_name||''}">${v.sheet_name||'<i style="color:#9ca3af;font-weight:400;font-size:11px;">no sheet name</i>'}</span>
-          <span style="font-size:10px;color:#cbd5e1;">↔</span>
-          <span style="font-size:11px;color:#374151;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:170px;" title="${v.tg_name||''}">${v.tg_name||'<i style="color:#d97706;font-weight:400;">no TG name</i>'}</span>
-          ${v.name_confirmed ? '<span style="font-size:9px;font-weight:700;padding:1px 7px;border-radius:10px;background:#dcfce7;color:#15803d;flex-shrink:0;">✅ saved</span>' : ''}
-        </div>
-        <div style="font-size:10px;color:#9ca3af;margin-top:2px;">${v.area||'—'} · VLAN ${v.vlan||'—'} · ${daysLbl}</div>
-      </div>
-      <div style="text-align:right;flex-shrink:0;">
-        <div style="font-size:11px;font-weight:700;color:${v.last_harvest_date?'#15803d':'#9ca3af'};">${v.last_harvest_date||'—'}</div>
-        <div style="font-size:9px;color:#9ca3af;">last harvest</div>
-      </div>
-      <button onclick="event.stopPropagation();vnCopyRow(this,'${v.sheet_name||''}','${v.tg_name||''}','${v.area||''}','${v.vlan||''}')" style="padding:3px 8px;border-radius:5px;border:1px solid #c7d2fe;background:#fff;font-size:10px;cursor:pointer;font-family:inherit;white-space:nowrap;flex-shrink:0;" title="Copy">📋</button>
-      <div style="color:#9ca3af;font-size:16px;flex-shrink:0;">›</div>
-    </div>`;
+    // Confirmed tab — rich registry card
+    if (_vnSubTabMode === 'saved') {
+      const gpsTag = v.lat && v.lng ? '<span style="font-size:9px;font-weight:700;padding:1px 6px;border-radius:8px;background:#e0f2fe;color:#0284c7;margin-left:4px;">📍 GPS</span>' : '';
+      const addrLine = v.address ? '<div style="font-size:10px;color:#0369a1;margin-top:2px;">📍 ' + v.address + '</div>' : '';
+      return '<div data-vnid="' + v.id + '" onclick="vnClickRow(this)" style="background:#fff;border:2px solid #bbf7d0;border-radius:12px;padding:12px 14px;cursor:pointer;transition:.15s;position:relative;" onmouseover="this.style.borderColor='#0f766e';this.style.background='#f0fdf4'" onmouseout="this.style.borderColor='#bbf7d0';this.style.background='#fff'">'
+        + '<div style="position:absolute;top:10px;right:12px;font-size:9px;font-weight:700;padding:2px 8px;border-radius:10px;background:#dcfce7;color:#0f766e;">✅ Confirmed</div>'
+        + '<div style="display:flex;gap:10px;align-items:flex-start;">'
+        + '<div style="width:10px;height:10px;border-radius:50%;background:#0f766e;flex-shrink:0;margin-top:3px;"></div>'
+        + '<div style="flex:1;min-width:0;padding-right:80px;">'
+        + '<div style="font-size:14px;font-weight:700;color:#0f766e;margin-bottom:2px;">' + (v.sheet_name || '<i style="color:#9ca3af;font-weight:400;">no sheet name</i>') + gpsTag + '</div>'
+        + '<div style="font-size:11px;color:#5b21b6;margin-bottom:2px;">TG: ' + (v.tg_name || '<i style="color:#d97706;">no TG name</i>') + '</div>'
+        + '<div style="font-size:10px;color:#6b7280;">' + (v.area||'—') + ' · VLAN ' + (v.vlan||'—') + ' · Last harvest: <b style="color:' + (v.last_harvest_date?'#15803d':'#9ca3af') + ';">' + (v.last_harvest_date||'—') + '</b></div>'
+        + addrLine
+        + '</div></div>'
+        + '</div>';
+    }
+
+    // Normal tab — standard card
+    return '<div data-vnid="' + v.id + '" style="background:#fff;border:1.5px solid #e5e7eb;border-radius:10px;padding:11px 14px;display:flex;align-items:center;gap:10px;cursor:pointer;transition:border-color .15s,background .15s;" onmouseover="this.style.borderColor='#93c5fd';this.style.background='#f8faff'" onmouseout="this.style.borderColor='#e5e7eb';this.style.background='#fff'" onclick="vnClickRow(this)">'
+      + '<div style="width:9px;height:9px;border-radius:50%;background:' + dotClr + ';flex-shrink:0;"></div>'
+      + '<div style="flex:1;min-width:0;">'
+      + '<div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;">'
+      + '<span style="font-size:13px;font-weight:700;color:#1e3cb8;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:210px;">' + (v.sheet_name||'<i style="color:#9ca3af;font-weight:400;font-size:11px;">no sheet name</i>') + '</span>'
+      + '<span style="font-size:10px;color:#cbd5e1;">↔</span>'
+      + '<span style="font-size:11px;color:#374151;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:170px;">' + (v.tg_name||'<i style="color:#d97706;font-weight:400;">no TG name</i>') + '</span>'
+      + (v.name_confirmed ? '<span style="font-size:9px;font-weight:700;padding:1px 7px;border-radius:10px;background:#dcfce7;color:#15803d;flex-shrink:0;">✅ saved</span>' : '')
+      + '</div>'
+      + '<div style="font-size:10px;color:#9ca3af;margin-top:2px;">' + (v.area||'—') + ' · VLAN ' + (v.vlan||'—') + ' · ' + daysLbl + '</div>'
+      + '</div>'
+      + '<div style="text-align:right;flex-shrink:0;">'
+      + '<div style="font-size:11px;font-weight:700;color:' + (v.last_harvest_date?'#15803d':'#9ca3af') + ';">' + (v.last_harvest_date||'—') + '</div>'
+      + '<div style="font-size:9px;color:#9ca3af;">last harvest</div>'
+      + '</div>'
+      + '<button onclick="event.stopPropagation();vnCopyRow(this,'' + (v.sheet_name||'') + '','' + (v.tg_name||'') + '','' + (v.area||'') + '','' + (v.vlan||'') + '')" style="padding:3px 8px;border-radius:5px;border:1px solid #c7d2fe;background:#fff;font-size:10px;cursor:pointer;font-family:inherit;white-space:nowrap;flex-shrink:0;" title="Copy">📋</button>'
+      + '<div style="color:#9ca3af;font-size:16px;flex-shrink:0;">›</div>'
+      + '</div>';
   }).join('');
 }
 
 function vnClickRow(el) {
   const vid = parseInt(el.dataset.vnid);
   if (!vid) return;
-  // Find the vendo in _vnFiltered and build the same row dataset that hvOpenDetail expects
   const v = _vnFiltered.find(x => x.id === vid);
   if (!v) return;
-  // Create a fake row object matching what hvOpenDetail reads
+  // If in confirmed/saved mode, open the confirmed popup
+  if (_vnSubTabMode === 'saved') {
+    vnOpenConfirmedPop(v);
+    return;
+  }
+  // Otherwise open the harvest detail popup
   const fakeRow = {
     dataset: {
       vid:     String(v.id),
@@ -4886,10 +4904,113 @@ function vnClickRow(el) {
       vlan:    String(v.vlan || ''),
       matched: String(!!(v.tg_name && v.sheet_name)),
       status:  v.last_harvest_date ? 'low' : 'critical',
-      last:    v.last_harvest_date || ''
+      last:    v.last_harvest_date || '',
+      addr:    v.address || '',
+      lat:     v.lat || '',
+      lng:     v.lng || ''
     }
   };
   hvOpenDetailFromRow(fakeRow);
+}
+
+// ── CONFIRMED VENDO POPUP ──
+var _vnCpCurrent = null;
+
+async function vnOpenConfirmedPop(v) {
+  _vnCpCurrent = v;
+  const pop = document.getElementById('vn-confirmed-pop');
+  pop.style.display = 'flex';
+
+  // Fill header
+  document.getElementById('vn-cp-title').textContent  = v.sheet_name || v.tg_name || '—';
+  document.getElementById('vn-cp-sub').textContent     = (v.area || '—') + ' · VLAN ' + (v.vlan || '—');
+  document.getElementById('vn-cp-sheet').textContent   = v.sheet_name || '—';
+  document.getElementById('vn-cp-tg').textContent      = v.tg_name || '—';
+  document.getElementById('vn-cp-area').textContent    = (v.area || '—') + ' · VLAN ' + (v.vlan || '—');
+  document.getElementById('vn-cp-last').textContent    = v.last_harvest_date || '— never harvested';
+  document.getElementById('vn-cp-addr').textContent    = v.address || '— no address';
+
+  // GPS
+  const gpsRow = document.getElementById('vn-cp-gps-row');
+  if (v.lat && v.lng) {
+    gpsRow.style.display = 'block';
+    document.getElementById('vn-cp-gps-link').href = 'https://www.google.com/maps?q=' + v.lat + ',' + v.lng;
+    document.getElementById('vn-cp-gps-coords').textContent = parseFloat(v.lat).toFixed(5) + ', ' + parseFloat(v.lng).toFixed(5);
+  } else {
+    gpsRow.style.display = 'none';
+  }
+
+  // Clear copied msg
+  document.getElementById('vn-cp-copied').textContent = '';
+
+  // Load harvest records
+  const hEl = document.getElementById('vn-cp-harvests');
+  hEl.innerHTML = '<div style="color:#9ca3af;">Loading harvest records...</div>';
+  try {
+    let url = v.tg_name
+      ? `${SB_URL}/rest/v1/harvests?tg_name=eq.${encodeURIComponent(v.tg_name)}&order=harvest_date.desc&limit=20`
+      : `${SB_URL}/rest/v1/harvests?sheet_name=eq.${encodeURIComponent(v.sheet_name)}&order=harvest_date.desc&limit=20`;
+    const r = await fetch(url, { headers: HDR });
+    const rows = await r.json();
+    if (!rows.length) {
+      hEl.innerHTML = '<div style="padding:12px;background:#f9fafb;border-radius:8px;text-align:center;color:#9ca3af;font-size:11px;">No harvest records yet</div>';
+      return;
+    }
+    const totalNet = rows.reduce((s,h) => s+(parseFloat(h.net_collectible)||0), 0);
+    hEl.innerHTML =
+      '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">' +
+        '<span style="font-size:10px;color:#6b7280;">' + rows.length + ' record' + (rows.length!==1?'s':'') + '</span>' +
+        '<span style="font-size:13px;font-weight:700;color:#15803d;">Total net: ₱' + totalNet.toLocaleString('en-PH',{minimumFractionDigits:2}) + '</span>' +
+      '</div>' +
+      rows.map(h => {
+        const net = parseFloat(h.net_collectible||0);
+        const saloy = parseFloat(h.coins_saloy||0);
+        return '<div style="border:1px solid #e5e7eb;border-radius:7px;padding:9px 12px;margin-bottom:6px;display:flex;justify-content:space-between;align-items:center;">' +
+          '<div>' +
+            '<div style="font-size:12px;font-weight:700;color:#374151;">' + (h.harvest_date||'—') + '</div>' +
+            '<div style="font-size:10px;color:#9ca3af;">' + (h.collector||'—') + ' · ' + (h.route_code||'ADMIN') + '</div>' +
+            (saloy ? '<div style="font-size:9px;color:#ea580c;">Saloy: -₱' + saloy.toLocaleString('en-PH',{minimumFractionDigits:2}) + '</div>' : '') +
+          '</div>' +
+          '<div style="text-align:right;">' +
+            '<div style="font-size:13px;font-weight:700;color:#15803d;">₱' + net.toLocaleString('en-PH',{minimumFractionDigits:2}) + '</div>' +
+            '<div style="font-size:9px;color:#9ca3af;">Spawn: ₱' + parseFloat(h.spawn_share||0).toLocaleString('en-PH',{minimumFractionDigits:2}) + '</div>' +
+          '</div>' +
+        '</div>';
+      }).join('');
+  } catch(e) {
+    hEl.innerHTML = '<div style="color:#dc2626;font-size:11px;">Error: ' + e.message + '</div>';
+  }
+}
+
+function vnCpCopy(type) {
+  const v = _vnCpCurrent;
+  if (!v) return;
+  let text = '';
+  if (type === 'names') {
+    text = (v.sheet_name||'—') + ' | ' + (v.tg_name||'—');
+  } else if (type === 'full') {
+    text = [
+      'Sheet name: ' + (v.sheet_name||'—'),
+      'TG name: ' + (v.tg_name||'—'),
+      'Area: ' + (v.area||'—'),
+      'VLAN: ' + (v.vlan||'—'),
+      'Last harvest: ' + (v.last_harvest_date||'—'),
+      'Address: ' + (v.address||'—'),
+      v.lat && v.lng ? 'GPS: ' + v.lat + ', ' + v.lng : ''
+    ].filter(Boolean).join('\n');
+  } else if (type === 'harvest') {
+    text = [
+      'Vendo: ' + (v.sheet_name||v.tg_name||'—'),
+      'TG: ' + (v.tg_name||'—'),
+      'Area: ' + (v.area||'—'),
+      'VLAN: ' + (v.vlan||'—'),
+      'Last harvest: ' + (v.last_harvest_date||'—')
+    ].join('\n');
+  }
+  navigator.clipboard.writeText(text).then(() => {
+    const el = document.getElementById('vn-cp-copied');
+    if (el) { el.textContent = '✅ Copied!'; setTimeout(() => { el.textContent = ''; }, 2000); }
+  });
 }
 
 
@@ -7356,13 +7477,14 @@ async function loadSystemStatus() {
     try {
       const dbSizeR = await fetch(`${SB_URL}/rest/v1/rpc/get_db_size`, {
         method: 'POST',
-        headers: { ...HDR, 'Content-Type': 'application/json' },
+        headers: { ...HDR, 'Content-Type': 'application/json', 'Prefer': 'return=representation' },
         body: '{}'
       });
       if (dbSizeR.ok) {
-        realDbSize = await dbSizeR.json(); // returns e.g. "221 MB"
+        const dbSizeRaw = await dbSizeR.text();
+        realDbSize = dbSizeRaw.replace(/^"|"$/g, '').trim(); // strip JSON quotes e.g. "221 MB" -> 221 MB
         // Parse MB number from string like "221 MB" or "1.2 GB"
-        const sizeMatch = String(realDbSize).match(/([\d.]+)\s*(MB|GB|KB)/i);
+        const sizeMatch = realDbSize.match(/([\d.]+)\s*(MB|GB|KB)/i);
         if (sizeMatch) {
           const num = parseFloat(sizeMatch[1]);
           const unit = sizeMatch[2].toUpperCase();
@@ -7943,6 +8065,72 @@ async function fullBackup() {
     </div>
   </div>
 
+</div>
+</div>
+
+
+<!-- CONFIRMED VENDO DETAILS POPUP -->
+<div id="vn-confirmed-pop" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:8000;align-items:center;justify-content:center;padding:16px;">
+<div style="background:#fff;border-radius:14px;width:min(560px,96vw);max-height:92vh;overflow-y:auto;box-shadow:0 24px 64px rgba(0,0,0,.3);display:flex;flex-direction:column;">
+
+  <!-- Header -->
+  <div style="background:#0f766e;padding:14px 16px;border-radius:14px 14px 0 0;display:flex;align-items:flex-start;justify-content:space-between;gap:10px;position:sticky;top:0;z-index:2;">
+    <div style="min-width:0;">
+      <div style="font-size:11px;font-weight:700;color:rgba(255,255,255,.7);text-transform:uppercase;letter-spacing:.05em;margin-bottom:3px;">✅ Final Confirmed Name</div>
+      <div style="font-size:16px;font-weight:700;color:#fff;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;" id="vn-cp-title">—</div>
+      <div style="font-size:10px;color:rgba(255,255,255,.65);margin-top:3px;" id="vn-cp-sub">—</div>
+    </div>
+    <button onclick="document.getElementById('vn-confirmed-pop').style.display='none'" style="flex-shrink:0;width:28px;height:28px;border-radius:50%;border:1.5px solid rgba(255,255,255,.4);background:rgba(255,255,255,.15);color:#fff;font-size:16px;cursor:pointer;display:flex;align-items:center;justify-content:center;">×</button>
+  </div>
+
+  <div style="padding:14px 16px;display:flex;flex-direction:column;gap:10px;">
+
+    <!-- Info cards -->
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">
+      <div style="background:#f0fdf4;border-radius:8px;padding:10px 12px;border-left:3px solid #0f766e;">
+        <div style="font-size:8px;font-weight:700;color:#0f766e;text-transform:uppercase;letter-spacing:.05em;margin-bottom:4px;">Sheet name / Owner</div>
+        <div style="font-size:13px;font-weight:700;color:#0f766e;word-break:break-word;" id="vn-cp-sheet">—</div>
+      </div>
+      <div style="background:#f5f3ff;border-radius:8px;padding:10px 12px;border-left:3px solid #7c3aed;">
+        <div style="font-size:8px;font-weight:700;color:#7c3aed;text-transform:uppercase;letter-spacing:.05em;margin-bottom:4px;">TG name</div>
+        <div style="font-size:11px;font-weight:700;color:#5b21b6;word-break:break-all;" id="vn-cp-tg">—</div>
+      </div>
+      <div style="background:#eef2ff;border-radius:8px;padding:10px 12px;border-left:3px solid #1e3cb8;">
+        <div style="font-size:8px;font-weight:700;color:#1e3cb8;text-transform:uppercase;letter-spacing:.05em;margin-bottom:4px;">Area / VLAN</div>
+        <div style="font-size:13px;font-weight:700;color:#1e3cb8;" id="vn-cp-area">—</div>
+      </div>
+      <div style="background:#f0fdf4;border-radius:8px;padding:10px 12px;border-left:3px solid #16a34a;">
+        <div style="font-size:8px;font-weight:700;color:#16a34a;text-transform:uppercase;letter-spacing:.05em;margin-bottom:4px;">Last harvest</div>
+        <div style="font-size:13px;font-weight:700;color:#15803d;" id="vn-cp-last">—</div>
+      </div>
+      <div style="background:#e0f2fe;border-radius:8px;padding:10px 12px;border-left:3px solid #0284c7;grid-column:1/-1;" id="vn-cp-addr-block">
+        <div style="font-size:8px;font-weight:700;color:#0284c7;text-transform:uppercase;letter-spacing:.05em;margin-bottom:4px;">Address &amp; GPS</div>
+        <div style="font-size:11px;color:#0369a1;" id="vn-cp-addr">—</div>
+        <div id="vn-cp-gps-row" style="margin-top:4px;display:none;">
+          <a id="vn-cp-gps-link" href="#" target="_blank" style="font-size:11px;font-weight:700;color:#0284c7;text-decoration:none;">📍 Open in Google Maps ↗</a>
+          <span id="vn-cp-gps-coords" style="font-size:9px;color:#6b7280;margin-left:8px;"></span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Copy buttons -->
+    <div style="background:#f8faff;border:1.5px solid #c7d2fe;border-radius:10px;padding:12px 14px;">
+      <div style="font-size:9px;font-weight:700;color:#1e3cb8;text-transform:uppercase;letter-spacing:.05em;margin-bottom:10px;">📋 Copy info</div>
+      <div style="display:flex;gap:6px;flex-wrap:wrap;">
+        <button onclick="vnCpCopy('names')" style="padding:6px 12px;background:#1e3cb8;color:#fff;border:none;border-radius:6px;font-size:11px;font-weight:700;cursor:pointer;font-family:inherit;">📋 Copy names</button>
+        <button onclick="vnCpCopy('full')" style="padding:6px 12px;background:#0f766e;color:#fff;border:none;border-radius:6px;font-size:11px;font-weight:700;cursor:pointer;font-family:inherit;">📋 Copy full details</button>
+        <button onclick="vnCpCopy('harvest')" style="padding:6px 12px;background:#7c3aed;color:#fff;border:none;border-radius:6px;font-size:11px;font-weight:700;cursor:pointer;font-family:inherit;">📋 Copy harvest info</button>
+        <div id="vn-cp-copied" style="font-size:10px;color:#15803d;font-weight:700;align-self:center;"></div>
+      </div>
+    </div>
+
+    <!-- Harvest records -->
+    <div>
+      <div style="font-size:10px;font-weight:700;color:#15803d;text-transform:uppercase;letter-spacing:.05em;margin-bottom:8px;">📋 Harvest records</div>
+      <div id="vn-cp-harvests" style="font-size:11px;color:#9ca3af;">Loading...</div>
+    </div>
+
+  </div>
 </div>
 </div>
 
