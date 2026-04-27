@@ -564,6 +564,14 @@ tr:hover td{background:#f8f9ff;cursor:pointer}
 .hv-rv-sheet{font-size:11px;font-weight:600;color:var(--blue);}
 .hv-rv-tg-ok{font-size:9px;color:#15803d;}
 .hv-rv-tg-no{font-size:9px;color:#d97706;}
+.hv-rv-tg-tbf{font-size:9px;color:#dc2626;font-weight:700;background:#fef2f2;border:1px solid #fca5a5;border-radius:4px;padding:1px 5px;display:inline-block;margin-top:2px;}
+.hv-rv-tg-inp{font-size:10px;border:1px solid #fca5a5;border-radius:4px;padding:2px 5px;font-family:inherit;outline:none;color:#374151;width:100%;box-sizing:border-box;margin-top:3px;}
+.hv-rv-tg-inp:focus{border-color:#1e3cb8;}
+.hv-unnamed-form{background:#fff7ed;border:1.5px dashed #fb923c;border-radius:7px;padding:7px 8px;margin:4px 6px;}
+.hv-unnamed-form input{width:100%;padding:5px 7px;border:1px solid #fed7aa;border-radius:5px;font-size:11px;font-family:inherit;outline:none;color:#374151;box-sizing:border-box;margin-bottom:4px;}
+.hv-unnamed-form input:focus{border-color:#ea580c;}
+.hv-add-unnamed-btn{width:100%;padding:5px;background:#fff7ed;color:#ea580c;border:1.5px dashed #fb923c;border-radius:6px;font-size:11px;font-weight:700;cursor:pointer;font-family:inherit;margin-top:2px;}
+.hv-add-unnamed-btn:hover{background:#ffedd5;}
 .hv-rv-area{font-size:8px;color:var(--mu);}
 .hv-rv-btns{display:flex;gap:3px;margin-top:2px;}
 .hv-done-btn{padding:1px 5px;border-radius:3px;border:1px solid var(--bd);background:#fff;color:var(--mu);font-size:8px;cursor:pointer;font-family:inherit;}
@@ -878,8 +886,20 @@ tr:hover td{background:#f8f9ff;cursor:pointer}
         <div>Select vendos from the list and click <b style="color:var(--blue);">+ add</b></div>
       </div>
     </div>
+    <!-- ADD UNNAMED VENDO FORM (inline, hidden by default) -->
+    <div class="hv-unnamed-form" id="hv-unnamed-form" style="display:none;">
+      <div style="font-size:9px;font-weight:700;color:#ea580c;margin-bottom:5px;text-transform:uppercase;letter-spacing:.04em;">➕ Add unnamed vendo</div>
+      <input id="hv-unnamed-label" placeholder="Description e.g. Cogon area, Near Jollibee Dipolog" maxlength="80" autocomplete="off">
+      <input id="hv-unnamed-area" placeholder="Area (e.g. DIPOLOG)" autocomplete="off">
+      <input id="hv-unnamed-last" type="date" title="Last harvest date (optional)">
+      <div style="display:flex;gap:4px;margin-top:2px;">
+        <button onclick="hvAddUnnamed()" style="flex:1;padding:5px;background:#ea580c;color:#fff;border:none;border-radius:5px;font-size:11px;font-weight:700;cursor:pointer;font-family:inherit;">Add to route</button>
+        <button onclick="hvToggleUnnamedForm(false)" style="padding:5px 10px;background:#fff;color:#6b7280;border:1px solid #e5e7eb;border-radius:5px;font-size:11px;cursor:pointer;font-family:inherit;">Cancel</button>
+      </div>
+    </div>
     <div class="hv-rc-bottom">
       <button class="hv-confirm-btn" onclick="hvConfirmRoute()">✅ Confirm route →</button>
+      <button class="hv-add-unnamed-btn" onclick="hvToggleUnnamedForm(true)">➕ Add vendo (TG name TBF)</button>
       <button class="hv-clear-btn" onclick="hvClearRoute()">🗑 Clear route</button>
       <div class="hv-warn" id="hv-warn" style="display:none;">⚠ Some vendos have no TG name — route will be partial</div>
     </div>
@@ -2775,7 +2795,53 @@ function hvToggleAdd(btn, row) {
   }
 }
 
-function hvAddToRoutePanel(vid, display, sheet, tg, area, matched, excel, addr, last) {
+/* ── UNNAMED / TBF VENDO ── */
+function hvToggleUnnamedForm(show) {
+  const f = document.getElementById('hv-unnamed-form');
+  if (!f) return;
+  f.style.display = show ? 'block' : 'none';
+  if (show) {
+    document.getElementById('hv-unnamed-label').focus();
+    // Set today as default last date placeholder only, not value
+  }
+}
+
+function hvAddUnnamed() {
+  const label = (document.getElementById('hv-unnamed-label').value || '').trim();
+  if (!label) {
+    document.getElementById('hv-unnamed-label').style.borderColor = '#dc2626';
+    document.getElementById('hv-unnamed-label').focus();
+    return;
+  }
+  document.getElementById('hv-unnamed-label').style.borderColor = '';
+  const area  = (document.getElementById('hv-unnamed-area').value || '').trim().toUpperCase() || '—';
+  const last  = document.getElementById('hv-unnamed-last').value || '';
+
+  // Generate a temp ID so we can track this row
+  const tempId = 'tbf_' + Date.now();
+  hvAddToRoutePanel(tempId, label, label, '', area, false, '', '', last, true);
+
+  // Reset form
+  document.getElementById('hv-unnamed-label').value = '';
+  document.getElementById('hv-unnamed-area').value  = '';
+  document.getElementById('hv-unnamed-last').value  = '';
+  hvToggleUnnamedForm(false);
+
+  const w = document.getElementById('hv-warn');
+  if (w) { w.textContent = '⚠ Some vendos have no TG name — fill in after finding'; w.style.display = 'block'; }
+}
+
+function hvTbfTgChanged(input) {
+  const val = input.value.trim();
+  const badge = input.closest('div').querySelector('.hv-rv-tg-tbf');
+  if (val) {
+    if (badge) { badge.textContent = 'TG: ' + val + ' (pending verify)'; badge.style.background = '#fef9c3'; badge.style.borderColor = '#fde047'; badge.style.color = '#854d0e'; }
+  } else {
+    if (badge) { badge.textContent = '🔴 TG: TBF'; badge.style.background = ''; badge.style.borderColor = ''; badge.style.color = ''; }
+  }
+}
+
+function hvAddToRoutePanel(vid, display, sheet, tg, area, matched, excel, addr, last, isTbf) {
   const scroll = document.getElementById('hv-rv-scroll');
   const empty  = document.getElementById('hv-rv-empty');
   if (empty) empty.style.display = 'none';
@@ -2784,10 +2850,22 @@ function hvAddToRoutePanel(vid, display, sheet, tg, area, matched, excel, addr, 
   const div = document.createElement('div');
   div.className    = 'hv-rv';
   div.dataset.rvid = vid;
+  if (isTbf) div.dataset.tbf = '1';
   const primaryName = excel || sheet || tg || display;
-  const tgLine = matched
-    ? `<div class="hv-rv-tg-ok">TG: ${tg||'—'} ✓</div>`
-    : `<div class="hv-rv-tg-no">TG: ${tg||'untraced ⚠'}</div>`;
+  let tgLine;
+  if (isTbf) {
+    tgLine = `<div>
+      <span class="hv-rv-tg-tbf">🔴 TG: TBF</span>
+      <input class="hv-rv-tg-inp" placeholder="Enter TG name when found..." maxlength="80"
+        data-tbf="1"
+        oninput="hvTbfTgChanged(this)"
+        title="Enter the Telegram name once found">
+    </div>`;
+  } else if (matched) {
+    tgLine = `<div class="hv-rv-tg-ok">TG: ${tg||'—'} ✓</div>`;
+  } else {
+    tgLine = `<div class="hv-rv-tg-no">TG: ${tg||'untraced ⚠'}</div>`;
+  }
   const addrLine = addr
     ? `<div style="font-size:8px;margin-top:2px;">📍 <a href="https://maps.google.com/?q=${encodeURIComponent(addr + ', Zamboanga del Norte, Philippines')}" target="_blank" style="color:#1e3cb8;text-decoration:none;">${addr}</a></div>`
     : '';
@@ -2821,7 +2899,7 @@ function hvAddToRoutePanel(vid, display, sheet, tg, area, matched, excel, addr, 
     </div>`;
   scroll.appendChild(div);
   hvUpdateRouteCnt();
-  if (!matched && tg) { const w = document.getElementById('hv-warn'); if (w) w.style.display = 'block'; }
+  if ((!matched && tg) || isTbf) { const w = document.getElementById('hv-warn'); if (w) { w.textContent = '⚠ Some vendos have no TG name — fill in after finding'; w.style.display = 'block'; } }
 }
 
 // Clear last_harvest_date in Supabase from route builder
@@ -2934,11 +3012,23 @@ async function hvConfirmRoute() {
   // Collect vendo data from route panel rows
   const vendos = [];
   rows.forEach(r => {
+    const isTbfRow = r.dataset.tbf === '1';
+    // For TBF rows, get TG from the input field; for normal rows, from the badge text
+    let tgVal = '';
+    if (isTbfRow) {
+      tgVal = (r.querySelector('input[data-tbf]')?.value || '').trim() || null;
+    } else {
+      tgVal = r.querySelector('.hv-rv-tg-ok, .hv-rv-tg-no')?.textContent
+        ?.replace('TG: ','').replace(' ✓','').replace(' ⚠','').trim() || '';
+    }
+    // Strip temp IDs — TBF rows have no real DB vendo id
+    const realVid = (r.dataset.rvid || '').startsWith('tbf_') ? null : (r.dataset.rvid || '');
     vendos.push({
-      vid:   r.dataset.rvid || '',
+      vid:   realVid,
       sheet: r.querySelector('.hv-rv-sheet')?.textContent || '',
-      tg:    r.querySelector('.hv-rv-tg-ok, .hv-rv-tg-no')?.textContent?.replace('TG: ','').replace(' ✓','').replace(' ⚠','') || '',
-      area:  r.querySelector('.hv-rv-area')?.textContent || ''
+      tg:    tgVal || null,
+      area:  r.querySelector('.hv-rv-area')?.textContent || '',
+      tbf:   isTbfRow
     });
   });
 
@@ -2971,11 +3061,15 @@ async function hvConfirmRoute() {
     const routeData = await r1.json();
     const routeId = routeData[0]?.id;
 
-    // Insert route_items
+    // Insert route_items (TBF rows have tg_name=null, sheet_name=label)
     if (routeId) {
       const items = vendos.map(v => ({
-        route_id: routeId, tg_name: v.tg,
-        sheet_name: v.sheet, area: v.area, status: 'pending'
+        route_id:   routeId,
+        tg_name:    v.tg || null,
+        sheet_name: v.sheet || null,
+        area:       v.area || null,
+        status:     'pending',
+        collector_note: v.tbf ? (v.tg ? '⚠ TG unverified — ' + v.tg : '🔴 TG name TBF') : null
       }));
       await fetch(_SB + '/rest/v1/route_items', {
         method: 'POST', headers: {...headers, 'Prefer': 'return=minimal'},
