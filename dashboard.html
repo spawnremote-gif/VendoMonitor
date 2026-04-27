@@ -979,8 +979,20 @@ tr:hover td{background:#f8f9ff;cursor:pointer}
         <div>Select vendos from the list and click <b style="color:var(--blue);">+ add</b></div>
       </div>
     </div>
+    <!-- ADD UNNAMED VENDO FORM (inline, hidden by default) -->
+    <div class="hv-unnamed-form" id="hv-unnamed-form" style="display:none;">
+      <div style="font-size:9px;font-weight:700;color:#ea580c;margin-bottom:5px;text-transform:uppercase;letter-spacing:.04em;">➕ Add unnamed vendo</div>
+      <input id="hv-unnamed-label" placeholder="Description e.g. Cogon area, Near Jollibee Dipolog" maxlength="80" autocomplete="off">
+      <input id="hv-unnamed-area" placeholder="Area (e.g. DIPOLOG)" autocomplete="off">
+      <input id="hv-unnamed-last" type="date" title="Last harvest date (optional)">
+      <div style="display:flex;gap:4px;margin-top:2px;">
+        <button onclick="hvAddUnnamed()" style="flex:1;padding:5px;background:#ea580c;color:#fff;border:none;border-radius:5px;font-size:11px;font-weight:700;cursor:pointer;font-family:inherit;">Add to route</button>
+        <button onclick="hvToggleUnnamedForm(false)" style="padding:5px 10px;background:#fff;color:#6b7280;border:1px solid #e5e7eb;border-radius:5px;font-size:11px;cursor:pointer;font-family:inherit;">Cancel</button>
+      </div>
+    </div>
     <div class="hv-rc-bottom">
       <button class="hv-confirm-btn" onclick="hvConfirmRoute()">✅ Confirm route →</button>
+      <button class="hv-add-unnamed-btn" onclick="hvToggleUnnamedForm(true)">➕ Add vendo (TG name TBF)</button>
       <button class="hv-clear-btn" onclick="hvClearRoute()">🗑 Clear route</button>
       <div class="hv-warn" id="hv-warn" style="display:none;">⚠ Some vendos have no TG name — route will be partial</div>
     </div>
@@ -3623,6 +3635,11 @@ async function hrepTransferItem(itemId, btn) {
           });
           if (r2.ok) {
             if (msg) { msg.textContent = '✅ Transferred to ' + code + ' (' + col + ')'; msg.style.color = '#15803d'; }
+            // Update hvoRouteItems cache so Records panel reflects change immediately
+            const cachedItem = hvoRouteItems ? hvoRouteItems.find(x => String(x.id) === String(itemId)) : null;
+            if (cachedItem) { cachedItem.route_id = parseInt(destId); cachedItem.status = 'pending'; cachedItem.total_coins = null; cachedItem.net_collectible = null; }
+            const destBody = document.querySelector('[data-routebody="' + destId + '"]');
+            if (destBody && destBody._refresh) destBody._refresh();
             btn.closest('div[style*="border:1px solid #e5e7eb"]').style.opacity = '0.5';
             btn.closest('div[style*="border:1px solid #e5e7eb"]').style.pointerEvents = 'none';
             setTimeout(() => { btn.closest('div[style*="border:1px solid #e5e7eb"]')?.remove(); if(msg) msg.textContent=''; }, 2000);
@@ -5429,8 +5446,8 @@ function hvoBindBodyEvents(body, routeId) {
           body: JSON.stringify({ collector: col, ...(date ? { route_date: date } : {}) })
         });
         if (r.ok) {
-          // Update in hvoAllRoutes cache
-          const rt = (hvoAllRoutes||[]).find(x => String(x.id) === String(rId));
+          // Update in hvoRoutes cache
+          const rt = (hvoRoutes||[]).find(x => String(x.id) === String(rId));
           if (rt) { rt.collector = col; if (date) rt.route_date = date; }
           if (msgEl) { msgEl.textContent = '✅ Saved'; msgEl.style.color = '#15803d'; setTimeout(()=>{ if(msgEl) msgEl.textContent=''; },2500); }
           hvRefreshPendingRoutes();
@@ -5458,7 +5475,7 @@ function hvoBindBodyEvents(body, routeId) {
         });
         if (r.ok) {
           // Update cache
-          const rt = (hvoAllRoutes||[]).find(x => String(x.id) === String(rId));
+          const rt = (hvoRoutes||[]).find(x => String(x.id) === String(rId));
           if (rt) rt.status = 'completed';
           if (body._refresh) body._refresh();
           hvRefreshPendingRoutes();
@@ -5521,10 +5538,13 @@ async function hvoShowTransferDropdown(itemId, btn, body) {
             body: JSON.stringify({ route_id: parseInt(destId), status: 'pending', harvested_at: null, total_coins: null, free_coins: null, old_coins: null, net_collectible: null, spawn_share: null, customer_share: null })
           });
           if (r2.ok) {
-            // Remove from hvoRouteItems cache
-            const idx = hvoRouteItems ? hvoRouteItems.findIndex(x => String(x.id) === String(itemId)) : -1;
-            if (idx > -1) hvoRouteItems.splice(idx, 1);
+            // Update route_id in hvoRouteItems cache so it appears in the destination route
+            const cached = hvoRouteItems ? hvoRouteItems.find(x => String(x.id) === String(itemId)) : null;
+            if (cached) { cached.route_id = parseInt(destId); cached.status = 'pending'; cached.total_coins = null; cached.net_collectible = null; }
             if (body && body._refresh) body._refresh();
+            // Also refresh destination route card if visible
+            const destBody = document.querySelector('[data-routebody="' + destId + '"]');
+            if (destBody && destBody._refresh) destBody._refresh();
             const toast = document.getElementById('hv-refresh-toast');
             if (toast) { toast.textContent = '✅ Transferred to ' + code + ' (' + col + ')'; toast.classList.add('show'); setTimeout(()=>toast.classList.remove('show'),3000); }
           } else {
@@ -5712,6 +5732,7 @@ function hvoRenderRoutes() {
     // Vendo items body — visible by default
     const body = document.createElement('div');
     body.style.cssText = 'display:block;border-top:1px solid ' + bdColor + ';';
+    body.dataset.routebody = routeId;
 
     // Build body content
     const routeId = r.id;
