@@ -535,7 +535,8 @@ async function loadRoute() {
     // Enrich by tg_name (normal vendos)
     const tgNamesForEnrich = currentRoute.items.map(i => i.tg_name).filter(Boolean);
     // Also enrich by sheet_name for TBF items (tg_name = null)
-    const sheetNamesForEnrich = currentRoute.items.filter(i => !i.tg_name && i.sheet_name).map(i => i.sheet_name);
+    // Also enrich by sheet_name if tg_name is null OR 'untraced' (no real match possible)
+    const sheetNamesForEnrich = currentRoute.items.filter(i => (!i.tg_name || i.tg_name === 'untraced') && i.sheet_name).map(i => i.sheet_name);
     try {
       const vendoMap = {};  // keyed by tg_name
       const sheetMap = {};  // keyed by sheet_name
@@ -555,7 +556,7 @@ async function loadRoute() {
       }
 
       currentRoute.items = currentRoute.items.map(item => {
-        const v = item.tg_name ? vendoMap[item.tg_name] : sheetMap[item.sheet_name];
+        const v = (item.tg_name && item.tg_name !== 'untraced') ? vendoMap[item.tg_name] : sheetMap[item.sheet_name];
         if (!v) return item;
         return {
           ...item,
