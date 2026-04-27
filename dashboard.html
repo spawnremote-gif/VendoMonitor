@@ -801,6 +801,7 @@ tr:hover td{background:#f8f9ff;cursor:pointer}
       <button class="hv-hvtab" id="hbtn-records" onclick="hvShowTab('records',this)">📊 Records</button>
       <button class="hv-hvtab" id="hbtn-recon" onclick="hvShowTab('recon',this)">⚖️ Reconcile</button>
       <button class="hv-hvtab" id="hbtn-addharvest" onclick="hvShowTab('addharvest',this)" style="background:#f0fdf4;border-color:#bbf7d0;color:#15803d;">➕ Add Harvest</button>
+      <button class="hv-hvtab" id="hbtn-newvendo" onclick="hvShowTab('newvendo',this)" style="background:#eff6ff;border-color:#bfdbfe;color:#1d4ed8;">🏭 New Vendo</button>
       <button class="hv-hvtab" id="hbtn-vnames" onclick="hvShowTab('vnames',this)">🔗 Vendo Names</button>
       <button class="hv-hvtab" id="hbtn-audited" onclick="hvShowTab('audited',this)" style="background:#fef2f2;border-color:#fca5a5;color:#dc2626;font-size:11px;">🤖 Claude Audited Vendos</button>
     </div>
@@ -1119,6 +1120,87 @@ tr:hover td{background:#f8f9ff;cursor:pointer}
   <div id="ah-msg" style="margin-top:10px;font-size:12px;text-align:center;"></div>
 </div>
 
+<!-- NEW VENDO PANEL -->
+<div id="hv-tab-newvendo" class="hv-hidden" style="padding:16px;max-width:620px;margin:0 auto;overflow-y:auto;max-height:calc(100vh - 120px);">
+  <div style="font-size:15px;font-weight:700;color:#1d4ed8;margin-bottom:2px;">🏭 Register New Vendo</div>
+  <div style="font-size:11px;color:#6b7280;margin-bottom:16px;">Saves to Supabase vendos table.</div>
+
+  <div style="background:#fff;border:1.5px solid #e5e7eb;border-radius:10px;padding:14px;margin-bottom:12px;">
+    <div style="font-size:11px;font-weight:700;color:#374151;text-transform:uppercase;letter-spacing:.04em;margin-bottom:10px;">📋 Basic Info</div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
+      <div style="grid-column:1/-1;">
+        <div style="font-size:10px;font-weight:700;color:#6b7280;margin-bottom:4px;">Sheet Name <span style="color:#dc2626;">*</span></div>
+        <input id="nv-name" placeholder="Exact name as in Google Sheet" style="width:100%;padding:9px 11px;border:1.5px solid #e5e7eb;border-radius:7px;font-size:13px;font-family:inherit;outline:none;box-sizing:border-box;">
+      </div>
+      <div>
+        <div style="font-size:10px;font-weight:700;color:#6b7280;margin-bottom:4px;">VLAN <span style="color:#dc2626;">*</span></div>
+        <input id="nv-vlan" type="number" placeholder="e.g. 246" min="1" oninput="nvShowServer(this.value)" style="width:100%;padding:9px 11px;border:1.5px solid #e5e7eb;border-radius:7px;font-size:13px;font-family:inherit;outline:none;box-sizing:border-box;">
+        <div id="nv-server-badge" style="margin-top:5px;"></div>
+      </div>
+      <div>
+        <div style="font-size:10px;font-weight:700;color:#6b7280;margin-bottom:4px;">Area <span style="color:#dc2626;">*</span></div>
+        <select id="nv-area" style="width:100%;padding:9px 11px;border:1.5px solid #e5e7eb;border-radius:7px;font-size:13px;font-family:inherit;outline:none;background:#fff;box-sizing:border-box;">
+          <option value="">Select area...</option>
+          <option>DAPITAN</option><option>DIPOLOG</option><option>SINDANGAN</option>
+          <option>SINAMAN</option><option>ROXAS</option><option>POLANCO</option>
+          <option>MINAOG</option><option>MIX AREAS</option>
+        </select>
+      </div>
+      <div>
+        <div style="font-size:10px;font-weight:700;color:#6b7280;margin-bottom:4px;">Contact Number</div>
+        <input id="nv-contact" placeholder="e.g. 09153031533" style="width:100%;padding:9px 11px;border:1.5px solid #e5e7eb;border-radius:7px;font-size:13px;font-family:inherit;outline:none;box-sizing:border-box;">
+      </div>
+    </div>
+  </div>
+
+  <div style="background:#fff;border:1.5px solid #e5e7eb;border-radius:10px;padding:14px;margin-bottom:12px;">
+    <div style="font-size:11px;font-weight:700;color:#374151;text-transform:uppercase;letter-spacing:.04em;margin-bottom:10px;">📍 Location</div>
+    <div style="margin-bottom:10px;">
+      <div style="font-size:10px;font-weight:700;color:#6b7280;margin-bottom:4px;">Address <span style="color:#dc2626;">*</span></div>
+      <input id="nv-address" placeholder="e.g. Purok 3, Barangay Cogon, Dipolog City" style="width:100%;padding:9px 11px;border:1.5px solid #e5e7eb;border-radius:7px;font-size:13px;font-family:inherit;outline:none;box-sizing:border-box;">
+    </div>
+    <div>
+      <div style="font-size:10px;font-weight:700;color:#6b7280;margin-bottom:4px;">GPS Coordinates</div>
+      <input id="nv-gps" placeholder="e.g. 8.5697, 123.3435" style="width:100%;padding:9px 11px;border:1.5px solid #e5e7eb;border-radius:7px;font-size:13px;font-family:inherit;outline:none;box-sizing:border-box;">
+      <div style="font-size:10px;color:#9ca3af;margin-top:3px;">lat, lng format</div>
+    </div>
+  </div>
+
+  <div style="background:#fff;border:1.5px solid #e5e7eb;border-radius:10px;padding:14px;margin-bottom:12px;">
+    <div style="font-size:11px;font-weight:700;color:#374151;text-transform:uppercase;letter-spacing:.04em;margin-bottom:10px;">🔧 Installation</div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
+      <div>
+        <div style="font-size:10px;font-weight:700;color:#6b7280;margin-bottom:4px;">Date Installed <span style="color:#dc2626;">*</span></div>
+        <input type="date" id="nv-date" style="width:100%;padding:9px 11px;border:1.5px solid #e5e7eb;border-radius:7px;font-size:13px;font-family:inherit;outline:none;box-sizing:border-box;">
+      </div>
+      <div>
+        <div style="font-size:10px;font-weight:700;color:#6b7280;margin-bottom:4px;">Installer / Technician</div>
+        <input id="nv-installer" placeholder="e.g. Mark Lobino" style="width:100%;padding:9px 11px;border:1.5px solid #e5e7eb;border-radius:7px;font-size:13px;font-family:inherit;outline:none;box-sizing:border-box;">
+      </div>
+    </div>
+  </div>
+
+  <div style="background:#fff;border:1.5px solid #e5e7eb;border-radius:10px;padding:14px;margin-bottom:12px;">
+    <div style="font-size:11px;font-weight:700;color:#374151;text-transform:uppercase;letter-spacing:.04em;margin-bottom:4px;">💬 Telegram Name Match</div>
+    <div style="font-size:10px;color:#6b7280;margin-bottom:10px;">Optional — search existing tg_names to link now</div>
+    <input id="nv-tg-search" placeholder="Search tg_name..." oninput="nvTgSearch(this.value)"
+      style="width:100%;padding:9px 11px;border:1.5px solid #e5e7eb;border-radius:7px;font-size:13px;font-family:inherit;outline:none;box-sizing:border-box;">
+    <div id="nv-tg-results" style="margin-top:6px;max-height:160px;overflow-y:auto;border-radius:7px;"></div>
+    <div id="nv-tg-selected" style="display:none;margin-top:8px;background:#eff6ff;border:1.5px solid #bfdbfe;border-radius:7px;padding:8px 12px;">
+      <div style="display:flex;align-items:center;justify-content:space-between;">
+        <div>
+          <div style="font-size:12px;font-weight:700;color:#1d4ed8;" id="nv-tg-sel-name">—</div>
+          <div style="font-size:10px;color:#6b7280;">✅ Confirmed TG match</div>
+        </div>
+        <button onclick="nvClearTg()" style="font-size:9px;color:#dc2626;background:none;border:none;cursor:pointer;font-weight:700;font-family:inherit;">✕ Clear</button>
+      </div>
+    </div>
+  </div>
+
+  <button onclick="nvSubmit()" id="nv-submit-btn" style="width:100%;padding:14px;background:#1d4ed8;color:#fff;border:none;border-radius:10px;font-size:15px;font-weight:700;cursor:pointer;font-family:inherit;margin-bottom:6px;">💾 Register Vendo</button>
+  <div id="nv-msg" style="margin-top:8px;font-size:12px;text-align:center;min-height:18px;"></div>
+</div>
+
 <!-- VENDO NAMES PANEL -->
 <div id="hv-tab-vnames" class="hv-hidden" style="padding:14px 16px;overflow-y:auto;height:calc(100vh - 132px);">
   <!-- Sub-tabs: All vendos / Saved by me -->
@@ -1258,6 +1340,7 @@ tr:hover td{background:#f8f9ff;cursor:pointer}
       <div style="background:#fafbff;border-radius:8px;padding:10px 12px;border-left:3px solid #6366f1;">
         <div style="font-size:8px;font-weight:700;color:#6366f1;text-transform:uppercase;letter-spacing:.05em;margin-bottom:4px;">Area / VLAN</div>
         <div style="font-size:13px;font-weight:700;color:#4338ca;" id="hv-dp-area">—</div>
+        <div id="hv-dp-server-badge" style="margin-top:5px;"></div>
       </div>
       <div style="background:#e0f2fe;border-radius:8px;padding:10px 12px;border-left:3px solid #0284c7;grid-column:1/-1;">
         <div style="font-size:8px;font-weight:700;color:#0284c7;text-transform:uppercase;letter-spacing:.05em;margin-bottom:4px;">Address &amp; GPS</div>
@@ -1313,6 +1396,49 @@ tr:hover td{background:#f8f9ff;cursor:pointer}
             oninput="hvSearchTGName(this.value)"
             style="width:100%;padding:8px 10px;border:1.5px solid #ddd6fe;border-radius:7px;font-size:12px;font-family:inherit;outline:none;color:#111827;box-sizing:border-box;">
           <div id="hv-dp-tg-results" style="display:none;position:absolute;top:100%;left:0;right:0;background:#fff;border:1.5px solid #ddd6fe;border-radius:0 0 8px 8px;max-height:160px;overflow-y:auto;z-index:10;box-shadow:0 4px 12px rgba(0,0,0,.12);"></div>
+        </div>
+
+        <!-- VLAN + Contact row -->
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">
+          <div>
+            <div style="font-size:9px;font-weight:700;color:#6b7280;text-transform:uppercase;letter-spacing:.04em;margin-bottom:4px;">VLAN</div>
+            <input type="number" id="hv-dp-vlan-inp" placeholder="e.g. 246" min="1"
+              style="width:100%;padding:7px 10px;border:1.5px solid #c7d2fe;border-radius:7px;font-size:12px;font-family:inherit;outline:none;color:#111827;box-sizing:border-box;">
+          </div>
+          <div>
+            <div style="font-size:9px;font-weight:700;color:#6b7280;text-transform:uppercase;letter-spacing:.04em;margin-bottom:4px;">Contact Number</div>
+            <input type="text" id="hv-dp-contact-inp" placeholder="e.g. 09153031533"
+              style="width:100%;padding:7px 10px;border:1.5px solid #c7d2fe;border-radius:7px;font-size:12px;font-family:inherit;outline:none;color:#111827;box-sizing:border-box;">
+          </div>
+        </div>
+
+        <!-- GPS field -->
+        <div>
+          <div style="font-size:9px;font-weight:700;color:#6b7280;text-transform:uppercase;letter-spacing:.04em;margin-bottom:4px;">GPS Coordinates</div>
+          <input type="text" id="hv-dp-gps-inp" placeholder="e.g. 8.5697, 123.3435"
+            style="width:100%;padding:7px 10px;border:1.5px solid #c7d2fe;border-radius:7px;font-size:12px;font-family:inherit;outline:none;color:#111827;box-sizing:border-box;">
+          <div style="font-size:9px;color:#9ca3af;margin-top:2px;">lat, lng — enables Maps link</div>
+        </div>
+
+        <!-- Address field -->
+        <div>
+          <div style="font-size:9px;font-weight:700;color:#6b7280;text-transform:uppercase;letter-spacing:.04em;margin-bottom:4px;">Address</div>
+          <input type="text" id="hv-dp-address-inp" placeholder="e.g. Purok 3, Dicayas, Dipolog City"
+            style="width:100%;padding:7px 10px;border:1.5px solid #c7d2fe;border-radius:7px;font-size:12px;font-family:inherit;outline:none;color:#111827;box-sizing:border-box;">
+        </div>
+
+        <!-- Date installed + Installer row -->
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">
+          <div>
+            <div style="font-size:9px;font-weight:700;color:#6b7280;text-transform:uppercase;letter-spacing:.04em;margin-bottom:4px;">Date Installed</div>
+            <input type="date" id="hv-dp-date-inp"
+              style="width:100%;padding:7px 10px;border:1.5px solid #c7d2fe;border-radius:7px;font-size:12px;font-family:inherit;outline:none;color:#111827;box-sizing:border-box;">
+          </div>
+          <div>
+            <div style="font-size:9px;font-weight:700;color:#6b7280;text-transform:uppercase;letter-spacing:.04em;margin-bottom:4px;">Installer</div>
+            <input type="text" id="hv-dp-installer-inp" placeholder="e.g. Mark Lobino"
+              style="width:100%;padding:7px 10px;border:1.5px solid #c7d2fe;border-radius:7px;font-size:12px;font-family:inherit;outline:none;color:#111827;box-sizing:border-box;">
+          </div>
         </div>
 
         <!-- Save changes button -->
@@ -1565,6 +1691,7 @@ function hvShowTab(tab, btn) {
     recon:  document.getElementById('hv-tab-recon'),
     vnames: document.getElementById('hv-tab-vnames'),
     addharvest: document.getElementById('hv-tab-addharvest'),
+    newvendo: document.getElementById('hv-tab-newvendo'),
     audited: document.getElementById('hv-tab-audited')
   };
   // Use classList to force display:none (overcomes !important in CSS)
@@ -1578,7 +1705,7 @@ function hvShowTab(tab, btn) {
   if (_aeld) _aeld.style.display = 'none';
   if (_rov)  _rov.style.display  = 'none';
   // Hide/show flex container elements
-  [els.page, els.area, els.filt, els.sched, els.rec, els.recon, els.vnames, els.addharvest, guide].forEach(hide);
+  [els.page, els.area, els.filt, els.sched, els.rec, els.recon, els.vnames, els.addharvest, els.newvendo, guide].forEach(hide);
   if (isRoute) {
     show(guide, ''); show(els.page, 'grid'); show(els.area, 'flex'); show(els.filt, 'flex');
     // Reset loading flag and reload vendos when switching back to route tab
@@ -1601,6 +1728,9 @@ function hvShowTab(tab, btn) {
     show(els.vnames, 'block');
   } else if (tab === 'addharvest') {
     show(els.addharvest, 'block');
+  } else if (tab === 'newvendo') {
+    show(els.newvendo, 'block');
+    nvInitDate();
   } else if (tab === 'audited') {
     // Audited uses fixed overlay - show it directly
     _showOverlay('hv-tab-audited');
@@ -1767,9 +1897,13 @@ function buildVendoRow(v, scroll) {
   div.dataset.last   = lastFmt;
   div.dataset.note   = v.admin_notes || '';
   div.dataset.excel  = v.excel_name  || '';
-  div.dataset.addr   = v.address     || '';
-  div.dataset.lat    = v.lat         || '';
-  div.dataset.lng    = v.lng         || '';
+  div.dataset.addr          = v.address        || '';
+  div.dataset.lat           = v.lat            || '';
+  div.dataset.lng           = v.lng            || '';
+  div.dataset.contact       = v.contact_number || '';
+  div.dataset.dateInstalled = v.date_installed || '';
+  div.dataset.installer     = v.installer      || '';
+  div.dataset.gps           = v.gps            || '';
 
   // Click row → open detail popup (reads from dataset, no string args)
   div.addEventListener('click', function() {
@@ -2074,8 +2208,27 @@ async function hvSaveDetailEdits() {
       window._hvSelectedExcelData = null;
     }
   }
-  if (tgInp)    updates.tg_name    = tgInp;
-  // Mark as confirmed by admin whenever names are saved
+  if (tgInp) updates.tg_name = tgInp;
+
+  // New fields
+  const vlanInp    = document.getElementById('hv-dp-vlan-inp')?.value?.trim();
+  const contactInp = document.getElementById('hv-dp-contact-inp')?.value?.trim();
+  const gpsInp     = document.getElementById('hv-dp-gps-inp')?.value?.trim();
+  const addrInp    = document.getElementById('hv-dp-address-inp')?.value?.trim();
+  const dateInp    = document.getElementById('hv-dp-date-inp')?.value?.trim();
+  const instInp    = document.getElementById('hv-dp-installer-inp')?.value?.trim();
+  if (vlanInp)    updates.vlan           = parseInt(vlanInp);
+  if (contactInp) updates.contact_number = contactInp;
+  if (addrInp)    updates.address        = addrInp;
+  if (dateInp)    updates.date_installed = dateInp;
+  if (instInp)    updates.installer      = instInp;
+  if (gpsInp) {
+    updates.gps = gpsInp;
+    const parts = gpsInp.split(',').map(s => parseFloat(s.trim()));
+    if (parts.length === 2 && !isNaN(parts[0]) && !isNaN(parts[1])) {
+      updates.lat = parts[0]; updates.lng = parts[1];
+    }
+  }
   updates.name_confirmed = true;
 
   try {
@@ -2095,9 +2248,26 @@ async function hvSaveDetailEdits() {
     }
 
     // Update detail popup display
-    if (updates.area)       document.getElementById('hv-dp-area').textContent  = updates.area + ' · ' + (hvCurrentDetail?.vlan || '—');
+    const newVlan = updates.vlan || hvCurrentDetail?.vlan || '—';
+    if (updates.area || updates.vlan) document.getElementById('hv-dp-area').textContent = (updates.area||hvCurrentDetail?.area||'—') + ' · VLAN ' + newVlan;
     if (updates.sheet_name) document.getElementById('hv-dp-sheet').textContent = updates.sheet_name;
     if (updates.tg_name)    document.getElementById('hv-dp-tg').textContent    = updates.tg_name;
+    if (updates.vlan) {
+      if (hvCurrentDetail) hvCurrentDetail.vlan = updates.vlan;
+      const badge = document.getElementById('hv-dp-server-badge');
+      const nowSheet = updates.sheet_name || hvCurrentDetail?.sheet || '';
+      const nowTg    = updates.tg_name    || hvCurrentDetail?.tg    || '';
+      if (badge) badge.innerHTML = (nowSheet && nowTg) ? getServerBadge(updates.vlan || hvCurrentDetail?.vlan) : '';
+    }
+    if (updates.gps) {
+      const gpsRow = document.getElementById('hv-dp-gps-row');
+      const gpsLink = document.getElementById('hv-dp-gps-link');
+      const gpsCrd  = document.getElementById('hv-dp-gps-coords');
+      if (gpsRow)  gpsRow.style.display = 'block';
+      if (gpsLink) gpsLink.href = 'https://maps.google.com/?q=' + encodeURIComponent(updates.gps);
+      if (gpsCrd)  gpsCrd.textContent = updates.gps;
+    }
+    if (updates.address) document.getElementById('hv-dp-address').textContent = updates.address;
 
     // Backfill tg_name into harvests if sheet_name was set
     if (updates.sheet_name && updates.tg_name) {
@@ -2112,6 +2282,7 @@ async function hvSaveDetailEdits() {
     document.getElementById('hv-dp-sheet-inp').value = '';
     document.getElementById('hv-dp-tg-inp').value    = '';
     document.getElementById('hv-dp-area-sel').value  = '';
+    ['hv-dp-vlan-inp','hv-dp-contact-inp','hv-dp-gps-inp','hv-dp-address-inp','hv-dp-date-inp','hv-dp-installer-inp'].forEach(id=>{const el=document.getElementById(id);if(el)el.value='';});
     _hvSelectedSheetName = '';
     _hvSelectedTGName    = '';
 
@@ -2219,6 +2390,17 @@ function hvOpenDetailFromRow(row) {
   if (dpSheetInp) dpSheetInp.value = '';
   const dpTgInp = document.getElementById('hv-dp-tg-inp');
   if (dpTgInp) dpTgInp.value = '';
+  // Pre-fill new fields
+  const dpVlan    = document.getElementById('hv-dp-vlan-inp');    if (dpVlan)    dpVlan.value    = d.vlan || '';
+  const dpContact = document.getElementById('hv-dp-contact-inp'); if (dpContact) dpContact.value = row.dataset.contact || '';
+  const dpGps     = document.getElementById('hv-dp-gps-inp');     if (dpGps)     dpGps.value     = (d.lat && d.lng) ? (d.lat + ', ' + d.lng) : (row.dataset.gps || '');
+  const dpAddr    = document.getElementById('hv-dp-address-inp'); if (dpAddr)    dpAddr.value    = row.dataset.addr || '';
+  const dpDate    = document.getElementById('hv-dp-date-inp');    if (dpDate)    dpDate.value    = row.dataset.dateInstalled || '';
+  const dpInst    = document.getElementById('hv-dp-installer-inp'); if (dpInst)  dpInst.value   = row.dataset.installer || '';
+  // Show server badge only if fully matched (sheet + tg)
+  const srvBadge = document.getElementById('hv-dp-server-badge');
+  const _isMatched = !!(d.sheet && d.tg);
+  if (srvBadge) srvBadge.innerHTML = _isMatched ? getServerBadge(d.vlan) : '';
   const dpSr = document.getElementById('hv-dp-sheet-results');
   if (dpSr) dpSr.style.display = 'none';
   const dpTr = document.getElementById('hv-dp-tg-results');
@@ -3639,6 +3821,140 @@ function ahClearVendo() {
   document.getElementById('ah-selected').style.display = 'none';
   document.getElementById('ah-search').value = '';
   document.getElementById('ah-results').innerHTML = '';
+}
+
+
+// Server classification
+function getServerInfo(vlan) {
+  const v = parseInt(vlan);
+  if (!v) return null;
+  const servers = [
+    { num:1, name:'Server 1', areas:'Dipolog',                   vlans:[1,99]   },
+    { num:2, name:'Server 2', areas:'Dapitan',                   vlans:[100,199] },
+    { num:3, name:'Server 3', areas:'Sinaman',                   vlans:[200,249] },
+    { num:4, name:'Server 4', areas:'Roxas / Galukso / Upper Irasan', vlans:[250,349] },
+    { num:5, name:'Server 5', areas:'Polanco',                   vlans:[350,449] },
+    { num:6, name:'Server 6', areas:'Sindangan',                 vlans:[450,549] },
+    { num:7, name:'Server 7', areas:'Katipunan',                 vlans:[550,649] },
+  ];
+  const s = servers.find(s => v >= s.vlans[0] && v <= s.vlans[1]);
+  return s || null;
+}
+function getServerBadge(vlan) {
+  const s = getServerInfo(vlan);
+  if (!s) return '';
+  return '<span style="display:inline-flex;align-items:center;gap:4px;padding:2px 8px;border-radius:10px;background:#dbeafe;color:#1e3cb8;font-size:9px;font-weight:700;">🖥️ ' + s.name + ' · ' + s.areas + '</span>';
+}
+
+// ── NEW VENDO ──
+var _nvTgSelected = null;
+var _nvTgCache = [];
+
+function nvInitDate() {
+  const d = document.getElementById('nv-date');
+  if (d && !d.value) d.value = new Date().toISOString().split('T')[0];
+}
+
+function nvShowServer(vlan) {
+  const b = document.getElementById('nv-server-badge');
+  if (b) b.innerHTML = getServerBadge(vlan);
+}
+
+async function nvTgSearch(q) {
+  const res = document.getElementById('nv-tg-results');
+  if (!q || q.length < 2) { res.innerHTML = ''; return; }
+  res.innerHTML = '<div style="padding:8px;font-size:11px;color:#9ca3af;">Searching…</div>';
+  try {
+    if (!_nvTgCache.length) {
+      const r = await fetch(_SB + '/rest/v1/transactions?select=vendo&limit=2000&order=vendo.asc',
+        { headers: { 'apikey': _KEY, 'Authorization': 'Bearer ' + _KEY } });
+      const rows = await r.json();
+      const seen = new Set();
+      rows.forEach(x => { if (x.vendo && !seen.has(x.vendo)) { seen.add(x.vendo); _nvTgCache.push(x.vendo); } });
+    }
+    const ql = q.toLowerCase();
+    const matches = _nvTgCache.filter(v => v.toLowerCase().includes(ql)).slice(0, 20);
+    if (!matches.length) { res.innerHTML = '<div style="padding:8px;font-size:11px;color:#9ca3af;">No matches</div>'; return; }
+    res.innerHTML = matches.map(v => {
+      const div = document.createElement('div');
+      div.setAttribute('data-tgname', v);
+      div.style.cssText = 'padding:8px 10px;font-size:12px;border-bottom:1px solid #f3f4f6;cursor:pointer;border-radius:4px;';
+      div.textContent = '💬 ' + v;
+      div.addEventListener('mouseover', function(){this.style.background='#eff6ff';});
+      div.addEventListener('mouseout',  function(){this.style.background='';});
+      div.addEventListener('click', function(){nvTgPick(this);});
+      return div.outerHTML;
+    }).join('');
+  } catch(e) { res.innerHTML = '<div style="padding:8px;font-size:11px;color:#dc2626;">Error: ' + e.message + '</div>'; }
+}
+
+function nvTgPick(el) {
+  const name = el.getAttribute('data-tgname');
+  _nvTgSelected = name;
+  document.getElementById('nv-tg-sel-name').textContent = name;
+  document.getElementById('nv-tg-selected').style.display = 'block';
+  document.getElementById('nv-tg-results').innerHTML = '';
+  document.getElementById('nv-tg-search').value = '';
+}
+
+function nvClearTg() {
+  _nvTgSelected = null;
+  document.getElementById('nv-tg-selected').style.display = 'none';
+  document.getElementById('nv-tg-search').value = '';
+  document.getElementById('nv-tg-results').innerHTML = '';
+}
+
+async function nvSubmit() {
+  const msg  = document.getElementById('nv-msg');
+  const btn  = document.getElementById('nv-submit-btn');
+  const name = document.getElementById('nv-name').value.trim();
+  const vlan = document.getElementById('nv-vlan').value.trim();
+  const area = document.getElementById('nv-area').value.trim();
+  const addr = document.getElementById('nv-address').value.trim();
+  const contact = document.getElementById('nv-contact').value.trim();
+  const gps  = document.getElementById('nv-gps').value.trim();
+  const date = document.getElementById('nv-date').value;
+  const installer = document.getElementById('nv-installer').value.trim();
+
+  if (!name)    { msg.innerHTML = '<span style="color:#dc2626;">⚠ Sheet Name is required.</span>'; return; }
+  if (!vlan)    { msg.innerHTML = '<span style="color:#dc2626;">⚠ VLAN is required.</span>'; return; }
+  if (!area)    { msg.innerHTML = '<span style="color:#dc2626;">⚠ Area is required.</span>'; return; }
+  if (!addr)    { msg.innerHTML = '<span style="color:#dc2626;">⚠ Address is required.</span>'; return; }
+  if (!date)    { msg.innerHTML = '<span style="color:#dc2626;">⚠ Date Installed is required.</span>'; return; }
+
+  btn.disabled = true; btn.textContent = '⏳ Saving…'; msg.innerHTML = '';
+
+  try {
+    const payload = {
+      sheet_name: name, vlan: parseInt(vlan), area, address: addr,
+      contact_number: contact || null,
+      gps: gps || null, tg_name: _nvTgSelected || null,
+      date_installed: date, installer: installer || null,
+      is_active: true, created_at: new Date().toISOString()
+    };
+    if (gps) {
+      const p = gps.split(',').map(s => parseFloat(s.trim()));
+      if (p.length===2 && !isNaN(p[0]) && !isNaN(p[1])) { payload.lat=p[0]; payload.lng=p[1]; }
+    }
+    const r = await fetch(_SB + '/rest/v1/vendos', {
+      method: 'POST',
+      headers: { 'apikey': _KEY, 'Authorization': 'Bearer ' + _KEY, 'Content-Type': 'application/json', 'Prefer': 'return=representation' },
+      body: JSON.stringify(payload)
+    });
+    if (!r.ok) { const e = await r.json(); throw new Error(e.message || e.details || 'HTTP '+r.status); }
+    const saved = await r.json();
+    const srv = getServerInfo(vlan);
+    msg.innerHTML = '<span style="color:#16a34a;font-weight:700;">✅ Registered! ID: ' + (saved[0]?.id||'—') + (srv?' · '+srv.name:'') + (_nvTgSelected?' · TG matched':' · No TG yet') + '</span>';
+    ['nv-name','nv-vlan','nv-address','nv-contact','nv-gps','nv-installer','nv-tg-search'].forEach(id=>{const el=document.getElementById(id);if(el)el.value='';});
+    document.getElementById('nv-area').value='';
+    document.getElementById('nv-date').value=new Date().toISOString().split('T')[0];
+    document.getElementById('nv-server-badge').innerHTML='';
+    nvClearTg();
+  } catch(e) {
+    msg.innerHTML = '<span style="color:#dc2626;">❌ ' + e.message + '</span>';
+  } finally {
+    btn.disabled=false; btn.textContent='💾 Register Vendo';
+  }
 }
 
 async function ahSubmit() {
@@ -7012,7 +7328,7 @@ async function loadHarvests() {
 
   // Hide all non-route sub-tabs
   ['hv-tab-schedule','hv-tab-recon',
-   'hv-tab-vnames','hv-tab-addharvest'].forEach(id => {
+   'hv-tab-vnames','hv-tab-addharvest','hv-tab-newvendo'].forEach(id => {
     const el = document.getElementById(id);
     if (el) { el.classList.add('hv-hidden'); el.style.display = 'none'; }
   });
