@@ -165,6 +165,28 @@ textarea:focus{border-color:var(--red);}
 
 /* DIST BADGE */
 .vi-dist{font-size:9px;color:#0284c7;background:#e0f2fe;border-radius:5px;padding:2px 6px;display:inline-block;margin-top:3px;}
+
+/* SEARCH BAR */
+.route-search{display:flex;align-items:center;gap:8px;background:#fff;border:1.5px solid var(--border);border-radius:10px;padding:8px 12px;margin-bottom:10px;}
+.route-search input{flex:1;border:none;outline:none;font-size:14px;font-family:inherit;color:var(--text);background:transparent;}
+.route-search-icon{color:var(--muted);font-size:14px;flex-shrink:0;}
+.search-clear{font-size:14px;color:var(--muted);cursor:pointer;flex-shrink:0;padding:0 2px;}
+
+/* NO-GPS SECTION */
+.nogps-section{background:#fff7ed;border:1.5px dashed #fb923c;border-radius:10px;padding:10px 12px;margin-top:8px;}
+.nogps-header{font-size:10px;font-weight:700;color:#ea580c;text-transform:uppercase;letter-spacing:.05em;margin-bottom:6px;display:flex;align-items:center;gap:6px;}
+.nogps-badge{background:#ea580c;color:#fff;font-size:9px;font-weight:700;padding:1px 6px;border-radius:8px;}
+
+/* SYNC RECEIPT SCREEN */
+.sync-item{background:#fff;border-radius:10px;border:1px solid var(--border);padding:12px 14px;margin-bottom:8px;display:flex;align-items:center;gap:10px;}
+.sync-item.synced{border-color:#86efac;background:var(--green-light);}
+.sync-item.offline-q{border-color:#fed7aa;background:#fff7ed;}
+.sync-icon{width:28px;height:28px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:13px;flex-shrink:0;}
+.sync-icon.ok{background:#dcfce7;color:#15803d;}
+.sync-icon.pend{background:#fef3c7;color:#d97706;}
+.sync-name{font-size:13px;font-weight:700;color:var(--text);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+.sync-meta{font-size:10px;color:var(--muted);margin-top:1px;}
+.sync-time{font-size:9px;color:var(--muted);white-space:nowrap;flex-shrink:0;text-align:right;}
 </style>
 </head>
 <body>
@@ -231,6 +253,13 @@ textarea:focus{border-color:var(--red);}
       </div>
     </div>
   </div>
+  <!-- SEARCH BAR -->
+  <div class="route-search">
+    <span class="route-search-icon">🔍</span>
+    <input type="text" id="route-search-inp" placeholder="Search vendo name..." oninput="onSearchInput(this.value)" autocomplete="off">
+    <span class="search-clear" id="search-clear-btn" onclick="clearSearch()" style="display:none;">✕</span>
+  </div>
+
   <!-- TABS -->
   <div class="route-tabs">
     <button class="rt-tab active" id="tab-pending" onclick="switchTab('pending')">
@@ -241,6 +270,9 @@ textarea:focus{border-color:var(--red);}
     </button>
     <button class="rt-tab tab-pending-issues" id="tab-issues" onclick="switchTab('issues')">
       ⏸ Issues<span class="rt-tab-badge" id="tab-issues-cnt">0</span>
+    </button>
+    <button class="rt-tab" id="tab-sync" onclick="switchTab('sync')" style="font-size:11px;">
+      📡 Sync<span class="rt-tab-badge" id="tab-sync-cnt">0</span>
     </button>
   </div>
   <div class="sort-info" id="sort-info" style="display:none;">
@@ -362,7 +394,33 @@ let currentRoute = null;
 let currentVendo = null;
 let currentItem  = null;
 let offlineQueue = JSON.parse(localStorage.getItem('harvest_queue') || '[]');
-let activeTab    = 'pending'; // pending | done | issues
+let activeTab    = 'pending'; // pending | done | issues | sync
+let searchQuery  = '';
+let syncLog      = JSON.parse(localStorage.getItem('harvest_sync_log') || '[]'); // {name,tg,net,ts,status:'synced'|'queued'}
+
+function addSyncLog(name, tg, net, status) {
+  syncLog.unshift({ name, tg, net: parseFloat(net)||0, ts: Date.now(), status });
+  if (syncLog.length > 100) syncLog = syncLog.slice(0, 100);
+  localStorage.setItem('harvest_sync_log', JSON.stringify(syncLog));
+  const badge = document.getElementById('tab-sync-cnt');
+  if (badge) badge.textContent = syncLog.length;
+}
+
+function onSearchInput(val) {
+  searchQuery = val.trim().toLowerCase();
+  const clearBtn = document.getElementById('search-clear-btn');
+  if (clearBtn) clearBtn.style.display = searchQuery ? 'inline' : 'none';
+  renderVendoList();
+}
+
+function clearSearch() {
+  searchQuery = '';
+  const inp = document.getElementById('route-search-inp');
+  if (inp) inp.value = '';
+  const clearBtn = document.getElementById('search-clear-btn');
+  if (clearBtn) clearBtn.style.display = 'none';
+  renderVendoList();
+}
 
 // Starting point: Gfour Minimart, Lalawan Dicayas, Dipolog City
 const START_LAT = 8.5912285;
@@ -409,6 +467,8 @@ function toast(msg, dur=2500) {
 }
 
 window.addEventListener('DOMContentLoaded', () => {
+  const badge = document.getElementById('tab-sync-cnt');
+  if (badge) badge.textContent = syncLog.length;
   const p = new URLSearchParams(location.search);
   const code  = p.get('code');
   const vendo = p.get('vendo');
@@ -530,8 +590,9 @@ async function loadRoute() {
 
 function switchTab(tab) {
   activeTab = tab;
-  ['pending','done','issues'].forEach(t => {
-    document.getElementById('tab-' + t).classList.toggle('active', t === tab);
+  ['pending','done','issues','sync'].forEach(t => {
+    const el = document.getElementById('tab-' + t);
+    if (el) el.classList.toggle('active', t === tab);
   });
   renderVendoList();
 }
@@ -608,18 +669,62 @@ function renderVendoList() {
   const sortInfo = document.getElementById('sort-info');
   if (sortInfo) sortInfo.style.display = hasSorted ? 'flex' : 'none';
 
+  // ── SYNC TAB ──
+  if (activeTab === 'sync') {
+    const badge = document.getElementById('tab-sync-cnt');
+    if (badge) badge.textContent = syncLog.length;
+    if (!syncLog.length) {
+      document.getElementById('vendo-list').innerHTML =
+        '<div class="loading"><span>No sync activity yet this session.</span></div>';
+      return;
+    }
+    const pendingCount = offlineQueue.filter(q => q.type === 'harvest').length;
+    const header = pendingCount
+      ? `<div style="background:#fff7ed;border:1.5px solid #fed7aa;border-radius:10px;padding:10px 14px;margin-bottom:10px;font-size:12px;font-weight:700;color:#d97706;">⚡ ${pendingCount} submission(s) waiting to sync</div>`
+      : '<div style="background:var(--green-light);border:1px solid #86efac;border-radius:10px;padding:8px 14px;margin-bottom:10px;font-size:12px;font-weight:700;color:#15803d;">✅ All submissions synced to Supabase</div>';
+    document.getElementById('vendo-list').innerHTML = header + syncLog.map(s => {
+      const dt = new Date(s.ts);
+      const timeStr = dt.toLocaleTimeString('en-PH',{hour:'2-digit',minute:'2-digit'}) + ' ' + dt.toLocaleDateString('en-PH',{month:'short',day:'numeric'});
+      const isSynced = s.status === 'synced';
+      return `<div class="sync-item ${isSynced ? 'synced' : 'offline-q'}">
+        <div class="sync-icon ${isSynced ? 'ok' : 'pend'}">${isSynced ? '✅' : '⏳'}</div>
+        <div style="flex:1;min-width:0;">
+          <div class="sync-name">${s.name||s.tg||'—'}</div>
+          <div class="sync-meta">${isSynced ? 'Recorded in Supabase' : 'Offline — pending sync'} · Net: ₱${(s.net||0).toLocaleString('en-PH',{minimumFractionDigits:2})}</div>
+        </div>
+        <div class="sync-time">${timeStr}</div>
+      </div>`;
+    }).join('');
+    return;
+  }
+
+  // ── SEARCH FILTER ──
+  if (searchQuery) {
+    viewItems = viewItems.filter(item => {
+      const name = (item.sheet_name || item.tg_name || '').toLowerCase();
+      const tg   = (item.tg_name || '').toLowerCase();
+      const area = (item.area || '').toLowerCase();
+      return name.includes(searchQuery) || tg.includes(searchQuery) || area.includes(searchQuery);
+    });
+  }
+
   if (!viewItems.length) {
-    const emptyMsg = {
-      pending: '🎉 All vendos harvested or marked!',
-      done:    'No vendos harvested yet.',
-      issues:  'No pending issues.'
-    }[activeTab];
+    const emptyMsg = searchQuery
+      ? `No vendos matching "${searchQuery}"`
+      : { pending: '🎉 All vendos harvested or marked!', done: 'No vendos harvested yet.', issues: 'No pending issues.' }[activeTab];
     document.getElementById('vendo-list').innerHTML =
       `<div class="loading"><span style="text-align:center;line-height:1.8;">${emptyMsg}</span></div>`;
     return;
   }
 
-  document.getElementById('vendo-list').innerHTML = viewItems.map((item, seqIdx) => {
+  // ── SPLIT GPS vs NO-GPS (for pending/issues only) ──
+  let gpsItems = viewItems, noGpsItems = [];
+  if (activeTab !== 'done') {
+    gpsItems   = viewItems.filter(i => i.lat && i.lng);
+    noGpsItems = viewItems.filter(i => !i.lat || !i.lng);
+  }
+
+  const renderItem = (item, seqIdx) => {
     const realIdx = item._origIdx;
     const cls = item.status === 'harvested' ? 'done' : item.collector_note ? 'pending-item' : '';
     const pill = item.status === 'harvested'
@@ -675,7 +780,24 @@ function renderVendoList() {
       <div class="vi-status" style="flex-shrink:0;margin-left:8px;">${pill}</div>
       <div class="vi-arrow">›</div>
     </div>`;
-  }).join('');
+  };
+
+  // Build GPS items HTML
+  const gpsHtml = gpsItems.map((item, seqIdx) => renderItem(item, seqIdx)).join('');
+
+  // Build no-GPS section (only for pending/issues tabs)
+  let noGpsHtml = '';
+  if (noGpsItems.length && activeTab !== 'done') {
+    noGpsHtml = `<div class="nogps-section">
+      <div class="nogps-header">
+        📍 No GPS — manual navigation needed
+        <span class="nogps-badge">${noGpsItems.length}</span>
+      </div>` +
+      noGpsItems.map((item, seqIdx) => renderItem(item, gpsItems.length + seqIdx)).join('') +
+    `</div>`;
+  }
+
+  document.getElementById('vendo-list').innerHTML = gpsHtml + noGpsHtml;
 }
 
 function openVendo(idx) {
@@ -817,6 +939,7 @@ async function submitHarvest() {
   const harvestRecord = {
     harvest_date:         today,
     harvest_window_start: windowStart,
+    harvest_window_end:   now,
     vendo_name:           currentItem.sheet_name || currentItem.tg_name || '',
     tg_name:              currentItem.tg_name    || null,
     sheet_name:           currentItem.sheet_name || null,
@@ -889,7 +1012,13 @@ async function submitHarvest() {
       localStorage.setItem('cached_route_' + currentRoute.route_code, JSON.stringify(currentRoute));
     }
 
-    toast('✅ Harvest saved!');
+    addSyncLog(
+      currentItem.sheet_name || currentItem.tg_name || '?',
+      currentItem.tg_name || '',
+      net,
+      navigator.onLine ? 'synced' : 'queued'
+    );
+    toast(navigator.onLine ? '✅ Harvest saved & synced!' : '⚡ Saved offline — will sync');
     setTimeout(() => { backToRoute(); }, 1000);
   } catch(e) {
     toast('❌ ' + e.message, 4000);
@@ -1054,10 +1183,13 @@ async function flushQueue() {
   for (const item of offlineQueue) {
     try {
       if (item.type === 'harvest') {
+        // Ensure harvest_window_end set to queued timestamp if not already
+        const flushData = { ...item.data };
+        if (!flushData.harvest_window_end) flushData.harvest_window_end = new Date(item.timestamp || Date.now()).toISOString();
         await fetch(`${SB}/rest/v1/harvests`, {
           method: 'POST',
           headers: { ...HDR, 'Prefer': 'return=minimal' },
-          body: JSON.stringify(item.data)
+          body: JSON.stringify(flushData)
         });
         if (item.item?.id) {
           await fetch(`${SB}/rest/v1/route_items?id=eq.${item.item.id}`, {
@@ -1097,7 +1229,13 @@ async function flushQueue() {
   }
   offlineQueue = remaining;
   localStorage.setItem('harvest_queue', JSON.stringify(offlineQueue));
-  if (!remaining.length) toast('✅ All offline submissions synced!', 3000);
+  if (!remaining.length) {
+    syncLog = syncLog.map(s => s.status === 'queued' ? {...s, status:'synced'} : s);
+    localStorage.setItem('harvest_sync_log', JSON.stringify(syncLog));
+    const badge = document.getElementById('tab-sync-cnt');
+    if (badge) badge.textContent = syncLog.length;
+    toast('✅ All offline submissions synced!', 3000);
+  }
 }
 </script>
 </body>
