@@ -981,35 +981,7 @@ tr:hover td{background:#f8f9ff;cursor:pointer}
     </div>
     <div class="hv-rc-bottom">
       <button class="hv-confirm-btn" onclick="hvConfirmRoute()">✅ Confirm route →</button>
-      <button class="hv-add-unnamed-btn" onclick="hvToggleUnnamedForm(true)">➕ Add vendo (TG name TBF)</button>
-      <!-- ADD UNNAMED VENDO FORM (inline, hidden by default) -->
-      <div class="hv-unnamed-form" id="hv-unnamed-form" style="display:none;">
-        <div style="font-size:9px;font-weight:700;color:#ea580c;margin-bottom:6px;text-transform:uppercase;letter-spacing:.04em;">➕ Add unnamed vendo</div>
-        <div style="font-size:8px;font-weight:700;color:#6b7280;margin-bottom:2px;text-transform:uppercase;">Name *</div>
-        <input id="hv-unnamed-label" placeholder="Owner name e.g. Juan dela Cruz" maxlength="80" autocomplete="off">
-        <div style="font-size:8px;font-weight:700;color:#6b7280;margin-bottom:2px;text-transform:uppercase;">Address</div>
-        <input id="hv-unnamed-addr" placeholder="e.g. Purok 3 Cogon, Dipolog City" maxlength="120" autocomplete="off">
-        <div style="display:grid;grid-template-columns:1fr 1fr;gap:4px;">
-          <div>
-            <div style="font-size:8px;font-weight:700;color:#6b7280;margin-bottom:2px;text-transform:uppercase;">Area</div>
-            <select id="hv-unnamed-area" style="width:100%;padding:5px 7px;border:1px solid #fed7aa;border-radius:5px;font-size:11px;font-family:inherit;outline:none;background:#fff;color:#374151;">
-              <option value="">— select —</option>
-              <option>DAPITAN</option><option>DIPOLOG</option><option>SINDANGAN</option>
-              <option>ROXAS</option><option>POLANCO</option><option>SINAMAN</option><option>MINAOG</option><option>MIX AREAS</option>
-            </select>
-          </div>
-          <div>
-            <div style="font-size:8px;font-weight:700;color:#6b7280;margin-bottom:2px;text-transform:uppercase;">VLAN</div>
-            <input id="hv-unnamed-vlan" type="number" placeholder="e.g. 116" style="width:100%;padding:5px 7px;border:1px solid #e5e7eb;border-radius:5px;font-size:11px;font-family:inherit;outline:none;color:#374151;box-sizing:border-box;">
-          </div>
-        </div>
-        <div style="font-size:8px;font-weight:700;color:#6b7280;margin-bottom:2px;text-transform:uppercase;">Last harvest date</div>
-        <input id="hv-unnamed-last" type="date" title="Last harvest date — used as TG income window start">
-        <div style="display:flex;gap:4px;margin-top:4px;">
-          <button onclick="hvAddUnnamed()" style="flex:1;padding:5px;background:#ea580c;color:#fff;border:none;border-radius:5px;font-size:11px;font-weight:700;cursor:pointer;font-family:inherit;">Add to route</button>
-          <button onclick="hvToggleUnnamedForm(false)" style="padding:5px 10px;background:#fff;color:#6b7280;border:1px solid #e5e7eb;border-radius:5px;font-size:11px;cursor:pointer;font-family:inherit;">Cancel</button>
-        </div>
-      </div>
+      <button class="hv-add-unnamed-btn" onclick="hvOpenUnnamedModal()">➕ Add vendo (TG name TBF)</button>
       <button class="hv-clear-btn" onclick="hvClearRoute()">🗑 Clear route</button>
       <div class="hv-warn" id="hv-warn" style="display:none;">⚠ Some vendos have no TG name — route will be partial</div>
     </div>
@@ -2977,44 +2949,122 @@ function hvToggleAdd(btn, row) {
 }
 
 /* ── UNNAMED / TBF VENDO ── */
-function hvToggleUnnamedForm(show) {
-  const f = document.getElementById('hv-unnamed-form');
-  if (!f) return;
-  f.style.display = show ? 'block' : 'none';
-  if (show) {
-    document.getElementById('hv-unnamed-label').focus();
-    // Set today as default last date placeholder only, not value
-  }
+/* ── UNNAMED VENDO MODAL ── */
+function hvOpenUnnamedModal() {
+  const m = document.getElementById('hv-unnamed-modal');
+  if (!m) return;
+  m.style.display = 'flex';
+  setTimeout(() => document.getElementById('hv-unnamed-label')?.focus(), 100);
+  // Hide message
+  const msg = document.getElementById('hv-unnamed-msg');
+  if (msg) msg.style.display = 'none';
+}
+
+function hvCloseUnnamedModal() {
+  const m = document.getElementById('hv-unnamed-modal');
+  if (m) m.style.display = 'none';
+}
+
+function hvUnnamedGetFields() {
+  return {
+    label: (document.getElementById('hv-unnamed-label')?.value || '').trim(),
+    area:  (document.getElementById('hv-unnamed-area')?.value || '').trim() || null,
+    vlan:  parseInt(document.getElementById('hv-unnamed-vlan')?.value) || null,
+    addr:  (document.getElementById('hv-unnamed-addr')?.value || '').trim() || null,
+    last:  document.getElementById('hv-unnamed-last')?.value || null
+  };
+}
+
+function hvUnnamedClearFields() {
+  ['hv-unnamed-label','hv-unnamed-addr','hv-unnamed-vlan','hv-unnamed-last'].forEach(id => {
+    const el = document.getElementById(id); if (el) el.value = '';
+  });
+  const area = document.getElementById('hv-unnamed-area'); if (area) area.value = '';
+}
+
+function hvUnnamedShowMsg(text, ok) {
+  const msg = document.getElementById('hv-unnamed-msg');
+  if (!msg) return;
+  msg.textContent = text;
+  msg.style.display = 'block';
+  msg.style.background = ok ? '#f0fdf4' : '#fef2f2';
+  msg.style.color = ok ? '#15803d' : '#dc2626';
 }
 
 function hvAddUnnamed() {
-  const label = (document.getElementById('hv-unnamed-label').value || '').trim();
+  const { label, area, vlan, addr, last } = hvUnnamedGetFields();
   if (!label) {
-    document.getElementById('hv-unnamed-label').style.borderColor = '#dc2626';
-    document.getElementById('hv-unnamed-label').focus();
+    const inp = document.getElementById('hv-unnamed-label');
+    if (inp) { inp.style.borderColor = '#dc2626'; inp.focus(); }
+    document.getElementById('hv-unnamed-label-err').style.display = 'block';
     return;
   }
-  document.getElementById('hv-unnamed-label').style.borderColor = '';
-  const area  = (document.getElementById('hv-unnamed-area').value || '').trim() || '—';
-  const vlan  = parseInt(document.getElementById('hv-unnamed-vlan')?.value) || null;
-  const addr  = (document.getElementById('hv-unnamed-addr')?.value || '').trim() || null;
-  const last  = document.getElementById('hv-unnamed-last').value || '';
-
-  // Generate a temp ID so we can track this row
+  document.getElementById('hv-unnamed-label-err').style.display = 'none';
   const tempId = 'tbf_' + Date.now();
-  hvAddToRoutePanel(tempId, label, label, '', area, false, '', addr||'', last, true, vlan);
-
-  // Reset form
-  document.getElementById('hv-unnamed-label').value = '';
-  const _ua = document.getElementById('hv-unnamed-area'); if(_ua) _ua.value = '';
-  const _uv = document.getElementById('hv-unnamed-vlan'); if(_uv) _uv.value = '';
-  const _ud = document.getElementById('hv-unnamed-addr'); if(_ud) _ud.value = '';
-  document.getElementById('hv-unnamed-last').value  = '';
-  hvToggleUnnamedForm(false);
-
+  hvAddToRoutePanel(tempId, label, label, '', area||'—', false, '', addr||'', last||'', true, vlan);
+  hvUnnamedClearFields();
+  hvCloseUnnamedModal();
   const w = document.getElementById('hv-warn');
   if (w) { w.textContent = '⚠ Some vendos have no TG name — fill in after finding'; w.style.display = 'block'; }
 }
+
+async function hvAddUnnamedAndSave() {
+  const { label, area, vlan, addr, last } = hvUnnamedGetFields();
+  if (!label) {
+    const inp = document.getElementById('hv-unnamed-label');
+    if (inp) { inp.style.borderColor = '#dc2626'; inp.focus(); }
+    document.getElementById('hv-unnamed-label-err').style.display = 'block';
+    return;
+  }
+  document.getElementById('hv-unnamed-label-err').style.display = 'none';
+  const addBtn  = document.getElementById('hv-unnamed-add-btn');
+  const saveBtn = document.getElementById('hv-unnamed-save-btn');
+  if (addBtn)  addBtn.disabled  = true;
+  if (saveBtn) { saveBtn.disabled = true; saveBtn.textContent = 'Saving…'; }
+
+  try {
+    // 1. Create vendo in Supabase
+    const r = await fetch(_SB + '/rest/v1/vendos', {
+      method: 'POST',
+      headers: { 'apikey': _KEY, 'Authorization': 'Bearer ' + _KEY, 'Content-Type': 'application/json', 'Prefer': 'return=representation' },
+      body: JSON.stringify({
+        tg_name: null,
+        sheet_name: label,
+        area: area || null,
+        vlan: vlan || null,
+        address: addr || null,
+        last_harvest_date: last || null
+      })
+    });
+    if (!r.ok) {
+      const err = await r.text();
+      hvUnnamedShowMsg('❌ Supabase error: ' + err.substring(0,100), false);
+      if (addBtn)  addBtn.disabled  = false;
+      if (saveBtn) { saveBtn.disabled = false; saveBtn.textContent = '💾 Add + Save to Supabase'; }
+      return;
+    }
+    const newVendos = await r.json();
+    const newVendo = Array.isArray(newVendos) ? newVendos[0] : newVendos;
+    const newId = newVendo?.id || ('tbf_' + Date.now());
+
+    // 2. Add to route panel with real ID
+    hvAddToRoutePanel(String(newId), label, label, '', area||'—', false, '', addr||'', last||'', true, vlan);
+    hvUnnamedShowMsg('✅ Saved to Supabase & added to route!', true);
+    hvUnnamedClearFields();
+    setTimeout(() => hvCloseUnnamedModal(), 1500);
+
+    const w = document.getElementById('hv-warn');
+    if (w) { w.textContent = '⚠ Some vendos have no TG name — fill in after finding'; w.style.display = 'block'; }
+  } catch(e) {
+    hvUnnamedShowMsg('❌ ' + e.message, false);
+  } finally {
+    if (addBtn)  addBtn.disabled  = false;
+    if (saveBtn) { saveBtn.disabled = false; saveBtn.textContent = '💾 Add + Save to Supabase'; }
+  }
+}
+
+/* legacy alias */
+function hvToggleUnnamedForm(show) { if (show) hvOpenUnnamedModal(); else hvCloseUnnamedModal(); }
 
 function hvTbfTgChanged(input) {
   const val = input.value.trim();
@@ -10756,6 +10806,81 @@ async function fullBackup() {
 
   </div>
 </div>
+</div>
+
+
+<!-- ═══ UNNAMED VENDO MODAL ═══ -->
+<div id="hv-unnamed-modal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:10000;align-items:center;justify-content:center;padding:16px;">
+  <div style="background:#fff;border-radius:14px;width:min(520px,96vw);max-height:90vh;overflow-y:auto;box-shadow:0 24px 64px rgba(0,0,0,.3);">
+    <!-- Header -->
+    <div style="background:#ea580c;padding:14px 18px;border-radius:14px 14px 0 0;display:flex;justify-content:space-between;align-items:center;position:sticky;top:0;z-index:2;">
+      <div>
+        <div style="font-size:15px;font-weight:700;color:#fff;">➕ Add unnamed vendo to route</div>
+        <div style="font-size:10px;color:rgba(255,255,255,.8);margin-top:2px;">Fill in what you know now — TG name can be filled later</div>
+      </div>
+      <button onclick="hvCloseUnnamedModal()" style="width:28px;height:28px;border-radius:50%;border:1.5px solid rgba(255,255,255,.4);background:rgba(255,255,255,.15);color:#fff;font-size:16px;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;">×</button>
+    </div>
+    <div style="padding:18px;display:flex;flex-direction:column;gap:12px;">
+
+      <!-- Name -->
+      <div>
+        <div style="font-size:11px;font-weight:700;color:#374151;margin-bottom:4px;">Name <span style="color:#dc2626;">*</span></div>
+        <input id="hv-unnamed-label" type="text" placeholder="Owner name e.g. Juan dela Cruz Piso Wifi" maxlength="80" autocomplete="off"
+          style="width:100%;padding:10px 12px;border:1.5px solid #e5e7eb;border-radius:8px;font-size:14px;font-family:inherit;outline:none;color:#374151;box-sizing:border-box;">
+        <div id="hv-unnamed-label-err" style="font-size:10px;color:#dc2626;margin-top:2px;display:none;">Name is required</div>
+      </div>
+
+      <!-- Address -->
+      <div>
+        <div style="font-size:11px;font-weight:700;color:#374151;margin-bottom:4px;">Address</div>
+        <input id="hv-unnamed-addr" type="text" placeholder="e.g. Purok 3 Cogon, Dipolog City" maxlength="150" autocomplete="off"
+          style="width:100%;padding:10px 12px;border:1.5px solid #e5e7eb;border-radius:8px;font-size:14px;font-family:inherit;outline:none;color:#374151;box-sizing:border-box;">
+      </div>
+
+      <!-- Area + VLAN -->
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
+        <div>
+          <div style="font-size:11px;font-weight:700;color:#374151;margin-bottom:4px;">Area</div>
+          <select id="hv-unnamed-area" style="width:100%;padding:10px 12px;border:1.5px solid #e5e7eb;border-radius:8px;font-size:13px;font-family:inherit;outline:none;background:#fff;color:#374151;box-sizing:border-box;">
+            <option value="">— select area —</option>
+            <option>DAPITAN</option><option>DIPOLOG</option><option>SINDANGAN</option>
+            <option>ROXAS</option><option>POLANCO</option><option>SINAMAN</option><option>MINAOG</option><option>MIX AREAS</option>
+          </select>
+        </div>
+        <div>
+          <div style="font-size:11px;font-weight:700;color:#374151;margin-bottom:4px;">VLAN</div>
+          <input id="hv-unnamed-vlan" type="number" placeholder="e.g. 116"
+            style="width:100%;padding:10px 12px;border:1.5px solid #e5e7eb;border-radius:8px;font-size:14px;font-family:inherit;outline:none;color:#374151;box-sizing:border-box;">
+        </div>
+      </div>
+
+      <!-- Last harvest date -->
+      <div>
+        <div style="font-size:11px;font-weight:700;color:#374151;margin-bottom:4px;">Last harvest date <span style="font-size:10px;font-weight:400;color:#6b7280;">(used as TG income window start)</span></div>
+        <input id="hv-unnamed-last" type="date"
+          style="width:100%;padding:10px 12px;border:1.5px solid #e5e7eb;border-radius:8px;font-size:14px;font-family:inherit;outline:none;color:#374151;box-sizing:border-box;">
+      </div>
+
+      <!-- Status message -->
+      <div id="hv-unnamed-msg" style="font-size:12px;font-weight:600;display:none;padding:8px 12px;border-radius:8px;"></div>
+
+      <!-- Action buttons -->
+      <div style="display:flex;gap:8px;padding-top:4px;">
+        <button onclick="hvAddUnnamed()" id="hv-unnamed-add-btn"
+          style="flex:1;padding:12px;background:#ea580c;color:#fff;border:none;border-radius:9px;font-size:14px;font-weight:700;cursor:pointer;font-family:inherit;">
+          ➕ Add to route only
+        </button>
+        <button onclick="hvAddUnnamedAndSave()" id="hv-unnamed-save-btn"
+          style="flex:1;padding:12px;background:#1e3cb8;color:#fff;border:none;border-radius:9px;font-size:14px;font-weight:700;cursor:pointer;font-family:inherit;">
+          💾 Add + Save to Supabase
+        </button>
+      </div>
+      <button onclick="hvCloseUnnamedModal()"
+        style="width:100%;padding:8px;background:#f3f4f6;color:#6b7280;border:none;border-radius:8px;font-size:13px;cursor:pointer;font-family:inherit;">
+        Cancel
+      </button>
+    </div>
+  </div>
 </div>
 
 </body>
