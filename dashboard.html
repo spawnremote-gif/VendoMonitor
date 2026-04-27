@@ -9008,22 +9008,26 @@ async function fullBackup() {
     }
     setProgress(73);
 
-    // ── STEP 3: Code files from GitHub ───────────────────
-    log('Fetching code files from GitHub...');
-    const ghBase = 'https://raw.githubusercontent.com/SpawnInternet';
-    const files = [
-      { url: `${ghBase}/VendoMonitor-Cloud/main/app.py`, name: 'code/app.py' },
-      { url: `${ghBase}/VendoMonitor/main/dashboard.html`, name: 'code/dashboard.html' },
-    ];
-    for (const f of files) {
-      try {
-        const r = await fetch(f.url);
-        if (r.ok) {
-          zip.file(f.name, await r.text());
-          log(`${f.name.split('/')[1]} saved`, true);
-        }
-      } catch(e) { log(`⚠️ Could not fetch ${f.name}`, false); }
-    }
+    // ── STEP 3: Code files ───────────────────────────────
+    log('Saving dashboard.html...');
+    try {
+      // Save current page HTML directly — no network needed
+      const pageHtml = document.documentElement.outerHTML;
+      zip.file('code/dashboard.html', pageHtml);
+      log('dashboard.html saved', true);
+    } catch(e) { log('⚠️ Could not save dashboard.html: ' + e.message, false); }
+
+    // Try app.py from GitHub (skip gracefully if private/missing)
+    log('Trying app.py from GitHub...');
+    try {
+      const apyR = await fetch('https://raw.githubusercontent.com/SpawnInternet/VendoMonitor-Cloud/main/app.py');
+      if (apyR.ok) {
+        zip.file('code/app.py', await apyR.text());
+        log('app.py saved', true);
+      } else {
+        log('⚠️ app.py skipped — repo is private or not found', false);
+      }
+    } catch(e) { log('⚠️ app.py skipped: ' + e.message, false); }
     setProgress(75);
 
     // ── STEP 4: Backup info file ──────────────────────────
