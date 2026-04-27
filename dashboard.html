@@ -886,20 +886,8 @@ tr:hover td{background:#f8f9ff;cursor:pointer}
         <div>Select vendos from the list and click <b style="color:var(--blue);">+ add</b></div>
       </div>
     </div>
-    <!-- ADD UNNAMED VENDO FORM (inline, hidden by default) -->
-    <div class="hv-unnamed-form" id="hv-unnamed-form" style="display:none;">
-      <div style="font-size:9px;font-weight:700;color:#ea580c;margin-bottom:5px;text-transform:uppercase;letter-spacing:.04em;">➕ Add unnamed vendo</div>
-      <input id="hv-unnamed-label" placeholder="Description e.g. Cogon area, Near Jollibee Dipolog" maxlength="80" autocomplete="off">
-      <input id="hv-unnamed-area" placeholder="Area (e.g. DIPOLOG)" autocomplete="off">
-      <input id="hv-unnamed-last" type="date" title="Last harvest date (optional)">
-      <div style="display:flex;gap:4px;margin-top:2px;">
-        <button onclick="hvAddUnnamed()" style="flex:1;padding:5px;background:#ea580c;color:#fff;border:none;border-radius:5px;font-size:11px;font-weight:700;cursor:pointer;font-family:inherit;">Add to route</button>
-        <button onclick="hvToggleUnnamedForm(false)" style="padding:5px 10px;background:#fff;color:#6b7280;border:1px solid #e5e7eb;border-radius:5px;font-size:11px;cursor:pointer;font-family:inherit;">Cancel</button>
-      </div>
-    </div>
     <div class="hv-rc-bottom">
       <button class="hv-confirm-btn" onclick="hvConfirmRoute()">✅ Confirm route →</button>
-      <button class="hv-add-unnamed-btn" onclick="hvToggleUnnamedForm(true)">➕ Add vendo (TG name TBF)</button>
       <button class="hv-clear-btn" onclick="hvClearRoute()">🗑 Clear route</button>
       <div class="hv-warn" id="hv-warn" style="display:none;">⚠ Some vendos have no TG name — route will be partial</div>
     </div>
@@ -1224,9 +1212,18 @@ tr:hover td{background:#f8f9ff;cursor:pointer}
 <!-- VENDO NAMES PANEL -->
 <div id="hv-tab-vnames" class="hv-hidden" style="padding:14px 16px;overflow-y:auto;height:calc(100vh - 132px);">
   <!-- Sub-tabs: All vendos / Saved by me -->
-  <div style="display:flex;gap:0;margin-bottom:10px;border-bottom:2px solid #e5e7eb;">
+  <div style="display:flex;gap:0;margin-bottom:10px;border-bottom:2px solid #e5e7eb;flex-wrap:wrap;">
     <button id="vn-subtab-all" onclick="vnSubTab('all',this)" style="padding:7px 18px;font-size:12px;font-weight:700;border:none;background:none;cursor:pointer;font-family:inherit;color:#0f766e;border-bottom:2px solid #0f766e;margin-bottom:-2px;">All vendos</button>
     <button id="vn-subtab-saved" onclick="vnSubTab('saved',this)" style="padding:7px 18px;font-size:12px;font-weight:700;border:none;background:none;cursor:pointer;font-family:inherit;color:#6b7280;border-bottom:2px solid transparent;margin-bottom:-2px;">📋 Final Confirmed Names &nbsp;<span id="vn-saved-count" style="font-size:10px;background:#dcfce7;color:#15803d;padding:1px 6px;border-radius:10px;">0</span></button>
+    <button id="vn-subtab-tbf" onclick="vnSubTab('tbf',this)" style="padding:7px 18px;font-size:12px;font-weight:700;border:none;background:none;cursor:pointer;font-family:inherit;color:#6b7280;border-bottom:2px solid transparent;margin-bottom:-2px;">🔴 Unnamed Route Vendos &nbsp;<span id="vn-tbf-count" style="font-size:10px;background:#fef2f2;color:#dc2626;padding:1px 6px;border-radius:10px;">0</span></button>
+  </div>
+  <!-- TBF PANEL -->
+  <div id="vn-panel-tbf" style="display:none;">
+    <div style="background:#fff7ed;border:1.5px dashed #fb923c;border-radius:10px;padding:12px 14px;margin-bottom:12px;">
+      <div style="font-size:11px;font-weight:700;color:#ea580c;margin-bottom:4px;">🔴 Unnamed vendos added to routes — fill in their details here</div>
+      <div style="font-size:10px;color:#6b7280;">These vendos were added to routes without a TG name. Fill in the form below and register them properly.</div>
+    </div>
+    <div id="vn-tbf-list"><div style="padding:20px;text-align:center;color:#9ca3af;font-size:12px;">Loading…</div></div>
   </div>
 
   <!-- Area tabs -->
@@ -3204,7 +3201,7 @@ function hrepRenderItems(items, routeId) {
         '<div style="flex:1;min-width:0;">' +
           '<div style="font-size:12px;font-weight:700;color:#1e3cb8;">' + (item.sheet_name || item.tg_name || '—') + '</div>' +
           '<div style="font-size:10px;color:#6b7280;">' + (item.tg_name || '—') + ' · ' + (item.area || '—') + '</div>' +
-          (isDone ? '<div style="font-size:10px;color:#15803d;font-weight:700;">✅ Harvested · Net: ₱' + net.toLocaleString('en-PH',{minimumFractionDigits:2}) + '</div>' :
+          (isDone ? '<div style="font-size:10px;color:#15803d;font-weight:700;">✅ Harvested · Net: ₱' + net.toLocaleString('en-PH',{minimumFractionDigits:2}) + '</div>' + (item.harvested_at ? '<div style="font-size:9px;color:#6b7280;margin-top:1px;">🕐 ' + new Date(item.harvested_at).toLocaleString('en-PH',{month:'short',day:'numeric',hour:'2-digit',minute:'2-digit',hour12:true}) + '</div>' : '') :
             '<div style="font-size:10px;color:#d97706;">' + (item.collector_note ? '⏳ Pending: ' + item.collector_note : 'Not yet harvested') + '</div>') +
         '</div>' +
         (!isDone ? '<div style="display:flex;gap:4px;flex-shrink:0;">' +
@@ -4217,6 +4214,7 @@ async function ahSubmit() {
           <button class="hvo-tab on" onclick="hvoSwitchTab('harvests',this)" style="padding:5px 14px;border:none;border-radius:6px;background:#fff;color:#1e3cb8;font-size:11px;font-weight:700;cursor:pointer;font-family:inherit;">📋 Harvest Records</button>
           <button class="hvo-tab" onclick="hvoSwitchTab('recon',this)" style="padding:5px 14px;border:none;border-radius:6px;background:transparent;color:rgba(255,255,255,.85);font-size:11px;font-weight:600;cursor:pointer;font-family:inherit;">⚖️ Reconciliation</button>
           <button class="hvo-tab" onclick="hvoSwitchTab('routes',this)" style="padding:5px 14px;border:none;border-radius:6px;background:transparent;color:rgba(255,255,255,.85);font-size:11px;font-weight:600;cursor:pointer;font-family:inherit;">🗺 Routes</button>
+          <button class="hvo-tab" id="hvo-tab-deficits" onclick="hvoSwitchTab('deficits',this)" style="padding:5px 14px;border:none;border-radius:6px;background:transparent;color:rgba(255,255,255,.85);font-size:11px;font-weight:600;cursor:pointer;font-family:inherit;">🔴 Deficits<span id="hvo-deficit-cnt" style="margin-left:4px;background:rgba(220,38,38,.7);color:#fff;font-size:9px;font-weight:700;padding:1px 5px;border-radius:8px;"></span></button>
         </div>
       </div>
       <div style="display:flex;gap:8px;align-items:center;">
@@ -4246,6 +4244,23 @@ async function ahSubmit() {
       <div class="hvo-panel" id="hvo-panel-routes" style="padding:14px;display:none;">
         <div id="hvo-route-stats" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:8px;margin-bottom:14px;"></div>
         <div id="hvo-route-table"><div style="text-align:center;padding:40px;color:#9ca3af;">Loading…</div></div>
+      </div>
+      <!-- DEFICITS PANEL -->
+      <div class="hvo-panel" id="hvo-panel-deficits" style="padding:14px;display:none;">
+        <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px;margin-bottom:12px;">
+          <div>
+            <div style="font-size:13px;font-weight:700;color:#dc2626;">🔴 Deficit Audit</div>
+            <div style="font-size:10px;color:#6b7280;margin-top:2px;">Vendos where coin collected &lt; TG income · Audit and explain each gap</div>
+          </div>
+          <div style="display:flex;gap:6px;flex-wrap:wrap;align-items:center;">
+            <select id="def-filter-date" onchange="hvoRenderDeficits()" style="padding:5px 8px;border:1px solid #e5e7eb;border-radius:6px;font-size:11px;font-family:inherit;outline:none;background:#fff;"><option value="">All dates</option></select>
+            <select id="def-filter-collector" onchange="hvoRenderDeficits()" style="padding:5px 8px;border:1px solid #e5e7eb;border-radius:6px;font-size:11px;font-family:inherit;outline:none;background:#fff;"><option value="">All collectors</option></select>
+            <select id="def-filter-status" onchange="hvoRenderDeficits()" style="padding:5px 8px;border:1px solid #e5e7eb;border-radius:6px;font-size:11px;font-family:inherit;outline:none;background:#fff;"><option value="">All</option><option value="open">Open</option><option value="explained">Explained ✅</option></select>
+            <button onclick="hvoLoadDeficits()" style="padding:5px 10px;background:#1e3cb8;color:#fff;border:none;border-radius:6px;font-size:11px;font-weight:700;cursor:pointer;font-family:inherit;">⟳ Refresh</button>
+          </div>
+        </div>
+        <div id="hvo-deficit-stats" style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:12px;"></div>
+        <div id="hvo-deficit-list"><div style="text-align:center;padding:40px;color:#9ca3af;">Click Refresh to load deficits</div></div>
       </div>
     </div>
   `;
@@ -4720,6 +4735,167 @@ function hvoSwitchTab(tab, btn) {
   if (tab === 'routes') {
     if (!_vnAll || !_vnAll.length) vnLoad();
   }
+  if (tab === 'deficits') hvoLoadDeficits();
+}
+
+/* ─── DEFICIT AUDIT FUNCTIONS ─── */
+let _deficits = []; // cached deficit records from harvests
+let _deficitNotes = JSON.parse(localStorage.getItem('deficit_notes') || '{}'); // {id: {note, explained, ts}}
+
+async function hvoLoadDeficits() {
+  const listEl = document.getElementById('hvo-deficit-list');
+  const statsEl = document.getElementById('hvo-deficit-stats');
+  if (listEl) listEl.innerHTML = '<div style="text-align:center;padding:30px;color:#9ca3af;">Loading harvest data…</div>';
+
+  try {
+    // Load all harvests with window data
+    const r = await fetch(_SB + '/rest/v1/harvests?select=id,vendo_name,tg_name,harvest_date,harvest_window_start,harvest_window_end,net_collectible,coins_total,coins_free,coins_old,collector,route_code,created_at&order=harvest_date.desc&limit=2000', {
+      headers: {'apikey':_KEY,'Authorization':'Bearer '+_KEY}
+    });
+    const harvests = await r.json();
+    if (!Array.isArray(harvests) || !harvests.length) {
+      if (listEl) listEl.innerHTML = '<div style="padding:30px;text-align:center;color:#9ca3af;">No harvest records found</div>';
+      return;
+    }
+
+    // Build TG income per vendo per date window (reuse _rcTG if loaded, else fetch)
+    const deficits = [];
+    for (const h of harvests) {
+      if (!h.tg_name) continue;
+      const tgIncome = _rcTG && _rcTG[h.tg_name]
+        ? _rcTA(h.tg_name, h.harvest_window_start, h.harvest_date, h.harvest_window_end)
+        : null;
+      const coinNet = parseFloat(h.net_collectible || 0);
+      if (tgIncome !== null && coinNet < tgIncome - 10) { // >₱10 deficit
+        deficits.push({ ...h, tg_income: tgIncome, coin_net: coinNet, gap: coinNet - tgIncome });
+      }
+    }
+    _deficits = deficits;
+
+    // Populate filters
+    const dates = [...new Set(deficits.map(d => d.harvest_date).filter(Boolean))].sort((a,b)=>b.localeCompare(a));
+    const collectors = [...new Set(deficits.map(d => d.collector).filter(Boolean))].sort();
+    const dateSel = document.getElementById('def-filter-date');
+    const colSel = document.getElementById('def-filter-collector');
+    if (dateSel) dateSel.innerHTML = '<option value="">All dates</option>' + dates.map(d=>`<option value="${d}">${d}</option>`).join('');
+    if (colSel) colSel.innerHTML = '<option value="">All collectors</option>' + collectors.map(c=>`<option value="${c}">${c}</option>`).join('');
+
+    // Update badge count
+    const badge = document.getElementById('hvo-deficit-cnt');
+    const openCount = deficits.filter(d => !_deficitNotes[d.id]?.explained).length;
+    if (badge) badge.textContent = openCount || '';
+
+    hvoRenderDeficits();
+  } catch(e) {
+    if (listEl) listEl.innerHTML = '<div style="color:#dc2626;padding:16px;">Error: ' + e.message + '</div>';
+  }
+}
+
+function hvoRenderDeficits() {
+  const listEl = document.getElementById('hvo-deficit-list');
+  const statsEl = document.getElementById('hvo-deficit-stats');
+  const dateF = document.getElementById('def-filter-date')?.value || '';
+  const colF = document.getElementById('def-filter-collector')?.value || '';
+  const statF = document.getElementById('def-filter-status')?.value || '';
+
+  let items = _deficits.filter(d => {
+    if (dateF && d.harvest_date !== dateF) return false;
+    if (colF && d.collector !== colF) return false;
+    const isExplained = !!_deficitNotes[d.id]?.explained;
+    if (statF === 'open' && isExplained) return false;
+    if (statF === 'explained' && !isExplained) return false;
+    return true;
+  });
+
+  const totalGap = items.reduce((s,d) => s + Math.abs(d.gap), 0);
+  const openCount = items.filter(d => !_deficitNotes[d.id]?.explained).length;
+  const explainedCount = items.filter(d => !!_deficitNotes[d.id]?.explained).length;
+  const fmt = v => '₱' + Math.abs(v).toLocaleString('en-PH',{minimumFractionDigits:2});
+
+  if (statsEl) statsEl.innerHTML =
+    `<div style="background:#fef2f2;border:1px solid #fca5a5;border-radius:8px;padding:10px 12px;text-align:center;">
+      <div style="font-size:18px;font-weight:700;color:#dc2626;">${openCount}</div>
+      <div style="font-size:10px;color:#6b7280;">Open deficits</div>
+    </div>
+    <div style="background:#f0fdf4;border:1px solid #86efac;border-radius:8px;padding:10px 12px;text-align:center;">
+      <div style="font-size:18px;font-weight:700;color:#15803d;">${explainedCount}</div>
+      <div style="font-size:10px;color:#6b7280;">Explained ✅</div>
+    </div>
+    <div style="background:#fff7ed;border:1px solid #fed7aa;border-radius:8px;padding:10px 12px;text-align:center;">
+      <div style="font-size:18px;font-weight:700;color:#d97706;">${fmt(totalGap)}</div>
+      <div style="font-size:10px;color:#6b7280;">Total gap</div>
+    </div>`;
+
+  if (!items.length) {
+    listEl.innerHTML = '<div style="padding:30px;text-align:center;color:#9ca3af;">No deficits found for selected filters 🎉</div>';
+    return;
+  }
+
+  listEl.innerHTML = items.map(item => {
+    const note = _deficitNotes[item.id] || {};
+    const isExp = !!note.explained;
+    const fmtDate = dt => dt ? new Date(dt).toLocaleString('en-PH',{month:'short',day:'numeric',year:'numeric',hour:'2-digit',minute:'2-digit',hour12:true}) : '—';
+    return `<div style="border:1.5px solid ${isExp?'#86efac':'#fca5a5'};border-radius:10px;padding:12px 14px;margin-bottom:10px;background:${isExp?'#f0fdf4':'#fff'};">
+      <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:8px;margin-bottom:8px;">
+        <div style="flex:1;min-width:0;">
+          <div style="font-size:13px;font-weight:700;color:#1e3cb8;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${item.vendo_name||item.tg_name||'—'}</div>
+          <div style="font-size:10px;color:#6b7280;margin-top:2px;">${item.tg_name||'—'} · ${item.collector||'—'} · ${item.harvest_date||'—'} · Route: ${item.route_code||'—'}</div>
+          <div style="font-size:10px;color:#6b7280;margin-top:1px;">Submitted: ${fmtDate(item.harvest_window_end||item.created_at)}</div>
+        </div>
+        <div style="text-align:right;flex-shrink:0;">
+          <div style="font-size:14px;font-weight:700;color:#dc2626;">${fmt(item.gap)}</div>
+          <div style="font-size:9px;color:#6b7280;">deficit</div>
+        </div>
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-bottom:8px;font-size:11px;">
+        <div style="background:#f8fafc;border-radius:6px;padding:6px 8px;">
+          <div style="color:#6b7280;font-size:9px;margin-bottom:1px;">Coin net</div>
+          <div style="font-weight:700;color:#1e3cb8;">${fmt(item.coin_net)}</div>
+        </div>
+        <div style="background:#f8fafc;border-radius:6px;padding:6px 8px;">
+          <div style="color:#6b7280;font-size:9px;margin-bottom:1px;">TG income</div>
+          <div style="font-weight:700;color:#7c3aed;">${fmt(item.tg_income)}</div>
+        </div>
+      </div>
+      <div style="margin-bottom:6px;">
+        <div style="font-size:9px;font-weight:700;color:#374151;margin-bottom:3px;">📝 Audit note</div>
+        <textarea id="def-note-${item.id}" rows="2" placeholder="Explain the gap e.g. customer free time, coin jammed, system error..."
+          style="width:100%;padding:7px 10px;border:1.5px solid ${isExp?'#86efac':'#e5e7eb'};border-radius:7px;font-size:12px;font-family:inherit;resize:none;outline:none;color:#374151;box-sizing:border-box;background:${isExp?'#f0fdf4':'#fff'};"
+          >${note.note||''}</textarea>
+      </div>
+      <div style="display:flex;gap:6px;align-items:center;">
+        ${!isExp
+          ? `<button onclick="hvoMarkExplained(${JSON.stringify(item.id)},false)" style="flex:1;padding:7px;background:#15803d;color:#fff;border:none;border-radius:7px;font-size:11px;font-weight:700;cursor:pointer;font-family:inherit;">✅ Mark as explained</button>`
+          : `<button onclick="hvoMarkExplained(${JSON.stringify(item.id)},true)" style="flex:1;padding:7px;background:#f3f4f6;color:#6b7280;border:1px solid #e5e7eb;border-radius:7px;font-size:11px;font-weight:700;cursor:pointer;font-family:inherit;">↩ Reopen</button>`
+        }
+        <button onclick="hvoSaveDeficitNote(${JSON.stringify(item.id)})" style="padding:7px 14px;background:#1e3cb8;color:#fff;border:none;border-radius:7px;font-size:11px;font-weight:700;cursor:pointer;font-family:inherit;">💾 Save note</button>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function hvoSaveDeficitNote(id) {
+  const ta = document.getElementById('def-note-' + id);
+  if (!ta) return;
+  if (!_deficitNotes[id]) _deficitNotes[id] = {};
+  _deficitNotes[id].note = ta.value.trim();
+  _deficitNotes[id].ts = Date.now();
+  localStorage.setItem('deficit_notes', JSON.stringify(_deficitNotes));
+  ta.style.borderColor = '#86efac';
+  setTimeout(() => { ta.style.borderColor = ''; }, 1500);
+}
+
+function hvoMarkExplained(id, reopen) {
+  hvoSaveDeficitNote(id);
+  if (!_deficitNotes[id]) _deficitNotes[id] = {};
+  _deficitNotes[id].explained = !reopen;
+  _deficitNotes[id].ts = Date.now();
+  localStorage.setItem('deficit_notes', JSON.stringify(_deficitNotes));
+  // Update badge
+  const badge = document.getElementById('hvo-deficit-cnt');
+  const openCount = _deficits.filter(d => !_deficitNotes[d.id]?.explained).length;
+  if (badge) badge.textContent = openCount || '';
+  hvoRenderDeficits();
 }
 
 function hvoPopCollector() {
@@ -6195,6 +6371,31 @@ function vnSubTab(tab, btn) {
   });
   btn.style.color = '#0f766e';
   btn.style.borderBottomColor = '#0f766e';
+
+  // Show/hide TBF panel vs main list
+  const tbfPanel = document.getElementById('vn-panel-tbf');
+  const areaRow = document.querySelector('#hv-tab-vnames > div:nth-child(3)');
+  const searchRow = document.querySelector('#hv-tab-vnames > div:nth-child(4)');
+  const statsEl = document.getElementById('vn-stats');
+  const listEl = document.getElementById('vn-list');
+
+  if (tab === 'tbf') {
+    _vnSubTabMode = 'tbf';
+    if (tbfPanel) tbfPanel.style.display = 'block';
+    if (areaRow) areaRow.style.display = 'none';
+    if (searchRow) searchRow.style.display = 'none';
+    if (statsEl) statsEl.style.display = 'none';
+    if (listEl) listEl.style.display = 'none';
+    vnLoadTBF();
+    return;
+  } else {
+    if (tbfPanel) tbfPanel.style.display = 'none';
+    if (areaRow) areaRow.style.display = '';
+    if (searchRow) searchRow.style.display = '';
+    if (statsEl) statsEl.style.display = '';
+    if (listEl) listEl.style.display = '';
+  }
+
   if (tab === 'saved') {
     _vnSubTabMode = 'saved';
   } else {
@@ -6208,6 +6409,127 @@ function vnSubTab(tab, btn) {
   if (inp) inp.value = '';
   vnUpdateAreaCounts();
   vnApplyFilter();
+}
+
+/* ── TBF (Unnamed route vendos) ── */
+async function vnLoadTBF() {
+  const listEl = document.getElementById('vn-tbf-list');
+  if (!listEl) return;
+  listEl.innerHTML = '<div style="padding:20px;text-align:center;color:#9ca3af;font-size:12px;">Loading…</div>';
+  try {
+    // Get route_items with null tg_name or tbf collector_note, from active routes
+    const r = await fetch(_SB + '/rest/v1/route_items?tg_name=is.null&status=eq.pending&select=id,tg_name,sheet_name,area,collector_note,route_id&order=id.desc&limit=200', {
+      headers: {'apikey':_KEY,'Authorization':'Bearer '+_KEY}
+    });
+    const items = await r.json();
+
+    // Also get items where collector_note contains TBF
+    const r2 = await fetch(_SB + '/rest/v1/route_items?collector_note=ilike.*TBF*&status=eq.pending&select=id,tg_name,sheet_name,area,collector_note,route_id&order=id.desc&limit=200', {
+      headers: {'apikey':_KEY,'Authorization':'Bearer '+_KEY}
+    });
+    const items2 = await r2.json();
+
+    // Merge and dedupe
+    const allItems = [...items, ...items2.filter(i2 => !items.find(i => i.id === i2.id))];
+
+    const badge = document.getElementById('vn-tbf-count');
+    if (badge) badge.textContent = allItems.length || '0';
+
+    if (!allItems.length) {
+      listEl.innerHTML = '<div style="padding:30px;text-align:center;color:#9ca3af;">No unnamed route vendos — all clear! ✅</div>';
+      return;
+    }
+
+    listEl.innerHTML = allItems.map(item => `
+      <div id="vn-tbf-${item.id}" style="border:1.5px solid #fed7aa;border-radius:10px;padding:12px 14px;margin-bottom:10px;background:#fff7ed;">
+        <div style="font-size:11px;font-weight:700;color:#ea580c;margin-bottom:6px;">🔴 Route item #${item.id} · Route ID: ${item.route_id}</div>
+        <div style="font-size:12px;font-weight:700;color:#374151;margin-bottom:6px;">${item.sheet_name||'(no label)'} · ${item.area||'—'}</div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-bottom:8px;">
+          <div>
+            <div style="font-size:9px;font-weight:700;color:#6b7280;margin-bottom:3px;">TG NAME *</div>
+            <input id="tbf-tg-${item.id}" type="text" value="${item.tg_name||''}" placeholder="Telegram vendo name..."
+              style="width:100%;padding:6px 8px;border:1.5px solid #fed7aa;border-radius:6px;font-size:12px;font-family:inherit;outline:none;box-sizing:border-box;">
+          </div>
+          <div>
+            <div style="font-size:9px;font-weight:700;color:#6b7280;margin-bottom:3px;">SHEET NAME</div>
+            <input id="tbf-sheet-${item.id}" type="text" value="${item.sheet_name||''}" placeholder="Owner name / sheet label..."
+              style="width:100%;padding:6px 8px;border:1.5px solid #e5e7eb;border-radius:6px;font-size:12px;font-family:inherit;outline:none;box-sizing:border-box;">
+          </div>
+          <div>
+            <div style="font-size:9px;font-weight:700;color:#6b7280;margin-bottom:3px;">AREA</div>
+            <select id="tbf-area-${item.id}" style="width:100%;padding:6px 8px;border:1.5px solid #e5e7eb;border-radius:6px;font-size:12px;font-family:inherit;outline:none;background:#fff;">
+              ${['DAPITAN','DIPOLOG','SINDANGAN','ROXAS','POLANCO','SINAMAN','MINAOG','MIX AREAS'].map(a=>`<option value="${a}" ${a===(item.area||'')?"selected":""}>${a}</option>`).join('')}
+            </select>
+          </div>
+          <div>
+            <div style="font-size:9px;font-weight:700;color:#6b7280;margin-bottom:3px;">VLAN</div>
+            <input id="tbf-vlan-${item.id}" type="number" placeholder="e.g. 116"
+              style="width:100%;padding:6px 8px;border:1.5px solid #e5e7eb;border-radius:6px;font-size:12px;font-family:inherit;outline:none;box-sizing:border-box;">
+          </div>
+          <div style="grid-column:1/-1;">
+            <div style="font-size:9px;font-weight:700;color:#6b7280;margin-bottom:3px;">ADDRESS / LOCATION</div>
+            <input id="tbf-addr-${item.id}" type="text" placeholder="e.g. Purok 3 Cogon, Dipolog City"
+              style="width:100%;padding:6px 8px;border:1.5px solid #e5e7eb;border-radius:6px;font-size:12px;font-family:inherit;outline:none;box-sizing:border-box;">
+          </div>
+        </div>
+        <div style="display:flex;gap:6px;">
+          <button onclick="vnSaveTBF(${item.id})" style="flex:1;padding:8px;background:#1e3cb8;color:#fff;border:none;border-radius:7px;font-size:12px;font-weight:700;cursor:pointer;font-family:inherit;">💾 Save & Register</button>
+          <span id="tbf-msg-${item.id}" style="font-size:10px;align-self:center;color:#15803d;"></span>
+        </div>
+      </div>`).join('');
+  } catch(e) {
+    listEl.innerHTML = '<div style="color:#dc2626;padding:16px;">Error: ' + e.message + '</div>';
+  }
+}
+
+async function vnSaveTBF(itemId) {
+  const tg    = (document.getElementById('tbf-tg-' + itemId)?.value || '').trim();
+  const sheet = (document.getElementById('tbf-sheet-' + itemId)?.value || '').trim();
+  const area  = document.getElementById('tbf-area-' + itemId)?.value || '';
+  const vlan  = parseInt(document.getElementById('tbf-vlan-' + itemId)?.value) || null;
+  const addr  = (document.getElementById('tbf-addr-' + itemId)?.value || '').trim() || null;
+  const msg   = document.getElementById('tbf-msg-' + itemId);
+
+  if (!tg) { if (msg) { msg.textContent = '⚠ TG name required'; msg.style.color = '#dc2626'; } return; }
+  if (msg) { msg.textContent = 'Saving…'; msg.style.color = '#6b7280'; }
+
+  try {
+    const H = {'apikey':_KEY,'Authorization':'Bearer '+_KEY,'Content-Type':'application/json','Prefer':'return=minimal'};
+
+    // 1. Check if vendo with this tg_name already exists
+    const chk = await fetch(_SB + '/rest/v1/vendos?tg_name=eq.' + encodeURIComponent(tg) + '&select=id&limit=1', {headers:H});
+    const existing = await chk.json();
+
+    if (!existing.length) {
+      // Create new vendo record
+      await fetch(_SB + '/rest/v1/vendos', {
+        method:'POST', headers:H,
+        body: JSON.stringify({ tg_name: tg, sheet_name: sheet||null, area: area||null, vlan: vlan, address: addr })
+      });
+    } else {
+      // Update existing
+      await fetch(_SB + '/rest/v1/vendos?tg_name=eq.' + encodeURIComponent(tg), {
+        method:'PATCH', headers:H,
+        body: JSON.stringify({ ...(sheet?{sheet_name:sheet}:{}), ...(area?{area}:{}), ...(vlan?{vlan}:{}), ...(addr?{address:addr}:{}) })
+      });
+    }
+
+    // 2. Update route_item with tg_name + clear TBF note
+    await fetch(_SB + '/rest/v1/route_items?id=eq.' + itemId, {
+      method:'PATCH', headers:H,
+      body: JSON.stringify({ tg_name: tg, sheet_name: sheet||null, area: area||null, collector_note: null })
+    });
+
+    if (msg) { msg.textContent = '✅ Saved!'; msg.style.color = '#15803d'; }
+    const card = document.getElementById('vn-tbf-' + itemId);
+    if (card) { card.style.borderColor = '#86efac'; card.style.background = '#f0fdf4'; }
+    // Update badge
+    const badge = document.getElementById('vn-tbf-count');
+    const cur = parseInt(badge?.textContent) || 0;
+    if (badge && cur > 0) badge.textContent = cur - 1;
+  } catch(e) {
+    if (msg) { msg.textContent = '❌ ' + e.message; msg.style.color = '#dc2626'; }
+  }
 }
 let _vnSubTabMode = 'all';
 
