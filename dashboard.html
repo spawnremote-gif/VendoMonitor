@@ -4030,22 +4030,33 @@ function hvoOpenReconPopup(popId) {
       + '<thead><tr style="background:#f8faff;">'
       + '<th style="padding:6px 10px;text-align:left;color:#6b7280;font-size:9px;text-transform:uppercase;border-bottom:1px solid #e5e7eb;">Vendo</th>'
       + '<th style="padding:6px 10px;text-align:right;color:#6b7280;font-size:9px;text-transform:uppercase;border-bottom:1px solid #e5e7eb;">Coin Net</th>'
+      + '<th style="padding:6px 10px;text-align:right;color:#1e3cb8;font-size:9px;text-transform:uppercase;border-bottom:1px solid #e5e7eb;">TG Income</th>'
+      + '<th style="padding:6px 10px;text-align:right;color:#6b7280;font-size:9px;text-transform:uppercase;border-bottom:1px solid #e5e7eb;">Diff</th>'
       + '<th style="padding:6px 10px;text-align:right;color:#6b7280;font-size:9px;text-transform:uppercase;border-bottom:1px solid #e5e7eb;">Window</th>'
       + '</tr></thead><tbody>'
       + items.map(h => {
-          const net = parseFloat(h.net_collectible||0);
-          return '<tr style="border-bottom:1px solid #f5f5f5;">'
+          const net   = parseFloat(h.net_collectible||0);
+          const tgAmt = getTg(h, d.date);
+          const diff  = net - tgAmt;
+          const dCls  = Math.abs(diff)<50 ? '#15803d' : diff>0 ? '#d97706' : '#dc2626';
+          const dTxt  = Math.abs(diff)<50 ? '\u2705' : (diff>0 ? '\u25b2 +' : '\u25bc -') + fmt2(Math.abs(diff));
+          const rowBg = Math.abs(diff)<50 ? '' : 'background:' + (diff>0 ? '#fffbeb' : '#fef2f2') + ';';
+          return '<tr style="border-bottom:1px solid #f5f5f5;' + rowBg + '">'
             + '<td style="padding:7px 10px;"><div style="font-weight:600;color:#1e3cb8;font-size:12px;">' + (h.vendo_name||h.tg_name||'—') + '</div>'
             + '<div style="font-size:9px;color:#9ca3af;">' + (h.tg_name||'—') + '</div>'
             + (h.collector_note ? '<div style="font-size:10px;color:#0369a1;margin-top:2px;">💬 ' + h.collector_note + '</div>' : '')
             + '</td>'
             + '<td style="padding:7px 10px;text-align:right;font-weight:700;color:#15803d;">' + fmt2(net) + '</td>'
+            + '<td style="padding:7px 10px;text-align:right;font-weight:700;color:#1e3cb8;">' + fmt2(tgAmt) + '</td>'
+            + '<td style="padding:7px 10px;text-align:right;font-weight:700;color:' + dCls + ';">' + dTxt + '</td>'
             + '<td style="padding:7px 10px;text-align:right;font-size:10px;color:#9ca3af;">' + (h.harvest_window_start||d.DS||'—') + '</td>'
             + '</tr>';
         }).join('')
       + '<tr style="background:#f0fdf4;font-weight:700;border-top:2px solid #dde3f5;">'
       + '<td style="padding:7px 10px;color:#374151;">Route total</td>'
       + '<td style="padding:7px 10px;text-align:right;color:#15803d;">' + fmt2(rCoin) + '</td>'
+      + '<td style="padding:7px 10px;text-align:right;color:#1e3cb8;">' + fmt2(rTg) + '</td>'
+      + '<td style="padding:7px 10px;text-align:right;font-weight:700;color:' + rCls + ';">' + (Math.abs(rDiff)<50?'✅':(rDiff>0?'▲ +':'▼ -')+fmt2(Math.abs(rDiff))) + '</td>'
       + '<td></td></tr>'
       + '</tbody></table></div>';
   });
