@@ -1319,7 +1319,16 @@ tr:hover td{background:#f8f9ff;cursor:pointer}
 
   <div id="hv-dp-alert" style="display:none;background:#fef2f2;border-left:4px solid #dc2626;padding:8px 14px;font-size:11px;color:#991b1b;"></div>
 
-  <div style="background:#fff;padding:14px 16px;display:flex;flex-direction:column;gap:10px;">
+  <!-- POPUP TABS -->
+  <div style="display:flex;border-bottom:2px solid #e5e7eb;background:#f8faff;">
+    <button id="hv-dp-tab-details" onclick="hvDpTab('details')"
+      style="flex:1;padding:10px 8px;font-size:12px;font-weight:700;border:none;background:none;cursor:pointer;font-family:inherit;color:#1e3cb8;border-bottom:3px solid #1e3cb8;margin-bottom:-2px;">📋 Details</button>
+    <button id="hv-dp-tab-edit" onclick="hvDpTab('edit')"
+      style="flex:1;padding:10px 8px;font-size:12px;font-weight:700;border:none;background:none;cursor:pointer;font-family:inherit;color:#6b7280;border-bottom:3px solid transparent;margin-bottom:-2px;">✏️ Edit</button>
+  </div>
+
+  <!-- TAB: DETAILS -->
+  <div id="hv-dp-panel-details" style="background:#fff;padding:14px 16px;display:flex;flex-direction:column;gap:10px;">
 
     <!-- Info cards -->
     <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">
@@ -1351,6 +1360,11 @@ tr:hover td{background:#f8f9ff;cursor:pointer}
         </div>
       </div>
     </div>
+
+  </div><!-- end hv-dp-panel-details -->
+
+  <!-- TAB: EDIT -->
+  <div id="hv-dp-panel-edit" style="display:none;background:#fff;padding:14px 16px;display:none;flex-direction:column;gap:10px;">
 
     <!-- ── EDIT SECTION ── -->
     <div style="border:1.5px solid #e5e7eb;border-radius:10px;overflow:hidden;">
@@ -1447,6 +1461,11 @@ tr:hover td{background:#f8f9ff;cursor:pointer}
       </div>
     </div>
 
+  </div><!-- end hv-dp-panel-edit -->
+
+  <!-- SCHEDULE + ACTIONS — always visible below tabs -->
+  <div style="background:#fff;padding:0 16px 14px;display:flex;flex-direction:column;gap:10px;">
+
     <!-- Schedule -->
     <div style="background:#f0f4ff;border:1.5px solid #c7d2fe;border-radius:8px;padding:10px 12px;">
       <div style="font-size:9px;font-weight:700;color:#1e3cb8;text-transform:uppercase;letter-spacing:.05em;margin-bottom:8px;display:flex;align-items:center;">
@@ -1488,6 +1507,7 @@ tr:hover td{background:#f8f9ff;cursor:pointer}
     </div>
 
   </div>
+  </div><!-- end always-visible section -->
 </div>
 </div>
 
@@ -2343,6 +2363,24 @@ document.addEventListener('click', function(e) {
   }
 });
 
+function hvDpTab(tab) {
+  const details = document.getElementById('hv-dp-panel-details');
+  const edit    = document.getElementById('hv-dp-panel-edit');
+  const btnD    = document.getElementById('hv-dp-tab-details');
+  const btnE    = document.getElementById('hv-dp-tab-edit');
+  if (tab === 'details') {
+    if (details) { details.style.display = 'flex'; }
+    if (edit)    { edit.style.display    = 'none'; }
+    if (btnD) { btnD.style.color='#1e3cb8'; btnD.style.borderBottomColor='#1e3cb8'; }
+    if (btnE) { btnE.style.color='#6b7280'; btnE.style.borderBottomColor='transparent'; }
+  } else {
+    if (details) { details.style.display = 'none'; }
+    if (edit)    { edit.style.display    = 'flex'; edit.style.flexDirection = 'column'; edit.style.gap = '10px'; }
+    if (btnE) { btnE.style.color='#1e3cb8'; btnE.style.borderBottomColor='#1e3cb8'; }
+    if (btnD) { btnD.style.color='#6b7280'; btnD.style.borderBottomColor='transparent'; }
+  }
+}
+
 function hvOpenDetailFromRow(row) {
   const d = row.dataset;
   hvCurrentDetail = {
@@ -2414,6 +2452,7 @@ function hvOpenDetailFromRow(row) {
     badge.style.display = 'inline-block';
     badge.style.background = isMatched ? 'rgba(22,163,74,.3)' : 'rgba(217,119,6,.3)';
   }
+  hvDpTab('details'); // always start on Details tab
   document.getElementById('hv-detail-pop').classList.add('show');
 }
 
@@ -5827,6 +5866,13 @@ async function vnOpenConfirmedPop(v) {
 
   // Clear copied msg
   document.getElementById('vn-cp-copied').textContent = '';
+  // Reset to info tab on open
+  document.getElementById('vn-cp-panel-info').style.display = 'flex';
+  document.getElementById('vn-cp-panel-edit').style.display = 'none';
+  const tabInfo = document.getElementById('vn-cp-tab-info');
+  const tabEdit = document.getElementById('vn-cp-tab-edit');
+  if (tabInfo) { tabInfo.style.color='#0f766e'; tabInfo.style.borderBottomColor='#0f766e'; }
+  if (tabEdit) { tabEdit.style.color='#6b7280'; tabEdit.style.borderBottomColor='transparent'; }
 
   // Load harvest records
   const hEl = document.getElementById('vn-cp-harvests');
@@ -5864,6 +5910,109 @@ async function vnOpenConfirmedPop(v) {
       }).join('');
   } catch(e) {
     hEl.innerHTML = '<div style="color:#dc2626;font-size:11px;">Error: ' + e.message + '</div>';
+  }
+}
+
+function vnCpTab(tab, btn) {
+  document.querySelectorAll('#vn-confirmed-pop [id^="vn-cp-tab-"]').forEach(b => {
+    b.style.color = '#6b7280'; b.style.borderBottomColor = 'transparent';
+  });
+  btn.style.color = '#0f766e'; btn.style.borderBottomColor = '#0f766e';
+  document.getElementById('vn-cp-panel-info').style.display = tab==='info' ? 'flex' : 'none';
+  document.getElementById('vn-cp-panel-edit').style.display = tab==='edit' ? 'flex' : 'none';
+  if (tab === 'edit') vnCpPrefillEdit();
+}
+
+function vnCpPrefillEdit() {
+  const v = _vnCpCurrent;
+  if (!v) return;
+  const set = (id, val) => { const el=document.getElementById(id); if(el) el.value=val||''; };
+  set('vn-cp-vlan-inp',     v.vlan);
+  set('vn-cp-contact-inp',  v.contact_number);
+  set('vn-cp-gps-inp',      (v.lat && v.lng) ? v.lat+', '+v.lng : (v.gps||''));
+  set('vn-cp-address-inp',  v.address);
+  set('vn-cp-date-inp',     v.date_installed);
+  set('vn-cp-installer-inp',v.installer);
+  const areaSel = document.getElementById('vn-cp-area-sel');
+  if (areaSel) areaSel.value = (v.area||'').toUpperCase();
+  const badge = document.getElementById('vn-cp-server-badge');
+  if (badge) badge.innerHTML = getServerBadge(v.vlan);
+}
+
+function vnCpShowServer(vlan) {
+  const badge = document.getElementById('vn-cp-server-badge');
+  if (badge) badge.innerHTML = getServerBadge(vlan);
+}
+
+async function vnCpSaveEdit() {
+  const v = _vnCpCurrent;
+  if (!v || !v.id) return;
+  const msg = document.getElementById('vn-cp-edit-msg');
+  const btn = document.getElementById('vn-cp-save-btn');
+  btn.disabled = true; btn.textContent = '⏳ Saving…'; msg.innerHTML = '';
+
+  const vlan    = document.getElementById('vn-cp-vlan-inp')?.value?.trim();
+  const contact = document.getElementById('vn-cp-contact-inp')?.value?.trim();
+  const gps     = document.getElementById('vn-cp-gps-inp')?.value?.trim();
+  const addr    = document.getElementById('vn-cp-address-inp')?.value?.trim();
+  const date    = document.getElementById('vn-cp-date-inp')?.value?.trim();
+  const inst    = document.getElementById('vn-cp-installer-inp')?.value?.trim();
+  const area    = document.getElementById('vn-cp-area-sel')?.value?.trim();
+
+  const updates = {};
+  if (vlan)    updates.vlan           = parseInt(vlan);
+  if (contact) updates.contact_number = contact;
+  if (addr)    updates.address        = addr;
+  if (date)    updates.date_installed = date;
+  if (inst)    updates.installer      = inst;
+  if (area)    updates.area           = area;
+  if (gps) {
+    updates.gps = gps;
+    const p = gps.split(',').map(s=>parseFloat(s.trim()));
+    if (p.length===2 && !isNaN(p[0]) && !isNaN(p[1])) { updates.lat=p[0]; updates.lng=p[1]; }
+  }
+
+  if (!Object.keys(updates).length) {
+    msg.innerHTML = '<span style="color:#9ca3af;">Nothing to save.</span>';
+    btn.disabled=false; btn.textContent='💾 Save changes'; return;
+  }
+
+  try {
+    const r = await fetch(`${_SB}/rest/v1/vendos?id=eq.${v.id}`, {
+      method: 'PATCH',
+      headers: {'apikey':_KEY,'Authorization':'Bearer '+_KEY,'Content-Type':'application/json','Prefer':'return=minimal'},
+      body: JSON.stringify(updates)
+    });
+    if (!r.ok) throw new Error('PATCH failed: '+r.status);
+
+    // Update local copy
+    Object.assign(v, updates);
+    if (updates.vlan) {
+      document.getElementById('vn-cp-sub').textContent = (v.area||'—') + ' · VLAN ' + updates.vlan;
+      const badge = document.getElementById('vn-cp-server-badge');
+      if (badge) badge.innerHTML = getServerBadge(updates.vlan);
+    }
+    if (updates.address) document.getElementById('vn-cp-addr').textContent = updates.address;
+    if (updates.area) {
+      document.getElementById('vn-cp-area').textContent = updates.area + ' · VLAN ' + (updates.vlan||v.vlan||'—');
+      document.getElementById('vn-cp-sub').textContent  = updates.area + ' · VLAN ' + (updates.vlan||v.vlan||'—');
+    }
+
+    msg.innerHTML = '<span style="color:#16a34a;font-weight:700;">✅ Saved!</span>';
+    // Update GPS link if updated
+    if (updates.lat && updates.lng) {
+      const gpsRow = document.getElementById('vn-cp-gps-row');
+      if (gpsRow) {
+        gpsRow.style.display = 'block';
+        document.getElementById('vn-cp-gps-link').href = 'https://www.google.com/maps?q='+updates.lat+','+updates.lng;
+        document.getElementById('vn-cp-gps-coords').textContent = updates.lat.toFixed(5)+', '+updates.lng.toFixed(5);
+      }
+    }
+    setTimeout(()=>{ msg.innerHTML=''; }, 2500);
+  } catch(e) {
+    msg.innerHTML = '<span style="color:#dc2626;">❌ '+e.message+'</span>';
+  } finally {
+    btn.disabled=false; btn.textContent='💾 Save changes';
   }
 }
 
@@ -8972,7 +9121,16 @@ async function fullBackup() {
     <button onclick="document.getElementById('vn-confirmed-pop').style.display='none'" style="flex-shrink:0;width:28px;height:28px;border-radius:50%;border:1.5px solid rgba(255,255,255,.4);background:rgba(255,255,255,.15);color:#fff;font-size:16px;cursor:pointer;display:flex;align-items:center;justify-content:center;">×</button>
   </div>
 
-  <div style="padding:14px 16px;display:flex;flex-direction:column;gap:10px;">
+  <!-- Tab bar -->
+  <div style="display:flex;border-bottom:2px solid #e5e7eb;background:#f8faff;padding:0 16px;">
+    <button id="vn-cp-tab-info" onclick="vnCpTab('info',this)"
+      style="padding:10px 16px;font-size:12px;font-weight:700;border:none;background:none;cursor:pointer;font-family:inherit;color:#0f766e;border-bottom:3px solid #0f766e;margin-bottom:-2px;">📋 Details</button>
+    <button id="vn-cp-tab-edit" onclick="vnCpTab('edit',this)"
+      style="padding:10px 16px;font-size:12px;font-weight:700;border:none;background:none;cursor:pointer;font-family:inherit;color:#6b7280;border-bottom:3px solid transparent;margin-bottom:-2px;">✏️ Edit</button>
+  </div>
+
+  <!-- INFO TAB -->
+  <div id="vn-cp-panel-info" style="padding:14px 16px;display:flex;flex-direction:column;gap:10px;">
 
     <!-- Info cards -->
     <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">
@@ -9019,7 +9177,70 @@ async function fullBackup() {
       <div id="vn-cp-harvests" style="font-size:11px;color:#9ca3af;">Loading...</div>
     </div>
 
-  </div>
+  </div><!-- end vn-cp-panel-info -->
+
+  <!-- EDIT TAB -->
+  <div id="vn-cp-panel-edit" style="display:none;padding:14px 16px;display:none;flex-direction:column;gap:10px;">
+
+    <!-- Server badge -->
+    <div id="vn-cp-server-badge" style="margin-bottom:4px;"></div>
+
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
+      <div>
+        <div style="font-size:9px;font-weight:700;color:#6b7280;text-transform:uppercase;letter-spacing:.04em;margin-bottom:4px;">VLAN</div>
+        <input type="number" id="vn-cp-vlan-inp" placeholder="e.g. 50" min="1" oninput="vnCpShowServer(this.value)"
+          style="width:100%;padding:8px 10px;border:1.5px solid #c7d2fe;border-radius:7px;font-size:13px;font-family:inherit;outline:none;color:#111827;box-sizing:border-box;">
+      </div>
+      <div>
+        <div style="font-size:9px;font-weight:700;color:#6b7280;text-transform:uppercase;letter-spacing:.04em;margin-bottom:4px;">Contact Number</div>
+        <input type="text" id="vn-cp-contact-inp" placeholder="e.g. 09153031533"
+          style="width:100%;padding:8px 10px;border:1.5px solid #c7d2fe;border-radius:7px;font-size:13px;font-family:inherit;outline:none;color:#111827;box-sizing:border-box;">
+      </div>
+    </div>
+
+    <div>
+      <div style="font-size:9px;font-weight:700;color:#6b7280;text-transform:uppercase;letter-spacing:.04em;margin-bottom:4px;">Address</div>
+      <input type="text" id="vn-cp-address-inp" placeholder="e.g. Purok 3, Dicayas, Dipolog City"
+        style="width:100%;padding:8px 10px;border:1.5px solid #c7d2fe;border-radius:7px;font-size:13px;font-family:inherit;outline:none;color:#111827;box-sizing:border-box;">
+    </div>
+
+    <div>
+      <div style="font-size:9px;font-weight:700;color:#6b7280;text-transform:uppercase;letter-spacing:.04em;margin-bottom:4px;">GPS Coordinates</div>
+      <input type="text" id="vn-cp-gps-inp" placeholder="e.g. 8.5697, 123.3435"
+        style="width:100%;padding:8px 10px;border:1.5px solid #c7d2fe;border-radius:7px;font-size:13px;font-family:inherit;outline:none;color:#111827;box-sizing:border-box;">
+      <div style="font-size:9px;color:#9ca3af;margin-top:2px;">lat, lng format</div>
+    </div>
+
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
+      <div>
+        <div style="font-size:9px;font-weight:700;color:#6b7280;text-transform:uppercase;letter-spacing:.04em;margin-bottom:4px;">Date Installed</div>
+        <input type="date" id="vn-cp-date-inp"
+          style="width:100%;padding:8px 10px;border:1.5px solid #c7d2fe;border-radius:7px;font-size:13px;font-family:inherit;outline:none;color:#111827;box-sizing:border-box;">
+      </div>
+      <div>
+        <div style="font-size:9px;font-weight:700;color:#6b7280;text-transform:uppercase;letter-spacing:.04em;margin-bottom:4px;">Installer</div>
+        <input type="text" id="vn-cp-installer-inp" placeholder="e.g. Mark Lobino"
+          style="width:100%;padding:8px 10px;border:1.5px solid #c7d2fe;border-radius:7px;font-size:13px;font-family:inherit;outline:none;color:#111827;box-sizing:border-box;">
+      </div>
+    </div>
+
+    <div>
+      <div style="font-size:9px;font-weight:700;color:#6b7280;text-transform:uppercase;letter-spacing:.04em;margin-bottom:4px;">Change Area</div>
+      <select id="vn-cp-area-sel"
+        style="width:100%;padding:8px 10px;border:1.5px solid #c7d2fe;border-radius:7px;font-size:13px;font-family:inherit;outline:none;background:#fff;box-sizing:border-box;color:#1e3cb8;font-weight:600;">
+        <option value="">— select area —</option>
+        <option>DAPITAN</option><option>DIPOLOG</option><option>SINDANGAN</option>
+        <option>SINAMAN</option><option>ROXAS</option><option>POLANCO</option>
+        <option>MINAOG</option><option>MIX AREAS</option>
+      </select>
+    </div>
+
+    <button onclick="vnCpSaveEdit()" id="vn-cp-save-btn"
+      style="width:100%;padding:10px;background:#0f766e;color:#fff;border:none;border-radius:8px;font-size:13px;font-weight:700;cursor:pointer;font-family:inherit;">💾 Save changes</button>
+    <div id="vn-cp-edit-msg" style="font-size:11px;text-align:center;min-height:16px;"></div>
+
+  </div><!-- end vn-cp-panel-edit -->
+
 </div>
 </div>
 
