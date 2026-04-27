@@ -148,6 +148,7 @@ tr:hover td{background:#f8f9ff;cursor:pointer}
 .rc-collector-hdr{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;padding-bottom:8px;border-bottom:2px solid var(--bd);}
 .rc-collector-name{font-size:14px;font-weight:700;color:var(--t);}
 .rc-route-block{background:#f0f4ff;border:1px solid #dde3f5;border-radius:8px;padding:12px;margin-bottom:8px;}
+#rc-content table tr{cursor:pointer;}
 .rc-route-hdr{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;}
 .rc-route-code{font-size:13px;font-weight:700;color:#1e3cb8;letter-spacing:.1em;}
 .rc-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px;margin-bottom:8px;}
@@ -168,6 +169,96 @@ tr:hover td{background:#f8f9ff;cursor:pointer}
 </style>
 </head>
 <body>
+
+
+<!-- LOGIN SCREEN -->
+<style>
+#spawn-login-screen{position:fixed;inset:0;background:linear-gradient(135deg,#0f1f6e 0%,#1e3cb8 60%,#2563eb 100%);z-index:99999;display:flex;align-items:center;justify-content:center;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;}
+#spawn-login-screen.hidden{display:none;}
+.sl-card{background:#fff;border-radius:16px;padding:32px 28px;width:min(380px,90vw);box-shadow:0 32px 80px rgba(0,0,0,.35);}
+.sl-logo{text-align:center;margin-bottom:24px;}
+.sl-logo-icon{font-size:40px;margin-bottom:8px;}
+.sl-logo-title{font-size:20px;font-weight:800;color:#1e3cb8;letter-spacing:-.01em;}
+.sl-logo-sub{font-size:11px;color:#6b7280;margin-top:2px;}
+.sl-field{margin-bottom:14px;}
+.sl-field label{display:block;font-size:11px;font-weight:700;color:#374151;text-transform:uppercase;letter-spacing:.04em;margin-bottom:5px;}
+.sl-field input{width:100%;padding:11px 14px;border:1.5px solid #e5e7eb;border-radius:8px;font-size:15px;font-family:inherit;outline:none;color:#111827;box-sizing:border-box;transition:.15s;}
+.sl-field input:focus{border-color:#1e3cb8;box-shadow:0 0 0 3px rgba(30,60,184,.12);}
+.sl-btn{width:100%;padding:13px;background:#1e3cb8;color:#fff;border:none;border-radius:9px;font-size:15px;font-weight:700;cursor:pointer;font-family:inherit;margin-top:4px;transition:.15s;}
+.sl-btn:hover{background:#1630a0;}
+.sl-btn:active{background:#0f1f6e;}
+.sl-error{background:#fef2f2;color:#dc2626;border:1px solid #fca5a5;border-radius:7px;padding:9px 12px;font-size:12px;font-weight:600;margin-top:10px;display:none;text-align:center;}
+.sl-error.show{display:block;}
+.sl-footer{text-align:center;font-size:10px;color:#9ca3af;margin-top:18px;}
+</style>
+<div id="spawn-login-screen">
+  <div class="sl-card">
+    <div class="sl-logo">
+      <div class="sl-logo-icon">🌐</div>
+      <div class="sl-logo-title">Spawn Internetan</div>
+      <div class="sl-logo-sub">Vendo Monitor — Admin Access</div>
+    </div>
+    <div class="sl-field">
+      <label>Username</label>
+      <input type="text" id="sl-user" placeholder="admin" autocomplete="username" onkeydown="if(event.key==='Enter')document.getElementById('sl-pass').focus()">
+    </div>
+    <div class="sl-field">
+      <label>Password</label>
+      <input type="password" id="sl-pass" placeholder="••••••••" autocomplete="current-password" onkeydown="if(event.key==='Enter')slLogin()">
+    </div>
+    <button class="sl-btn" onclick="slLogin()">Sign in →</button>
+    <div class="sl-error" id="sl-error">Incorrect username or password</div>
+    <div class="sl-footer">Session expires after 24 hours</div>
+  </div>
+</div>
+<script>
+(function(){
+  const SL_KEY='spawn_admin_auth';
+  const SL_USER='admin';
+  const SL_PASS='spawn2024';
+  const SL_TTL=24*60*60*1000; // 24 hours
+
+  function slCheck(){
+    try{
+      const s=JSON.parse(localStorage.getItem(SL_KEY)||'null');
+      if(s && s.ok && Date.now()-s.ts < SL_TTL){
+        document.getElementById('spawn-login-screen').classList.add('hidden');
+        return;
+      }
+    }catch(e){}
+    // Not logged in or expired — show login, hide body content
+    document.getElementById('spawn-login-screen').classList.remove('hidden');
+  }
+
+  window.slLogin=function(){
+    const u=(document.getElementById('sl-user').value||'').trim();
+    const p=(document.getElementById('sl-pass').value||'').trim();
+    const err=document.getElementById('sl-error');
+    if(u===SL_USER && p===SL_PASS){
+      localStorage.setItem(SL_KEY,JSON.stringify({ok:true,ts:Date.now()}));
+      document.getElementById('spawn-login-screen').classList.add('hidden');
+      err.classList.remove('show');
+    } else {
+      err.classList.add('show');
+      document.getElementById('sl-pass').value='';
+      document.getElementById('sl-pass').focus();
+      // Shake animation
+      const card=document.querySelector('.sl-card');
+      card.style.animation='none';
+      card.style.transform='translateX(-8px)';
+      setTimeout(()=>{card.style.transform='translateX(8px)';},80);
+      setTimeout(()=>{card.style.transform='';},160);
+    }
+  };
+
+  window.slLogout=function(){
+    localStorage.removeItem(SL_KEY);
+    location.reload();
+  };
+
+  slCheck();
+})();
+</script>
 
 <!-- GLOBAL FLOATING BACK BUTTON -->
 <style>
@@ -222,6 +313,7 @@ tr:hover td{background:#f8f9ff;cursor:pointer}
       <option value="all">All Years</option>
     </select>
     <button class="btn p" style="font-size:11px;padding:4px 9px;background:rgba(255,255,255,.18);border-color:rgba(255,255,255,.3);" onclick="loadDashboard()">⟳ Refresh</button>
+    <button onclick="slLogout()" style="padding:4px 10px;border-radius:6px;border:1px solid rgba(255,255,255,.3);background:rgba(220,38,38,.3);color:#fff;font-size:10px;font-weight:700;cursor:pointer;font-family:inherit;" title="Logout">🔒 Logout</button>
   </div>
 </div>
 
@@ -812,6 +904,7 @@ tr:hover td{background:#f8f9ff;cursor:pointer}
       <button class="hv-hvtab" id="hbtn-newvendo" onclick="hvShowTab('newvendo',this)" style="background:#eff6ff;border-color:#bfdbfe;color:#1d4ed8;">🏭 New Vendo</button>
       <button class="hv-hvtab" id="hbtn-vnames" onclick="hvShowTab('vnames',this)">🔗 Vendo Names</button>
       <button class="hv-hvtab" id="hbtn-audited" onclick="hvShowTab('audited',this)" style="background:#fef2f2;border-color:#fca5a5;color:#dc2626;font-size:11px;">🤖 Claude Audited Vendos</button>
+      <button class="hv-hvtab" id="hbtn-settings" onclick="hvShowTab('settings',this)" style="background:#f5f3ff;border-color:#ddd6fe;color:#7c3aed;font-size:11px;">⚙️ Settings</button>
     </div>
   </div>
   <div id="hv-guide-bar" style="display:none;"></div>
@@ -1256,6 +1349,63 @@ tr:hover td{background:#f8f9ff;cursor:pointer}
     <div style="padding:20px;text-align:center;color:#9ca3af;font-size:12px;">Click Refresh to load vendos</div>
   </div>
 </div>
+<!-- SETTINGS TAB -->
+<div id="hv-tab-settings" class="hv-hidden" style="padding:20px;overflow-y:auto;height:calc(100vh - 132px);max-width:700px;margin:0 auto;">
+  <div style="font-size:16px;font-weight:700;color:#7c3aed;margin-bottom:4px;">⚙️ Settings</div>
+  <div style="font-size:11px;color:#6b7280;margin-bottom:20px;">Configure harvest starting point, vendo names, and harvest record adjustments</div>
+
+  <!-- Starting Point -->
+  <div style="background:#fff;border:1.5px solid #ddd6fe;border-radius:12px;padding:16px;margin-bottom:14px;">
+    <div style="font-size:12px;font-weight:700;color:#7c3aed;text-transform:uppercase;letter-spacing:.05em;margin-bottom:12px;">📍 Harvest Starting Point</div>
+    <div style="font-size:11px;color:#6b7280;margin-bottom:10px;">This is where Lobino/collectors start their route. Used for nearest-neighbor sorting in harvest.html</div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:10px;">
+      <div>
+        <div style="font-size:10px;font-weight:700;color:#374151;margin-bottom:4px;">Latitude</div>
+        <input id="set-lat" type="number" step="0.000001" placeholder="8.5912285"
+          style="width:100%;padding:8px 10px;border:1.5px solid #ddd6fe;border-radius:7px;font-size:13px;font-family:inherit;outline:none;box-sizing:border-box;">
+      </div>
+      <div>
+        <div style="font-size:10px;font-weight:700;color:#374151;margin-bottom:4px;">Longitude</div>
+        <input id="set-lng" type="number" step="0.000001" placeholder="123.3539253"
+          style="width:100%;padding:8px 10px;border:1.5px solid #ddd6fe;border-radius:7px;font-size:13px;font-family:inherit;outline:none;box-sizing:border-box;">
+      </div>
+    </div>
+    <div>
+      <div style="font-size:10px;font-weight:700;color:#374151;margin-bottom:4px;">Location label</div>
+      <input id="set-start-label" type="text" placeholder="e.g. Gfour Minimart, Lalawan Dicayas"
+        style="width:100%;padding:8px 10px;border:1.5px solid #ddd6fe;border-radius:7px;font-size:13px;font-family:inherit;outline:none;box-sizing:border-box;margin-bottom:10px;">
+    </div>
+    <div style="background:#f5f3ff;border-radius:7px;padding:8px 10px;font-size:11px;color:#7c3aed;margin-bottom:10px;" id="set-start-current">
+      Current: <b>Gfour Minimart, Lalawan Dicayas</b> (8.5912285, 123.3539253)
+    </div>
+    <button onclick="setStartingPoint()" style="padding:8px 20px;background:#7c3aed;color:#fff;border:none;border-radius:7px;font-size:12px;font-weight:700;cursor:pointer;font-family:inherit;">💾 Save starting point</button>
+    <span id="set-start-msg" style="font-size:11px;margin-left:10px;"></span>
+  </div>
+
+  <!-- Edit Vendo Names -->
+  <div style="background:#fff;border:1.5px solid #c7d2fe;border-radius:12px;padding:16px;margin-bottom:14px;">
+    <div style="font-size:12px;font-weight:700;color:#1e3cb8;text-transform:uppercase;letter-spacing:.05em;margin-bottom:10px;">✏️ Edit Vendo Names</div>
+    <div style="display:flex;gap:8px;margin-bottom:10px;">
+      <input id="set-vendo-search" type="text" placeholder="🔍 Search by TG name or sheet name..."
+        style="flex:1;padding:8px 10px;border:1.5px solid #c7d2fe;border-radius:7px;font-size:12px;font-family:inherit;outline:none;"
+        oninput="setVendoSearch(this.value)">
+    </div>
+    <div id="set-vendo-results" style="max-height:280px;overflow-y:auto;border:1px solid #e5e7eb;border-radius:7px;background:#f8faff;"></div>
+  </div>
+
+  <!-- Edit Harvest Record -->
+  <div style="background:#fff;border:1.5px solid #bbf7d0;border-radius:12px;padding:16px;">
+    <div style="font-size:12px;font-weight:700;color:#15803d;text-transform:uppercase;letter-spacing:.05em;margin-bottom:10px;">💰 Edit Harvest Record Amounts</div>
+    <div style="font-size:11px;color:#6b7280;margin-bottom:10px;">Changing coin amounts recalculates net, spawn share, and owner share. TG income window updates on next reconciliation refresh.</div>
+    <div style="display:flex;gap:8px;margin-bottom:10px;">
+      <input id="set-harvest-search" type="text" placeholder="🔍 Search harvest by vendo name..."
+        style="flex:1;padding:8px 10px;border:1.5px solid #bbf7d0;border-radius:7px;font-size:12px;font-family:inherit;outline:none;"
+        oninput="setHarvestSearch(this.value)">
+    </div>
+    <div id="set-harvest-results" style="max-height:320px;overflow-y:auto;border:1px solid #e5e7eb;border-radius:7px;background:#f8fdf4;"></div>
+  </div>
+</div>
+
 <!-- REFRESH FAB -->
 <button class="hv-refresh-fab" id="hv-refresh-fab" onclick="hvRefreshVendos()" title="Refresh vendo list">
   <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
@@ -1729,7 +1879,9 @@ function hvShowTab(tab, btn) {
     vnames: document.getElementById('hv-tab-vnames'),
     addharvest: document.getElementById('hv-tab-addharvest'),
     newvendo: document.getElementById('hv-tab-newvendo'),
-    audited: document.getElementById('hv-tab-audited')
+    audited: document.getElementById('hv-tab-audited'),
+    settings: document.getElementById('hv-tab-settings'),
+    settings: document.getElementById('hv-tab-settings')
   };
   // Use classList to force display:none (overcomes !important in CSS)
   const hide = el => { if (!el) return; el.classList.add('hv-hidden'); el.style.display = ''; };
@@ -1742,7 +1894,7 @@ function hvShowTab(tab, btn) {
   if (_aeld) _aeld.style.display = 'none';
   if (_rov)  _rov.style.display  = 'none';
   // Hide/show flex container elements
-  [els.page, els.area, els.filt, els.sched, els.rec, els.recon, els.vnames, els.addharvest, els.newvendo, guide].forEach(hide);
+  [els.page, els.area, els.filt, els.sched, els.rec, els.recon, els.vnames, els.addharvest, els.newvendo, els.settings, guide].forEach(hide);
   if (isRoute) {
     show(guide, ''); show(els.page, 'grid'); show(els.area, 'flex'); show(els.filt, 'flex');
     // Reset loading flag and reload vendos when switching back to route tab
@@ -1771,6 +1923,9 @@ function hvShowTab(tab, btn) {
   } else if (tab === 'audited') {
     // Audited uses fixed overlay - show it directly
     _showOverlay('hv-tab-audited');
+  } else if (tab === 'settings') {
+    show(els.settings, 'block');
+    setInitSettings();
   }
   if (tab === 'records') hvLoadRecordDates();
   if (tab === 'schedule') hvLoadSchedule();
@@ -3894,7 +4049,10 @@ function _rcRender(date){
     const ai=Object.values(routes).flat(),cC=ai.reduce((s,h)=>s+(parseFloat(h.net_collectible)||0),0),cT=ai.reduce((s,h)=>s+_rcTA(h.tg_name,h.harvest_window_start,date,h.harvest_window_end),0),cD=cC-cT;
     html+=`<div style="background:#fff;border:2px solid #e5e7eb;border-radius:12px;margin-bottom:14px;overflow:hidden;">
       <div style="padding:12px 16px;background:#f8faff;border-bottom:1px solid #e5e7eb;display:flex;justify-content:space-between;align-items:center;">
-        <div><div style="font-size:14px;font-weight:800;color:#111">👤 ${col}</div><div style="font-size:10px;color:#6b7280;margin-top:2px">${Object.keys(routes).length} route(s) · ${ai.length} vendo(s)</div></div>
+        <div style="cursor:pointer;" onclick="rcShowCollectorDeficits('${col.replace(/'/g,"\'").replace(/"/g,'&quot;')}','${date}')" title="Click to see deficits for ${col}">
+          <div style="font-size:14px;font-weight:800;color:#111">👤 ${col} <span style="font-size:10px;color:#6b7280;font-weight:400;">· click for deficits</span></div>
+          <div style="font-size:10px;color:#6b7280;margin-top:2px">${Object.keys(routes).length} route(s) · ${ai.length} vendo(s)</div>
+        </div>
         <div style="display:flex;align-items:center;gap:8px">
           <button class="hv-xls-btn" data-collector="${col.replace(/"/g,'&quot;')}" data-date="${date}" style="padding:4px 10px;background:#16a34a;color:#fff;border:none;border-radius:6px;font-size:10px;font-weight:700;cursor:pointer;font-family:inherit">📥 Export</button>
           <span style="font-size:11px;font-weight:700;color:${dC(cD)};padding:4px 12px;border-radius:20px;background:${Math.abs(cD)<200?'#f0fdf4':cD>0?'#fffbeb':'#fef2f2'}">${dT(cD)}</span>
@@ -3922,7 +4080,8 @@ function _rcRender(date){
           <th style="padding:6px 10px;text-align:right;font-size:9px;color:#6b7280;font-weight:700;border-bottom:1px solid #e5e7eb">Diff</th>
         </tr></thead><tbody>${rI.map(h=>{
           const coin=parseFloat(h.net_collectible||0),tg=_rcTA(h.tg_name,h.harvest_window_start,date,h.harvest_window_end),gap=coin-tg;
-          return `<tr style="${Math.abs(gap)<50?'':gap>0?'background:#fffbeb':'background:#fef2f2'}">
+          const hJson = JSON.stringify(h).replace(/'/g,"\'").replace(/`/g,'\`');
+          return `<tr style="cursor:pointer;${Math.abs(gap)<50?'':gap>0?'background:#fffbeb':'background:#fef2f2'}" onclick="rcShowHarvestDetail(${JSON.stringify(h).replace(/</g,'\u003c')})" title="Click for harvest details">
             <td style="padding:7px 10px"><b style="color:#1e3cb8">${h.vendo_name||h.tg_name||'—'}</b><div style="font-size:9px;color:#6b7280">${h.tg_name||'—'}</div></td>
             <td style="padding:7px 10px;font-size:10px;color:#6b7280">${h.harvest_window_start||_RC0}→${date}</td>
             <td style="padding:7px 10px;text-align:right;font-weight:700;color:#16a34a">${_fP(coin)}</td>
@@ -4320,6 +4479,7 @@ function auditShowVendo(key,btn){}
       #hv-overlay-recon th{padding:7px 10px;text-align:left;background:#eef2ff;color:var(--blue);font-weight:700;font-size:9px;text-transform:uppercase;letter-spacing:.04em;border-bottom:2px solid #c7d2fe;white-space:nowrap;}
       #hv-overlay-recon td{padding:8px 10px;border-bottom:1px solid #f0f0f8;vertical-align:middle;}
       #hv-overlay-recon tr:hover td{background:#f8faff;}
+      #rc-content tr:hover td{background:#eef2ff !important;transition:.1s;}
       #hv-overlay-recon .pill{display:inline-block;padding:2px 8px;border-radius:10px;font-size:9px;font-weight:700;}
       #hv-overlay-recon .pill.green{background:#dcfce7;color:#15803d;}
       #hv-overlay-recon .pill.amber{background:#fef3c7;color:#92400e;}
@@ -8356,6 +8516,307 @@ function _anlR({mm,aD}){
   if(analyticsAreaChart)analyticsAreaChart.destroy();
   const ac=document.getElementById('analytics-area-chart');
   if(ac&&aD&&aD.length){const c8=['#1565c0','#1D9E75','#F5C518','#7B5EA7','#E85D24','#4A90D9','#d97706','#dc2626'];analyticsAreaChart=new Chart(ac,{type:'doughnut',data:{labels:aD.map(a=>a.area),datasets:[{data:aD.map(a=>parseFloat(a.total_sales||0)),backgroundColor:c8}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'right',labels:{font:{size:10}}},tooltip:{callbacks:{label:c=>c.label+': ₱'+c.raw.toLocaleString()}}}}});}
+}
+
+
+/* ════════════════════════════════════
+   SETTINGS TAB FUNCTIONS
+════════════════════════════════════ */
+const SET_KEY = 'spawn_settings';
+function setGetSettings() {
+  try { return JSON.parse(localStorage.getItem(SET_KEY) || '{}'); } catch(e) { return {}; }
+}
+function setInitSettings() {
+  const s = setGetSettings();
+  const lat = s.startLat || 8.5912285;
+  const lng = s.startLng || 123.3539253;
+  const lbl = s.startLabel || 'Gfour Minimart, Lalawan Dicayas';
+  const latInp = document.getElementById('set-lat');
+  const lngInp = document.getElementById('set-lng');
+  const lblInp = document.getElementById('set-start-label');
+  const cur = document.getElementById('set-start-current');
+  if (latInp) latInp.value = lat;
+  if (lngInp) lngInp.value = lng;
+  if (lblInp) lblInp.value = lbl;
+  if (cur) cur.innerHTML = 'Current: <b>' + lbl + '</b> (' + lat + ', ' + lng + ')';
+}
+function setStartingPoint() {
+  const lat = parseFloat(document.getElementById('set-lat').value);
+  const lng = parseFloat(document.getElementById('set-lng').value);
+  const lbl = (document.getElementById('set-start-label').value || '').trim();
+  const msg = document.getElementById('set-start-msg');
+  if (isNaN(lat) || isNaN(lng)) { if (msg) { msg.textContent = '⚠ Enter valid coordinates'; msg.style.color = '#dc2626'; } return; }
+  const s = setGetSettings();
+  s.startLat = lat; s.startLng = lng; s.startLabel = lbl || 'Starting point';
+  localStorage.setItem(SET_KEY, JSON.stringify(s));
+  const cur = document.getElementById('set-start-current');
+  if (cur) cur.innerHTML = 'Current: <b>' + (lbl||'Starting point') + '</b> (' + lat + ', ' + lng + ')';
+  if (msg) { msg.textContent = '✅ Saved! Reload harvest.html to apply'; msg.style.color = '#15803d'; setTimeout(() => { msg.textContent = ''; }, 3000); }
+}
+
+let _setVendoTimer = null;
+function setVendoSearch(q) {
+  clearTimeout(_setVendoTimer);
+  _setVendoTimer = setTimeout(() => _setVendoDoSearch(q), 400);
+}
+async function _setVendoDoSearch(q) {
+  const box = document.getElementById('set-vendo-results');
+  if (!q || q.length < 2) { box.innerHTML = '<div style="padding:12px;text-align:center;color:#9ca3af;font-size:11px;">Type at least 2 characters to search</div>'; return; }
+  box.innerHTML = '<div style="padding:12px;text-align:center;color:#9ca3af;font-size:11px;">Searching…</div>';
+  try {
+    const r = await fetch(_SB + '/rest/v1/vendos?or=(tg_name.ilike.*' + encodeURIComponent(q) + '*,sheet_name.ilike.*' + encodeURIComponent(q) + '*)&select=id,tg_name,sheet_name,area,vlan&limit=10', {
+      headers: {'apikey':_KEY,'Authorization':'Bearer '+_KEY}
+    });
+    const rows = await r.json();
+    if (!rows.length) { box.innerHTML = '<div style="padding:12px;text-align:center;color:#9ca3af;font-size:11px;">No vendos found</div>'; return; }
+    box.innerHTML = rows.map(v => `
+      <div style="padding:10px 12px;border-bottom:1px solid #e5e7eb;">
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-bottom:6px;">
+          <div>
+            <div style="font-size:9px;font-weight:700;color:#6b7280;margin-bottom:2px;">TG NAME</div>
+            <input id="sv-tg-${v.id}" value="${(v.tg_name||'').replace(/"/g,'&quot;')}" placeholder="TG name..."
+              style="width:100%;padding:5px 7px;border:1px solid #c7d2fe;border-radius:5px;font-size:11px;font-family:inherit;outline:none;box-sizing:border-box;">
+          </div>
+          <div>
+            <div style="font-size:9px;font-weight:700;color:#6b7280;margin-bottom:2px;">SHEET NAME</div>
+            <input id="sv-sh-${v.id}" value="${(v.sheet_name||'').replace(/"/g,'&quot;')}" placeholder="Sheet name..."
+              style="width:100%;padding:5px 7px;border:1px solid #c7d2fe;border-radius:5px;font-size:11px;font-family:inherit;outline:none;box-sizing:border-box;">
+          </div>
+        </div>
+        <div style="display:flex;align-items:center;justify-content:space-between;">
+          <span style="font-size:10px;color:#6b7280;">${v.area||'—'} · VLAN ${v.vlan||'—'}</span>
+          <div style="display:flex;gap:4px;align-items:center;">
+            <span id="sv-msg-${v.id}" style="font-size:10px;"></span>
+            <button onclick="setVendoSave(${JSON.stringify(v.id)})" style="padding:4px 10px;background:#1e3cb8;color:#fff;border:none;border-radius:5px;font-size:10px;font-weight:700;cursor:pointer;font-family:inherit;">💾 Save</button>
+          </div>
+        </div>
+      </div>`).join('');
+  } catch(e) { box.innerHTML = '<div style="padding:12px;color:#dc2626;font-size:11px;">Error: ' + e.message + '</div>'; }
+}
+async function setVendoSave(id) {
+  const tg = (document.getElementById('sv-tg-' + id)?.value || '').trim();
+  const sh = (document.getElementById('sv-sh-' + id)?.value || '').trim();
+  const msg = document.getElementById('sv-msg-' + id);
+  if (msg) { msg.textContent = 'Saving…'; msg.style.color = '#6b7280'; }
+  try {
+    const r = await fetch(_SB + '/rest/v1/vendos?id=eq.' + id, {
+      method: 'PATCH',
+      headers: {'apikey':_KEY,'Authorization':'Bearer '+_KEY,'Content-Type':'application/json','Prefer':'return=minimal'},
+      body: JSON.stringify({ tg_name: tg||null, sheet_name: sh||null })
+    });
+    if (r.ok) { if (msg) { msg.textContent = '✅ Saved'; msg.style.color = '#15803d'; setTimeout(()=>{if(msg)msg.textContent='';},2000); } }
+    else { if (msg) { msg.textContent = '❌ Failed'; msg.style.color = '#dc2626'; } }
+  } catch(e) { if (msg) { msg.textContent = '❌ ' + e.message; msg.style.color = '#dc2626'; } }
+}
+
+let _setHarvestTimer = null;
+function setHarvestSearch(q) {
+  clearTimeout(_setHarvestTimer);
+  _setHarvestTimer = setTimeout(() => _setHarvestDoSearch(q), 400);
+}
+async function _setHarvestDoSearch(q) {
+  const box = document.getElementById('set-harvest-results');
+  if (!q || q.length < 2) { box.innerHTML = '<div style="padding:12px;text-align:center;color:#9ca3af;font-size:11px;">Type at least 2 characters</div>'; return; }
+  box.innerHTML = '<div style="padding:12px;text-align:center;color:#9ca3af;font-size:11px;">Searching…</div>';
+  try {
+    const r = await fetch(_SB + '/rest/v1/harvests?or=(vendo_name.ilike.*' + encodeURIComponent(q) + '*,tg_name.ilike.*' + encodeURIComponent(q) + '*)&select=id,vendo_name,tg_name,harvest_date,coins_total,coins_free,coins_old,coins_saloy,net_collectible,spawn_share,customer_share,collector,route_code&order=harvest_date.desc&limit=10', {
+      headers: {'apikey':_KEY,'Authorization':'Bearer '+_KEY}
+    });
+    const rows = await r.json();
+    if (!rows.length) { box.innerHTML = '<div style="padding:12px;text-align:center;color:#9ca3af;font-size:11px;">No harvest records found</div>'; return; }
+    box.innerHTML = rows.map(h => {
+      const net = parseFloat(h.net_collectible||0);
+      return `<div style="padding:10px 12px;border-bottom:1px solid #e5e7eb;">
+        <div style="font-size:12px;font-weight:700;color:#1e3cb8;margin-bottom:2px;">${h.vendo_name||h.tg_name||'—'}</div>
+        <div style="font-size:10px;color:#6b7280;margin-bottom:8px;">${h.harvest_date} · ${h.collector||'—'} · Route: ${h.route_code||'—'} · Net: <b style="color:#15803d;">₱${net.toLocaleString('en-PH',{minimumFractionDigits:2})}</b></div>
+        <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:5px;margin-bottom:8px;">
+          <div><div style="font-size:9px;font-weight:700;color:#374151;margin-bottom:2px;">Total coins</div>
+            <input id="sh-tot-${h.id}" type="number" value="${h.coins_total||0}" style="width:100%;padding:5px;border:1px solid #bbf7d0;border-radius:5px;font-size:12px;font-family:inherit;outline:none;text-align:right;" oninput="setCalcNet('${h.id}')"></div>
+          <div><div style="font-size:9px;font-weight:700;color:#374151;margin-bottom:2px;">Free time</div>
+            <input id="sh-free-${h.id}" type="number" value="${h.coins_free||0}" style="width:100%;padding:5px;border:1px solid #bbf7d0;border-radius:5px;font-size:12px;font-family:inherit;outline:none;text-align:right;" oninput="setCalcNet('${h.id}')"></div>
+          <div><div style="font-size:9px;font-weight:700;color:#374151;margin-bottom:2px;">Old coins</div>
+            <input id="sh-old-${h.id}" type="number" value="${h.coins_old||0}" style="width:100%;padding:5px;border:1px solid #bbf7d0;border-radius:5px;font-size:12px;font-family:inherit;outline:none;text-align:right;" oninput="setCalcNet('${h.id}')"></div>
+          <div><div style="font-size:9px;font-weight:700;color:#ea580c;margin-bottom:2px;">Saloy</div>
+            <input id="sh-sal-${h.id}" type="number" value="${h.coins_saloy||0}" style="width:100%;padding:5px;border:1px solid #fed7aa;border-radius:5px;font-size:12px;font-family:inherit;outline:none;text-align:right;" oninput="setCalcNet('${h.id}')"></div>
+        </div>
+        <div style="display:flex;align-items:center;justify-content:space-between;background:#f0fdf4;border-radius:6px;padding:6px 10px;margin-bottom:8px;">
+          <span style="font-size:11px;color:#6b7280;">Net → Spawn (75%) → Owner (25%)</span>
+          <span id="sh-net-${h.id}" style="font-size:13px;font-weight:700;color:#15803d;">₱${net.toLocaleString('en-PH',{minimumFractionDigits:2})}</span>
+        </div>
+        <div style="display:flex;gap:6px;align-items:center;">
+          <button onclick="setHarvestSave('${h.id}')" style="flex:1;padding:7px;background:#15803d;color:#fff;border:none;border-radius:6px;font-size:11px;font-weight:700;cursor:pointer;font-family:inherit;">💾 Save changes</button>
+          <span id="sh-msg-${h.id}" style="font-size:10px;"></span>
+        </div>
+      </div>`;
+    }).join('');
+  } catch(e) { box.innerHTML = '<div style="padding:12px;color:#dc2626;font-size:11px;">Error: ' + e.message + '</div>'; }
+}
+function setCalcNet(id) {
+  const tot  = parseFloat(document.getElementById('sh-tot-' + id)?.value) || 0;
+  const free = parseFloat(document.getElementById('sh-free-' + id)?.value) || 0;
+  const old  = parseFloat(document.getElementById('sh-old-' + id)?.value) || 0;
+  const sal  = parseFloat(document.getElementById('sh-sal-' + id)?.value) || 0;
+  const net  = Math.max(0, tot - free - old - sal);
+  const el   = document.getElementById('sh-net-' + id);
+  if (el) el.textContent = '₱' + net.toLocaleString('en-PH',{minimumFractionDigits:2}) + ' → ₱' + (net*0.75).toLocaleString('en-PH',{minimumFractionDigits:2}) + ' → ₱' + (net*0.25).toLocaleString('en-PH',{minimumFractionDigits:2});
+}
+async function setHarvestSave(id) {
+  const tot  = parseFloat(document.getElementById('sh-tot-' + id)?.value) || 0;
+  const free = parseFloat(document.getElementById('sh-free-' + id)?.value) || 0;
+  const old  = parseFloat(document.getElementById('sh-old-' + id)?.value) || 0;
+  const sal  = parseFloat(document.getElementById('sh-sal-' + id)?.value) || 0;
+  const net  = Math.max(0, tot - free - old - sal);
+  const msg  = document.getElementById('sh-msg-' + id);
+  if (msg) { msg.textContent = 'Saving…'; msg.style.color = '#6b7280'; }
+  try {
+    const r = await fetch(_SB + '/rest/v1/harvests?id=eq.' + id, {
+      method: 'PATCH',
+      headers: {'apikey':_KEY,'Authorization':'Bearer '+_KEY,'Content-Type':'application/json','Prefer':'return=minimal'},
+      body: JSON.stringify({ coins_total:tot, coins_free:free, coins_old:old, coins_saloy:sal, net_collectible:net, spawn_share:net*0.75, customer_share:net*0.25 })
+    });
+    if (r.ok) {
+      if (msg) { msg.textContent = '✅ Saved — refresh Reconciliation to see updated TG income window'; msg.style.color = '#15803d'; setTimeout(()=>{if(msg)msg.textContent='';},4000); }
+    } else { if (msg) { msg.textContent = '❌ Save failed'; msg.style.color = '#dc2626'; } }
+  } catch(e) { if (msg) { msg.textContent = '❌ ' + e.message; msg.style.color = '#dc2626'; } }
+}
+
+/* ════════════════════════════════════
+   HARVEST DETAIL POPUP (Reconciliation vendo click)
+════════════════════════════════════ */
+function rcShowHarvestDetail(h) {
+  // Remove existing popup
+  const ex = document.getElementById('rc-harvest-detail-pop');
+  if (ex) ex.remove();
+
+  const tgIncome = _rcTG && _rcTG[h.tg_name] ? _rcTA(h.tg_name, h.harvest_window_start, h.harvest_date, h.harvest_window_end) : null;
+  const coin = parseFloat(h.net_collectible||0);
+  const free = parseFloat(h.coins_free||0);
+  const old  = parseFloat(h.coins_old||0);
+  const sal  = parseFloat(h.coins_saloy||0);
+  const tot  = parseFloat(h.coins_total||0);
+  const spawn = parseFloat(h.spawn_share||0);
+  const cust  = parseFloat(h.customer_share||0);
+  const fmt = v => '₱' + parseFloat(v||0).toLocaleString('en-PH',{minimumFractionDigits:2});
+  const fmtDT = ts => ts ? new Date(ts).toLocaleString('en-PH',{month:'short',day:'numeric',year:'numeric',hour:'2-digit',minute:'2-digit',hour12:true}) : '—';
+
+  const pop = document.createElement('div');
+  pop.id = 'rc-harvest-detail-pop';
+  pop.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:9000;display:flex;align-items:center;justify-content:center;padding:16px;';
+  pop.innerHTML = `
+    <div style="background:#fff;border-radius:14px;width:min(500px,96vw);max-height:90vh;overflow-y:auto;box-shadow:0 24px 64px rgba(0,0,0,.3);">
+      <div style="background:#1e3cb8;padding:14px 16px;border-radius:14px 14px 0 0;display:flex;justify-content:space-between;align-items:center;position:sticky;top:0;z-index:2;">
+        <div>
+          <div style="font-size:15px;font-weight:700;color:#fff;">${h.vendo_name||h.tg_name||'—'}</div>
+          <div style="font-size:10px;color:rgba(255,255,255,.7);margin-top:2px;">${h.tg_name||'—'}</div>
+        </div>
+        <button onclick="document.getElementById('rc-harvest-detail-pop').remove()" style="width:28px;height:28px;border-radius:50%;border:1.5px solid rgba(255,255,255,.4);background:rgba(255,255,255,.15);color:#fff;font-size:16px;cursor:pointer;">×</button>
+      </div>
+      <div style="padding:16px;display:flex;flex-direction:column;gap:10px;">
+
+        <!-- Collector + timing -->
+        <div style="background:#f8faff;border-radius:10px;padding:12px 14px;">
+          <div style="font-size:10px;font-weight:700;color:#1e3cb8;text-transform:uppercase;letter-spacing:.05em;margin-bottom:8px;">👤 Collector Info</div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;font-size:12px;">
+            <div><span style="color:#6b7280;">Collector:</span> <b>${h.collector||'—'}</b></div>
+            <div><span style="color:#6b7280;">Route:</span> <b>${h.route_code||'—'}</b></div>
+            <div style="grid-column:1/-1;"><span style="color:#6b7280;">Harvest date:</span> <b>${h.harvest_date||'—'}</b></div>
+            <div style="grid-column:1/-1;"><span style="color:#6b7280;">Time submitted:</span> <b style="color:#1e3cb8;">${fmtDT(h.harvest_window_end||h.created_at)}</b></div>
+            <div style="grid-column:1/-1;"><span style="color:#6b7280;">Window start:</span> <b>${h.harvest_window_start||'—'}</b></div>
+          </div>
+        </div>
+
+        <!-- Coin breakdown -->
+        <div style="background:#f0fdf4;border-radius:10px;padding:12px 14px;">
+          <div style="font-size:10px;font-weight:700;color:#15803d;text-transform:uppercase;letter-spacing:.05em;margin-bottom:8px;">💰 Coin Breakdown</div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;font-size:12px;">
+            <div><span style="color:#6b7280;">Total coins:</span> <b>${fmt(tot)}</b></div>
+            <div><span style="color:#6b7280;">Free time:</span> <b>-${fmt(free)}</b></div>
+            <div><span style="color:#6b7280;">Old coins:</span> <b>-${fmt(old)}</b></div>
+            ${sal>0?`<div><span style="color:#ea580c;">Saloy:</span> <b style="color:#ea580c;">-${fmt(sal)}</b></div>`:'<div></div>'}
+            <div style="grid-column:1/-1;border-top:1px solid #86efac;padding-top:6px;margin-top:2px;">
+              <span style="color:#6b7280;">Net collectible:</span> <b style="color:#15803d;font-size:14px;">${fmt(coin)}</b>
+            </div>
+          </div>
+        </div>
+
+        <!-- Share breakdown -->
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">
+          <div style="background:#eef2ff;border-radius:10px;padding:10px 12px;text-align:center;">
+            <div style="font-size:10px;color:#6b7280;margin-bottom:2px;">Spawn share (75%)</div>
+            <div style="font-size:16px;font-weight:700;color:#1e3cb8;">${fmt(spawn)}</div>
+          </div>
+          <div style="background:#f5f3ff;border-radius:10px;padding:10px 12px;text-align:center;">
+            <div style="font-size:10px;color:#6b7280;margin-bottom:2px;">Owner share (25%)</div>
+            <div style="font-size:16px;font-weight:700;color:#7c3aed;">${fmt(cust)}</div>
+          </div>
+        </div>
+
+        ${h.collector_note ? `<div style="background:#fef3c7;border-left:3px solid #d97706;border-radius:0 8px 8px 0;padding:8px 12px;font-size:12px;color:#92400e;">📝 <b>Note:</b> ${h.collector_note}</div>` : ''}
+      </div>
+    </div>`;
+  pop.addEventListener('click', e => { if (e.target === pop) pop.remove(); });
+  document.body.appendChild(pop);
+}
+
+/* ════════════════════════════════════
+   COLLECTOR DEFICIT POPUP (click collector card)
+════════════════════════════════════ */
+function rcShowCollectorDeficits(collector, date) {
+  const ex = document.getElementById('rc-deficit-pop');
+  if (ex) ex.remove();
+
+  const hs = _rcH.filter(h => h.harvest_date === date && (h.collector||'Unknown').trim() === collector);
+  const deficits = hs.map(h => {
+    const tg = _rcTA(h.tg_name, h.harvest_window_start, date, h.harvest_window_end);
+    const coin = parseFloat(h.net_collectible||0);
+    return { ...h, tg_income: tg, gap: coin - tg };
+  }).filter(h => h.gap < -10).sort((a,b) => a.gap - b.gap);
+
+  const fmt = v => '₱' + Math.abs(parseFloat(v||0)).toLocaleString('en-PH',{minimumFractionDigits:2});
+
+  const pop = document.createElement('div');
+  pop.id = 'rc-deficit-pop';
+  pop.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:9000;display:flex;align-items:center;justify-content:center;padding:16px;';
+
+  if (!deficits.length) {
+    pop.innerHTML = `<div style="background:#fff;border-radius:14px;padding:24px 28px;text-align:center;width:min(400px,90vw);">
+      <div style="font-size:32px;margin-bottom:8px;">✅</div>
+      <div style="font-size:14px;font-weight:700;color:#15803d;">No deficits for ${collector} on ${date}</div>
+      <button onclick="document.getElementById('rc-deficit-pop').remove()" style="margin-top:16px;padding:8px 24px;background:#1e3cb8;color:#fff;border:none;border-radius:8px;font-size:12px;font-weight:700;cursor:pointer;font-family:inherit;">Close</button>
+    </div>`;
+  } else {
+    const totalGap = deficits.reduce((s,h) => s + h.gap, 0);
+    pop.innerHTML = `<div style="background:#fff;border-radius:14px;width:min(520px,96vw);max-height:88vh;overflow-y:auto;box-shadow:0 24px 64px rgba(0,0,0,.3);">
+      <div style="background:#dc2626;padding:14px 16px;border-radius:14px 14px 0 0;display:flex;justify-content:space-between;align-items:center;position:sticky;top:0;z-index:2;">
+        <div>
+          <div style="font-size:14px;font-weight:700;color:#fff;">🔴 Deficits — ${collector}</div>
+          <div style="font-size:10px;color:rgba(255,255,255,.8);margin-top:2px;">${date} · ${deficits.length} vendo(s) · Total gap: ${fmt(totalGap)}</div>
+        </div>
+        <button onclick="document.getElementById('rc-deficit-pop').remove()" style="width:28px;height:28px;border-radius:50%;border:1.5px solid rgba(255,255,255,.4);background:rgba(255,255,255,.15);color:#fff;font-size:16px;cursor:pointer;">×</button>
+      </div>
+      <div style="padding:14px;display:flex;flex-direction:column;gap:8px;">
+        ${deficits.map(h => `
+          <div style="border:1.5px solid #fca5a5;border-radius:10px;padding:10px 12px;background:#fef2f2;">
+            <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:6px;">
+              <div>
+                <div style="font-size:13px;font-weight:700;color:#1e3cb8;">${h.vendo_name||h.tg_name||'—'}</div>
+                <div style="font-size:10px;color:#6b7280;">${h.tg_name||'—'}</div>
+              </div>
+              <div style="text-align:right;">
+                <div style="font-size:14px;font-weight:700;color:#dc2626;">${fmt(h.gap)}</div>
+                <div style="font-size:9px;color:#6b7280;">deficit</div>
+              </div>
+            </div>
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;font-size:11px;">
+              <div style="background:#fff;border-radius:6px;padding:5px 8px;"><div style="color:#6b7280;font-size:9px;">Coin net</div><b style="color:#15803d;">${fmt(h.net_collectible)}</b></div>
+              <div style="background:#fff;border-radius:6px;padding:5px 8px;"><div style="color:#6b7280;font-size:9px;">TG income</div><b style="color:#7c3aed;">${fmt(h.tg_income)}</b></div>
+            </div>
+          </div>`).join('')}
+      </div>
+    </div>`;
+  }
+  pop.addEventListener('click', e => { if (e.target === pop) pop.remove(); });
+  document.body.appendChild(pop);
 }
 
 window.addEventListener('load', () => { setTimeout(() => loadDashboard(), 500); ['hv-tab-audited','hv-overlay-recon','hv-overlay-records'].forEach(function(oid){ var el=document.getElementById(oid); if(el) el.style.display='none'; }); });
