@@ -8923,7 +8923,63 @@ async function fullBackup() {
       zip.file(`data/vendo_summary_${dateStr}.csv`, vsCsv);
       log(`Vendo summary: ${vs.length} vendos saved`, true);
     }
-    setProgress(55);
+    setProgress(45);
+
+    // ── STEP 2b: Vendos table ─────────────────────────────
+    log('Fetching vendos table...');
+    const vendosR = await fetch(`${SB_URL}/rest/v1/vendos?select=*&order=id.asc&limit=2000`, { headers: HDR });
+    const vendos = await vendosR.json();
+    if (vendos?.length) {
+      const vKeys = Object.keys(vendos[0]);
+      const vCsv = [vKeys.join(','), ...vendos.map(r =>
+        vKeys.map(k => { const val=String(r[k]??'').replace(/"/g,'""'); return (val.includes(',')||val.includes('"')||val.includes('\n'))?'"'+val+'"':val; }).join(',')
+      )].join('\n');
+      zip.file(`data/vendos_${dateStr}.csv`, vCsv);
+      log(`Vendos: ${vendos.length} rows saved`, true);
+    }
+    setProgress(52);
+
+    // ── STEP 2c: Harvests table ───────────────────────────
+    log('Fetching harvests table...');
+    const harvR = await fetch(`${SB_URL}/rest/v1/harvests?select=*&order=harvest_date.desc&limit=5000`, { headers: HDR });
+    const harvs = await harvR.json();
+    if (harvs?.length) {
+      const hKeys = Object.keys(harvs[0]);
+      const hCsv = [hKeys.join(','), ...harvs.map(r =>
+        hKeys.map(k => { const val=String(r[k]??'').replace(/"/g,'""'); return (val.includes(',')||val.includes('"')||val.includes('\n'))?'"'+val+'"':val; }).join(',')
+      )].join('\n');
+      zip.file(`data/harvests_${dateStr}.csv`, hCsv);
+      log(`Harvests: ${harvs.length} rows saved`, true);
+    }
+    setProgress(57);
+
+    // ── STEP 2d: Routes table ─────────────────────────────
+    log('Fetching routes table...');
+    const routesR = await fetch(`${SB_URL}/rest/v1/routes?select=*&order=created_at.desc&limit=500`, { headers: HDR });
+    const routes = await routesR.json();
+    if (routes?.length) {
+      const rKeys = Object.keys(routes[0]);
+      const rCsv = [rKeys.join(','), ...routes.map(r =>
+        rKeys.map(k => { const val=String(r[k]??'').replace(/"/g,'""'); return (val.includes(',')||val.includes('"')||val.includes('\n'))?'"'+val+'"':val; }).join(',')
+      )].join('\n');
+      zip.file(`data/routes_${dateStr}.csv`, rCsv);
+      log(`Routes: ${routes.length} rows saved`, true);
+    }
+    setProgress(60);
+
+    // ── STEP 2e: Route Items table ────────────────────────
+    log('Fetching route items...');
+    const riR = await fetch(`${SB_URL}/rest/v1/route_items?select=*&order=id.asc&limit=5000`, { headers: HDR });
+    const ris = await riR.json();
+    if (ris?.length) {
+      const riKeys = Object.keys(ris[0]);
+      const riCsv = [riKeys.join(','), ...ris.map(r =>
+        riKeys.map(k => { const val=String(r[k]??'').replace(/"/g,'""'); return (val.includes(',')||val.includes('"')||val.includes('\n'))?'"'+val+'"':val; }).join(',')
+      )].join('\n');
+      zip.file(`data/route_items_${dateStr}.csv`, riCsv);
+      log(`Route items: ${ris.length} rows saved`, true);
+    }
+    setProgress(65);
 
     // ── STEP 3: Code files from GitHub ───────────────────
     log('Fetching code files from GitHub...');
@@ -8957,6 +9013,10 @@ async function fullBackup() {
       `FILES IN THIS BACKUP:`,
       `  data/transactions_${dateStr}.csv  — all transactions`,
       `  data/vendo_summary_${dateStr}.csv — vendo totals`,
+      `  data/vendos_${dateStr}.csv        — vendos table (names, GPS, VLAN, etc.)`,
+      `  data/harvests_${dateStr}.csv      — all harvest records`,
+      `  data/routes_${dateStr}.csv        — all routes`,
+      `  data/route_items_${dateStr}.csv   — route vendo assignments`,
       `  code/app.py                       — Railway Telethon listener`,
       `  code/dashboard.html               — web dashboard`,
       `  backup_info.txt                   — this file`,
