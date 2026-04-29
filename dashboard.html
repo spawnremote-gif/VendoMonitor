@@ -1837,33 +1837,8 @@ tr:hover td{background:#f8f9ff;cursor:pointer}
   <div><div style="font-size:14px;font-weight:700;color:#1e3cb8;">⚖️ Harvest Reconciliation</div><div style="font-size:10px;color:#6b7280;margin-top:2px;">Coin net vs Telegram income · skipped excluded</div></div>
   <button id="rc-btn" onclick="rcLoad()" style="padding:6px 16px;background:#1e3cb8;color:#fff;border:none;border-radius:8px;font-size:11px;font-weight:700;cursor:pointer;font-family:inherit;">⟳ Refresh</button>
 </div>
-<!-- Sub-tabs: Reconcile vs Deficit -->
-<div style="display:flex;gap:6px;margin-bottom:14px;border-bottom:2px solid #e5e7eb;padding-bottom:8px;">
-  <button id="rc-subtab-recon" onclick="rcSubTab('recon')" style="padding:5px 16px;border:none;border-radius:6px;background:#1e3cb8;color:#fff;font-size:11px;font-weight:700;cursor:pointer;font-family:inherit;">⚖️ Reconciliation</button>
-  <button id="rc-subtab-deficit" onclick="rcSubTab('deficit')" style="padding:5px 16px;border:none;border-radius:6px;background:transparent;border:1.5px solid #fca5a5;color:#dc2626;font-size:11px;font-weight:700;cursor:pointer;font-family:inherit;">🔴 Deficit Audit <span id="hvo-deficit-cnt" style="margin-left:4px;background:#dc2626;color:#fff;font-size:9px;font-weight:700;padding:1px 6px;border-radius:8px;"></span></button>
-</div>
-<!-- Reconciliation sub-panel -->
-<div id="rc-subpanel-recon">
-  <div id="rc-date-tabs" style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:14px;"></div>
-  <div id="rc-content"><div style="text-align:center;padding:60px 20px;color:#9ca3af;"><div style="font-size:32px;margin-bottom:12px;">⚖️</div><div style="font-size:13px;font-weight:600;color:#374151;">Click ⟳ Refresh to load</div></div></div>
-</div>
-<!-- Deficit Audit sub-panel -->
-<div id="rc-subpanel-deficit" style="display:none;">
-  <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px;margin-bottom:12px;">
-    <div>
-      <div style="font-size:13px;font-weight:700;color:#dc2626;">🔴 Deficit Audit</div>
-      <div style="font-size:10px;color:#6b7280;margin-top:2px;">Vendos where coin collected &lt; TG income · Audit and explain each gap</div>
-    </div>
-    <div style="display:flex;gap:6px;flex-wrap:wrap;align-items:center;">
-      <select id="def-filter-date" onchange="hvoRenderDeficits()" style="padding:5px 8px;border:1px solid #e5e7eb;border-radius:6px;font-size:11px;font-family:inherit;outline:none;background:#fff;"><option value="">All dates</option></select>
-      <select id="def-filter-collector" onchange="hvoRenderDeficits()" style="padding:5px 8px;border:1px solid #e5e7eb;border-radius:6px;font-size:11px;font-family:inherit;outline:none;background:#fff;"><option value="">All collectors</option></select>
-      <select id="def-filter-status" onchange="hvoRenderDeficits()" style="padding:5px 8px;border:1px solid #e5e7eb;border-radius:6px;font-size:11px;font-family:inherit;outline:none;background:#fff;"><option value="">All</option><option value="open">Open</option><option value="explained">Explained ✅</option></select>
-      <button onclick="hvoLoadDeficits()" style="padding:5px 10px;background:#dc2626;color:#fff;border:none;border-radius:6px;font-size:11px;font-weight:700;cursor:pointer;font-family:inherit;">⟳ Load Deficits</button>
-    </div>
-  </div>
-  <div id="hvo-deficit-stats" style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:12px;"></div>
-  <div id="hvo-deficit-list"><div style="text-align:center;padding:30px;color:#9ca3af;">Click "Load Deficits" above to audit</div></div>
-</div>
+<div id="rc-date-tabs" style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:14px;"></div>
+<div id="rc-content"><div style="text-align:center;padding:60px 20px;color:#9ca3af;"><div style="font-size:32px;margin-bottom:12px;">⚖️</div><div style="font-size:13px;font-weight:600;color:#374151;">Click ⟳ Refresh to load</div></div></div>
 </div>
 
 
@@ -4361,6 +4336,24 @@ async function rcLoad(){
   }catch(err){if(ct)ct.innerHTML=`<div class="hv-rec-empty" style="color:#dc2626">Error: ${err.message}</div>`;}
   finally{if(btn){btn.textContent='⟳ Refresh';btn.disabled=false;}}
 }
+function rcoSubTab(tab){
+  const reconPanel=document.getElementById('rco-panel-recon');
+  const defPanel=document.getElementById('rco-panel-deficit');
+  const reconBtn=document.getElementById('rco-subtab-recon');
+  const defBtn=document.getElementById('rco-subtab-deficit');
+  if(tab==='recon'){
+    if(reconPanel)reconPanel.style.display='block';
+    if(defPanel)defPanel.style.display='none';
+    if(reconBtn){reconBtn.style.background='#fff';reconBtn.style.color='#1e3cb8';reconBtn.style.border='none';}
+    if(defBtn){defBtn.style.background='transparent';defBtn.style.border='1.5px solid #fca5a5';defBtn.style.color='#fff';}
+  } else {
+    if(reconPanel)reconPanel.style.display='none';
+    if(defPanel)defPanel.style.display='block';
+    if(defBtn){defBtn.style.background='#dc2626';defBtn.style.color='#fff';defBtn.style.border='none';}
+    if(reconBtn){reconBtn.style.background='transparent';reconBtn.style.border='1.5px solid rgba(255,255,255,.4)';reconBtn.style.color='#fff';}
+    if(!_deficits||!_deficits.length) hvoLoadDeficits();
+  }
+}
 function rcSubTab(tab){
   const reconPanel=document.getElementById('rc-subpanel-recon');
   const defPanel=document.getElementById('rc-subpanel-deficit');
@@ -4376,6 +4369,8 @@ function rcSubTab(tab){
     if(defPanel)defPanel.style.display='block';
     if(defBtn){defBtn.style.background='#dc2626';defBtn.style.color='#fff';defBtn.style.border='none';}
     if(reconBtn){reconBtn.style.background='transparent';reconBtn.style.border='1.5px solid #c7d2fe';reconBtn.style.color='#1e3cb8';}
+    // Auto-load deficits if not yet loaded
+    if(!_deficits||!_deficits.length) hvoLoadDeficits();
   }
 }
 function rcSel(date,btn){
@@ -4872,13 +4867,35 @@ function auditShowVendo(key,btn){}
     <div class="hvo-rhead">
       <span style="font-size:13px;font-weight:700;">⚖️ Harvest Reconciliation</span>
       <div style="display:flex;gap:8px;align-items:center;">
+        <div style="display:flex;gap:4px;">
+          <button id="rco-subtab-recon" onclick="rcoSubTab('recon')" style="padding:4px 12px;border:none;border-radius:6px;background:#fff;color:#1e3cb8;font-size:11px;font-weight:700;cursor:pointer;font-family:inherit;">⚖️ Reconciliation</button>
+          <button id="rco-subtab-deficit" onclick="rcoSubTab('deficit')" style="padding:4px 12px;border:1.5px solid #fca5a5;border-radius:6px;background:transparent;color:#fff;font-size:11px;font-weight:700;cursor:pointer;font-family:inherit;">🔴 Deficit Audit</button>
+        </div>
         <span id="hvo-recon-status" style="font-size:10px;padding:3px 10px;border-radius:10px;background:rgba(255,255,255,.2);">Click Refresh</span>
         <button class="hvo-rbtn" onclick="hvoRenderReconOverlay(true)">⟳ Refresh</button>
         <button class="hvo-rbtn" onclick="document.getElementById('hv-overlay-recon').style.display='none';document.querySelectorAll('#panel-harvest .hv-hvtab').forEach(b=>b.classList.remove('on'));document.getElementById('hbtn-route')&&document.getElementById('hbtn-route').classList.add('on');" style="background:rgba(255,255,255,.15);padding:5px 10px;">✕ Close</button>
       </div>
     </div>
     <div class="hvo-rbody">
-      <div id="hvo-recon-body"><div style="text-align:center;padding:40px;color:#6b7280;">⏳ Loading…</div></div>
+      <div id="rco-panel-recon">
+        <div id="hvo-recon-body"><div style="text-align:center;padding:40px;color:#6b7280;">⏳ Loading…</div></div>
+      </div>
+      <div id="rco-panel-deficit" style="display:none;">
+        <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px;margin-bottom:12px;">
+          <div>
+            <div style="font-size:13px;font-weight:700;color:#dc2626;">🔴 Deficit Audit <span id="hvo-deficit-cnt" style="margin-left:4px;background:#dc2626;color:#fff;font-size:9px;font-weight:700;padding:1px 7px;border-radius:8px;"></span></div>
+            <div style="font-size:10px;color:#6b7280;margin-top:2px;">Vendos where coin collected &lt; TG income · Audit and explain each gap</div>
+          </div>
+          <div style="display:flex;gap:6px;flex-wrap:wrap;align-items:center;">
+            <select id="def-filter-date" onchange="hvoRenderDeficits()" style="padding:5px 8px;border:1px solid #e5e7eb;border-radius:6px;font-size:11px;font-family:inherit;outline:none;background:#fff;"><option value="">All dates</option></select>
+            <select id="def-filter-collector" onchange="hvoRenderDeficits()" style="padding:5px 8px;border:1px solid #e5e7eb;border-radius:6px;font-size:11px;font-family:inherit;outline:none;background:#fff;"><option value="">All collectors</option></select>
+            <select id="def-filter-status" onchange="hvoRenderDeficits()" style="padding:5px 8px;border:1px solid #e5e7eb;border-radius:6px;font-size:11px;font-family:inherit;outline:none;background:#fff;"><option value="">All</option><option value="open">Open</option><option value="explained">Explained ✅</option></select>
+            <button onclick="hvoLoadDeficits()" style="padding:5px 10px;background:#dc2626;color:#fff;border:none;border-radius:6px;font-size:11px;font-weight:700;cursor:pointer;font-family:inherit;">⟳ Load Deficits</button>
+          </div>
+        </div>
+        <div id="hvo-deficit-stats" style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:12px;"></div>
+        <div id="hvo-deficit-list"><div style="text-align:center;padding:30px;color:#9ca3af;">Click "Load Deficits" above to audit</div></div>
+      </div>
     </div>
   `;
   document.body.appendChild(ov);
