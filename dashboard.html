@@ -1839,6 +1839,23 @@ tr:hover td{background:#f8f9ff;cursor:pointer}
 </div>
 <div id="rc-date-tabs" style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:14px;"></div>
 <div id="rc-content"><div style="text-align:center;padding:60px 20px;color:#9ca3af;"><div style="font-size:32px;margin-bottom:12px;">⚖️</div><div style="font-size:13px;font-weight:600;color:#374151;">Click ⟳ Refresh to load</div></div></div>
+
+<div style="margin-top:24px;border-top:2px solid #fca5a5;padding-top:16px;">
+  <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px;margin-bottom:12px;">
+    <div>
+      <div style="font-size:14px;font-weight:700;color:#dc2626;">🔴 Deficit Audit <span id="hvo-deficit-cnt" style="margin-left:4px;background:#dc2626;color:#fff;font-size:9px;font-weight:700;padding:1px 7px;border-radius:8px;"></span></div>
+      <div style="font-size:10px;color:#6b7280;margin-top:2px;">Vendos where coin collected &lt; TG income · Audit and explain each gap</div>
+    </div>
+    <div style="display:flex;gap:6px;flex-wrap:wrap;align-items:center;">
+      <select id="def-filter-date" onchange="hvoRenderDeficits()" style="padding:5px 8px;border:1px solid #e5e7eb;border-radius:6px;font-size:11px;font-family:inherit;outline:none;background:#fff;"><option value="">All dates</option></select>
+      <select id="def-filter-collector" onchange="hvoRenderDeficits()" style="padding:5px 8px;border:1px solid #e5e7eb;border-radius:6px;font-size:11px;font-family:inherit;outline:none;background:#fff;"><option value="">All collectors</option></select>
+      <select id="def-filter-status" onchange="hvoRenderDeficits()" style="padding:5px 8px;border:1px solid #e5e7eb;border-radius:6px;font-size:11px;font-family:inherit;outline:none;background:#fff;"><option value="">All</option><option value="open">Open</option><option value="explained">Explained ✅</option></select>
+      <button onclick="hvoLoadDeficits()" style="padding:5px 10px;background:#dc2626;color:#fff;border:none;border-radius:6px;font-size:11px;font-weight:700;cursor:pointer;font-family:inherit;">⟳ Load Deficits</button>
+    </div>
+  </div>
+  <div id="hvo-deficit-stats" style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:12px;"></div>
+  <div id="hvo-deficit-list"><div style="text-align:center;padding:30px;color:#9ca3af;">Click "Load Deficits" above to audit</div></div>
+</div>
 </div>
 
 
@@ -4715,7 +4732,6 @@ async function ahSubmit() {
         <span style="font-size:13px;font-weight:700;">📋 Records &amp; Reconciliation</span>
         <div style="display:flex;gap:3px;background:rgba(255,255,255,.15);border-radius:8px;padding:3px;">
           <button class="hvo-tab on" onclick="hvoSwitchTab('harvests',this)" style="padding:5px 14px;border:none;border-radius:6px;background:#fff;color:#1e3cb8;font-size:11px;font-weight:700;cursor:pointer;font-family:inherit;">📋 Harvest Records</button>
-          <button class="hvo-tab" onclick="hvoSwitchTab('recon',this)" style="padding:5px 14px;border:none;border-radius:6px;background:transparent;color:rgba(255,255,255,.85);font-size:11px;font-weight:600;cursor:pointer;font-family:inherit;">⚖️ Reconcile &amp; Deficits</button>
           <button class="hvo-tab" onclick="hvoSwitchTab('routes',this)" style="padding:5px 14px;border:none;border-radius:6px;background:transparent;color:rgba(255,255,255,.85);font-size:11px;font-weight:600;cursor:pointer;font-family:inherit;">🗺 Routes</button>
         </div>
       </div>
@@ -4739,26 +4755,6 @@ async function ahSubmit() {
         <div id="hvo-harvest-table"><div style="text-align:center;padding:40px;color:#9ca3af;">Loading…</div></div>
       </div>
       <!-- RECON PANEL -->
-      <div class="hvo-panel" id="hvo-panel-recon" style="padding:14px;display:none;">
-        <div id="hvo-recon-content"><div style="text-align:center;padding:40px;color:#9ca3af;">⏳ Loading…</div></div>
-        <!-- DEFICIT SECTION embedded inside Reconcile -->
-        <div style="margin-top:20px;border-top:2px solid #fca5a5;padding-top:16px;">
-          <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px;margin-bottom:12px;">
-            <div>
-              <div style="font-size:13px;font-weight:700;color:#dc2626;">🔴 Deficit Audit <span id="hvo-deficit-cnt" style="margin-left:4px;background:#dc2626;color:#fff;font-size:9px;font-weight:700;padding:1px 7px;border-radius:8px;"></span></div>
-              <div style="font-size:10px;color:#6b7280;margin-top:2px;">Vendos where coin collected &lt; TG income · Audit and explain each gap</div>
-            </div>
-            <div style="display:flex;gap:6px;flex-wrap:wrap;align-items:center;">
-              <select id="def-filter-date" onchange="hvoRenderDeficits()" style="padding:5px 8px;border:1px solid #e5e7eb;border-radius:6px;font-size:11px;font-family:inherit;outline:none;background:#fff;"><option value="">All dates</option></select>
-              <select id="def-filter-collector" onchange="hvoRenderDeficits()" style="padding:5px 8px;border:1px solid #e5e7eb;border-radius:6px;font-size:11px;font-family:inherit;outline:none;background:#fff;"><option value="">All collectors</option></select>
-              <select id="def-filter-status" onchange="hvoRenderDeficits()" style="padding:5px 8px;border:1px solid #e5e7eb;border-radius:6px;font-size:11px;font-family:inherit;outline:none;background:#fff;"><option value="">All</option><option value="open">Open</option><option value="explained">Explained ✅</option></select>
-              <button onclick="hvoLoadDeficits()" style="padding:5px 10px;background:#dc2626;color:#fff;border:none;border-radius:6px;font-size:11px;font-weight:700;cursor:pointer;font-family:inherit;">⟳ Load Deficits</button>
-            </div>
-          </div>
-          <div id="hvo-deficit-stats" style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:12px;"></div>
-          <div id="hvo-deficit-list"><div style="text-align:center;padding:30px;color:#9ca3af;">Click "Load Deficits" above to audit</div></div>
-        </div>
-      </div>
       <!-- ROUTES PANEL -->
       <div class="hvo-panel" id="hvo-panel-routes" style="padding:14px;display:none;">
         <div id="hvo-route-stats" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:8px;margin-bottom:14px;"></div>
@@ -6004,9 +6000,10 @@ function hvoRenderRoutes() {
           (isComp ? '<span style="font-size:10px;font-weight:700;padding:2px 8px;border-radius:10px;background:#dcfce7;color:#15803d;">✅ Completed</span>'
                   : '<span style="font-size:10px;font-weight:700;padding:2px 8px;border-radius:10px;background:#fef3c7;color:#92400e;">⏳ Active</span>') +
         '</div>' +
-        '<div style="display:flex;align-items:center;gap:8px;">' +
-          '<span style="font-size:12px;color:#374151;font-weight:600;">' + r.collector + '</span>' +
-          '<span style="font-size:11px;color:#6b7280;">· ' + (r.route_date||r.harvest_date||'—') + '</span>' +
+        '<div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;">' +
+          '<button data-copycode="' + r.route_code + '" title="Copy route code" style="padding:3px 8px;border:1.5px solid #bfdbfe;border-radius:6px;background:#eff6ff;color:#1e40af;font-size:10px;font-weight:700;cursor:pointer;font-family:inherit;flex-shrink:0;">📋 Copy</button>' +
+          '<button data-quickcol="' + r.id + '" data-curval="' + (r.collector||'').replace(/"/g,'&quot;') + '" title="Change collector" style="padding:3px 8px;border:1.5px solid #d8b4fe;border-radius:6px;background:#faf5ff;color:#6d28d9;font-size:10px;font-weight:700;cursor:pointer;font-family:inherit;flex-shrink:0;">✏️ ' + (r.collector||'—') + '</button>' +
+          '<button data-quickdate="' + r.id + '" data-curval="' + (r.route_date||r.harvest_date||'') + '" title="Change harvest date" style="padding:3px 8px;border:1.5px solid #a5f3fc;border-radius:6px;background:#ecfeff;color:#0e7490;font-size:10px;font-weight:700;cursor:pointer;font-family:inherit;flex-shrink:0;">📅 ' + (r.route_date||r.harvest_date||'—') + '</button>' +
           '<span style="font-size:11px;font-weight:700;color:' + barColor + ';">' + doneN + '/' + items.length + ' done</span>' +
           '<span style="font-size:16px;color:#9ca3af;transition:.2s;transform:rotate(180deg);display:inline-block;" class="hvo-rt-arr">▾</span>' +
         '</div>' +
@@ -6129,8 +6126,93 @@ function hvoRenderRoutes() {
     body._refresh = () => { body.innerHTML = renderItems(); hvoBindBodyEvents(body, routeId); };
     hvoBindBodyEvents(body, routeId);
 
-    // Toggle expand on click
-    hdr.addEventListener('click', function() {
+    // ── Header quick-action buttons ─────────────────────────────────
+    hdr.addEventListener('click', function(e) {
+      // Copy route code
+      const cpBtn = e.target.closest('[data-copycode]');
+      if (cpBtn) {
+        e.stopPropagation();
+        const code = cpBtn.dataset.copycode;
+        navigator.clipboard.writeText(code).then(() => {
+          const orig = cpBtn.textContent;
+          cpBtn.textContent = '✅ Copied!';
+          cpBtn.style.background = '#dcfce7';
+          cpBtn.style.borderColor = '#86efac';
+          cpBtn.style.color = '#15803d';
+          setTimeout(() => { cpBtn.textContent = orig; cpBtn.style.background = '#eff6ff'; cpBtn.style.borderColor = '#bfdbfe'; cpBtn.style.color = '#1e40af'; }, 1500);
+        });
+        return;
+      }
+
+      // Quick-edit collector
+      const colBtn = e.target.closest('[data-quickcol]');
+      if (colBtn) {
+        e.stopPropagation();
+        const rId = colBtn.dataset.quickcol;
+        const cur = colBtn.dataset.curval || '';
+        const val = window.prompt('Change collector name:', cur);
+        if (val === null) return; // cancelled
+        const trimmed = val.trim();
+        if (!trimmed) { alert('Collector name cannot be empty.'); return; }
+        colBtn.textContent = '⏳ Saving…';
+        colBtn.disabled = true;
+        fetch(_SB + '/rest/v1/routes?id=eq.' + rId, {
+          method: 'PATCH',
+          headers: { 'apikey': _KEY, 'Authorization': 'Bearer ' + _KEY, 'Content-Type': 'application/json', 'Prefer': 'return=minimal' },
+          body: JSON.stringify({ collector: trimmed })
+        }).then(res => {
+          if (res.ok) {
+            const rt = (hvoRoutes||[]).find(x => String(x.id) === String(rId));
+            if (rt) rt.collector = trimmed;
+            colBtn.textContent = '✏️ ' + trimmed;
+            colBtn.dataset.curval = trimmed;
+            // also update edit-col input if visible
+            const inp = document.querySelector('[data-editcol="' + rId + '"]');
+            if (inp) inp.value = trimmed;
+            hvRefreshPendingRoutes();
+          } else {
+            alert('Failed to save collector. Try again.');
+          }
+          colBtn.disabled = false;
+        }).catch(() => { alert('Network error.'); colBtn.disabled = false; colBtn.textContent = '✏️ ' + cur; });
+        return;
+      }
+
+      // Quick-edit harvest date
+      const dtBtn = e.target.closest('[data-quickdate]');
+      if (dtBtn) {
+        e.stopPropagation();
+        const rId = dtBtn.dataset.quickdate;
+        const cur = dtBtn.dataset.curval || '';
+        const val = window.prompt('Change harvest date (YYYY-MM-DD):', cur);
+        if (val === null) return; // cancelled
+        const trimmed = val.trim();
+        if (!trimmed) { alert('Date cannot be empty.'); return; }
+        if (!/^\d{4}-\d{2}-\d{2}$/.test(trimmed)) { alert('Use YYYY-MM-DD format, e.g. 2026-05-07'); return; }
+        dtBtn.textContent = '⏳ Saving…';
+        dtBtn.disabled = true;
+        fetch(_SB + '/rest/v1/routes?id=eq.' + rId, {
+          method: 'PATCH',
+          headers: { 'apikey': _KEY, 'Authorization': 'Bearer ' + _KEY, 'Content-Type': 'application/json', 'Prefer': 'return=minimal' },
+          body: JSON.stringify({ route_date: trimmed })
+        }).then(res => {
+          if (res.ok) {
+            const rt = (hvoRoutes||[]).find(x => String(x.id) === String(rId));
+            if (rt) rt.route_date = trimmed;
+            dtBtn.textContent = '📅 ' + trimmed;
+            dtBtn.dataset.curval = trimmed;
+            const inp = document.querySelector('[data-editdate="' + rId + '"]');
+            if (inp) inp.value = trimmed;
+            hvRefreshPendingRoutes();
+          } else {
+            alert('Failed to save date. Try again.');
+          }
+          dtBtn.disabled = false;
+        }).catch(() => { alert('Network error.'); dtBtn.disabled = false; dtBtn.textContent = '📅 ' + cur; });
+        return;
+      }
+
+      // Toggle expand (default click)
       const isOpen = body.style.display !== 'none';
       body.style.display = isOpen ? 'none' : 'block';
       const arr = hdr.querySelector('.hvo-rt-arr');
