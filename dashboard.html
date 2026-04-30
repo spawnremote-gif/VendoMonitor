@@ -2498,6 +2498,36 @@ async function hvSaveDetailEdits() {
       });
     }
 
+    // Backfill tg_name into route_items where sheet_name matches and tg_name is null
+    if (updates.tg_name) {
+      const sheetName = updates.sheet_name || hvCurrentDetail?.sheet_name || hvCurrentDetail?.sheet;
+      if (sheetName) {
+        await fetch(`${_SB}/rest/v1/route_items?sheet_name=eq.${encodeURIComponent(sheetName)}&tg_name=is.null`, {
+          method: 'PATCH',
+          headers: { 'apikey': _KEY, 'Authorization': 'Bearer ' + _KEY, 'Content-Type': 'application/json', 'Prefer': 'return=minimal' },
+          body: JSON.stringify({ tg_name: updates.tg_name })
+        });
+      }
+      // Also update by collector_note containing TBF — find route_items with matching sheet_name regardless
+      if (sheetName) {
+        // Update collector_note to remove TBF flag
+        const riRes = await fetch(`${_SB}/rest/v1/route_items?sheet_name=eq.${encodeURIComponent(sheetName)}&collector_note=like.*TG name TBF*`, {
+          headers: { 'apikey': _KEY, 'Authorization': 'Bearer ' + _KEY }
+        });
+        if (riRes.ok) {
+          const ris = await riRes.json();
+          for (const ri of (ris||[])) {
+            const newNote = (ri.collector_note||'').replace('🔴 TG name TBF', `✅ TG: ${updates.tg_name}`);
+            await fetch(`${_SB}/rest/v1/route_items?id=eq.${ri.id}`, {
+              method: 'PATCH',
+              headers: { 'apikey': _KEY, 'Authorization': 'Bearer ' + _KEY, 'Content-Type': 'application/json', 'Prefer': 'return=minimal' },
+              body: JSON.stringify({ tg_name: updates.tg_name, collector_note: newNote })
+            });
+          }
+        }
+      }
+    }
+
     // Clear inputs
     document.getElementById('hv-dp-sheet-inp').value = '';
     document.getElementById('hv-dp-tg-inp').value    = '';
@@ -6938,6 +6968,56 @@ async function hvShowHarvestHistory() {
 /* ─── VENDO NAMES TAB ─── */
 var _vnAll = [], _vnFiltered = [];
 
+var _tbfTgTimer = null;
+async function tbfTgSearch(inp, itemId) {
+  const q = inp.value.trim();
+  const drop = document.getElementById('tbf-tg-drop-' + itemId);
+  if (!drop) return;
+  if (q.length < 2) { drop.style.display = 'none'; return; }
+  clearTimeout(_tbfTgTimer);
+  _tbfTgTimer = setTimeout(async () => {
+    drop.innerHTML = '<div style="padding:8px 10px;color:#9ca3af;">Searching…</div>';
+    drop.style.display = 'block';
+    try {
+      const [rTxn, rVendo] = await Promise.all([
+        fetch(`${_SB}/rest/v1/transactions?select=vendo&vendo=ilike.*${encodeURIComponent(q)}*&limit=20&order=vendo.asc`, {
+          headers: { 'apikey': _KEY, 'Authorization': 'Bearer ' + _KEY, 'Prefer': 'count=none' }
+        }),
+        fetch(`${_SB}/rest/v1/vendos?select=tg_name,sheet_name,area,vlan&tg_name=ilike.*${encodeURIComponent(q)}*&limit=10`, {
+          headers: { 'apikey': _KEY, 'Authorization': 'Bearer ' + _KEY }
+        })
+      ]);
+      const txnData = rTxn.ok ? await rTxn.json() : [];
+      const vendoData = rVendo.ok ? await rVendo.json() : [];
+      const txnNames = [...new Set((Array.isArray(txnData) ? txnData : []).map(r => r.vendo).filter(Boolean))];
+      const matchedNames = new Set((Array.isArray(vendoData) ? vendoData : []).map(v => v.tg_name).filter(Boolean));
+
+      let html = '';
+      // Already matched vendos (purple)
+      if (Array.isArray(vendoData)) vendoData.forEach(v => {
+        if (!v.tg_name) return;
+        html += `<div onmousedown="document.getElementById('tbf-tg-${itemId}').value='${v.tg_name.replace(/'/g,"\\'")}';document.getElementById('tbf-tg-drop-${itemId}').style.display='none';"
+          style="padding:8px 10px;cursor:pointer;border-bottom:1px solid #f0f0f0;"
+          onmouseover="this.style.background='#f5f3ff'" onmouseout="this.style.background=''">
+          <div style="font-weight:600;color:#7c3aed;">${v.tg_name} <span style="font-size:8px;background:#ede9fe;color:#7c3aed;padding:1px 5px;border-radius:4px;">matched</span></div>
+          <div style="font-size:9px;color:#6b7280;">${v.sheet_name||'—'} · ${v.area||'—'} · VLAN ${v.vlan||'?'}</div>
+        </div>`;
+      });
+      // Unmatched TG names from transactions (orange)
+      txnNames.filter(n => !matchedNames.has(n)).forEach(name => {
+        html += `<div onmousedown="document.getElementById('tbf-tg-${itemId}').value='${name.replace(/'/g,"\\'")}';document.getElementById('tbf-tg-drop-${itemId}').style.display='none';"
+          style="padding:8px 10px;cursor:pointer;border-bottom:1px solid #f0f0f0;"
+          onmouseover="this.style.background='#fff7ed'" onmouseout="this.style.background=''">
+          <div style="font-weight:600;color:#d97706;">${name} <span style="font-size:8px;background:#fef3c7;color:#d97706;padding:1px 5px;border-radius:4px;">unmatched</span></div>
+          <div style="font-size:9px;color:#9ca3af;">From transactions · not yet linked</div>
+        </div>`;
+      });
+      drop.innerHTML = html || '<div style="padding:8px 10px;color:#9ca3af;">No names found</div>';
+      drop.style.display = 'block';
+    } catch(e) { drop.innerHTML = '<div style="padding:8px 10px;color:#dc2626;">Error searching</div>'; }
+  }, 300);
+}
+
 async function vnLoad() {
   const list  = document.getElementById('vn-list');
   const stats = document.getElementById('vn-stats');
@@ -7368,10 +7448,12 @@ async function vnLoadTBF() {
         <div style="font-size:11px;font-weight:700;color:#ea580c;margin-bottom:6px;">🔴 Route item #${item.id} · Route ID: ${item.route_id}</div>
         <div style="font-size:12px;font-weight:700;color:#374151;margin-bottom:6px;">${item.sheet_name||'(no label)'} · ${item.area||'—'}</div>
         <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-bottom:8px;">
-          <div>
+          <div style="position:relative;">
             <div style="font-size:9px;font-weight:700;color:#6b7280;margin-bottom:3px;">TG NAME *</div>
             <input id="tbf-tg-${item.id}" type="text" value="${item.tg_name||''}" placeholder="Telegram vendo name..."
-              style="width:100%;padding:6px 8px;border:1.5px solid #fed7aa;border-radius:6px;font-size:12px;font-family:inherit;outline:none;box-sizing:border-box;">
+              style="width:100%;padding:6px 8px;border:1.5px solid #fed7aa;border-radius:6px;font-size:12px;font-family:inherit;outline:none;box-sizing:border-box;"
+              oninput="tbfTgSearch(this,'${item.id}')" onblur="setTimeout(()=>{const d=document.getElementById('tbf-tg-drop-${item.id}');if(d)d.style.display='none';},200)" autocomplete="off">
+            <div id="tbf-tg-drop-${item.id}" style="display:none;position:absolute;top:100%;left:0;right:0;background:#fff;border:1.5px solid #fed7aa;border-radius:6px;box-shadow:0 4px 12px rgba(0,0,0,.12);z-index:999;max-height:200px;overflow-y:auto;font-size:11px;"></div>
           </div>
           <div>
             <div style="font-size:9px;font-weight:700;color:#6b7280;margin-bottom:3px;">SHEET NAME</div>
