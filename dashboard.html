@@ -4333,34 +4333,31 @@ async function rcLoad(){
     _rcWin={};_rcH.forEach(h=>{if(h.tg_name&&h.harvest_window_start)_rcWin[h.tg_name]=h.harvest_window_start;});
     const dates=[...new Set(_rcH.map(h=>h.harvest_date).filter(Boolean))].sort((a,b)=>b.localeCompare(a));
     if(tb)tb.innerHTML=dates.map((d,i)=>{const lb=new Date(d+'T12:00:00').toLocaleDateString('en-PH',{month:'short',day:'numeric',year:'numeric'});return `<button class="rc-dtab${i===0?' on':''}" onclick="rcSel('${d}',this)">${lb}</button>`;}).join('');
-    const tgs=[...new Set(_rcH.map(h=>h.tg_name).filter(Boolean))];
-    if(ct)ct.innerHTML=`<div class="hv-rec-empty">⏳ Fetching TG income for ${tgs.length} vendos…</div>`;
     _rcTG={};
-    // Single bulk fetch — get all TG transactions in one query then group by vendo+date in JS
-    const minWin=Object.values(_rcWin).concat([_RC0]).sort()[0]||_RC0;
-    const maxDate=[..._rcH.map(h=>h.harvest_date).filter(Boolean)].sort().pop()||new Date().toISOString().slice(0,10);
-    let allTxns=[];
-    let rcOffset=0;const rcPage=1000;
-    if(ct)ct.innerHTML=`<div class="hv-rec-empty">⏳ Loading transactions…</div>`;
-    while(true){
-      try{
-        const res=await fetch(`${_SB}/rest/v1/transactions?is_skipped=eq.false&date=gte.${minWin}&date=lte.${maxDate}&select=vendo,amount,date&limit=${rcPage}&offset=${rcOffset}`,
-          {headers:{'apikey':_KEY,'Authorization':'Bearer '+_KEY,'Prefer':'count=none'}});
-        if(!res.ok)break;
-        const rows=await res.json();
-        if(!Array.isArray(rows)||rows.length===0)break;
-        allTxns=allTxns.concat(rows);
-        if(rows.length<rcPage)break;
-        rcOffset+=rcPage;
-      }catch(e){break;}
-    }
-    // Group by vendo → date → sum
-    allTxns.forEach(t=>{
-      if(!t.vendo)return;
-      if(!_rcTG[t.vendo])_rcTG[t.vendo]={};
-      if(!_rcTG[t.vendo][t.date])_rcTG[t.vendo][t.date]=0;
-      _rcTG[t.vendo][t.date]+=parseFloat(t.amount)||0;
-    });
+    // Fetch per-vendo using exact harvest windows only
+    const tgs=[...new Set(_rcH.map(h=>h.tg_name).filter(Boolean))];
+    if(ct)ct.innerHTML=`<div class="hv-rec-empty">⏳ Loading TG income for ${tgs.length} harvested vendos…</div>`;
+    await Promise.all(tgs.map(async tgName=>{
+      const vh=_rcH.filter(h=>h.tg_name===tgName);
+      const winStart=vh.map(h=>h.harvest_window_start).filter(Boolean).sort()[0]||_RC0;
+      const winEnd=vh.map(h=>h.harvest_date).filter(Boolean).sort().pop();
+      if(!winEnd)return;
+      let rows=[],page=0;
+      while(true){
+        try{
+          const res=await fetch(`${_SB}/rest/v1/transactions?vendo=eq.${encodeURIComponent(tgName)}&date=gte.${winStart}&date=lte.${winEnd}&is_skipped=eq.false&not.and=(total_time.like.*w*,extended.eq.1)&select=amount,date`,
+            {headers:{'apikey':_KEY,'Authorization':'Bearer '+_KEY,'Range':`${page*1000}-${(page+1)*1000-1}`,'Prefer':'count=none'}});
+          if(!res.ok)break;
+          const d=await res.json();
+          if(!Array.isArray(d)||d.length===0)break;
+          rows=rows.concat(d);
+          if(d.length<1000)break;
+          page++;
+        }catch(e){break;}
+      }
+      if(!_rcTG[tgName])_rcTG[tgName]={};
+      rows.forEach(t=>{if(!_rcTG[tgName][t.date])_rcTG[tgName][t.date]=0;_rcTG[tgName][t.date]+=parseFloat(t.amount)||0;});
+    }));
     _rcDone=true;
     if(dates.length)rcSel(dates[0],tb&&tb.querySelector('.rc-dtab.on'));
   }catch(err){if(ct)ct.innerHTML=`<div class="hv-rec-empty" style="color:#dc2626">Error: ${err.message}</div>`;}
@@ -4980,25 +4977,24 @@ async function hvoRenderReconOverlay(force) {
     const allH = await rh.json() || [];
     if (!allH.length) { body.innerHTML = '<div style="text-align:center;padding:40px;color:#6b7280;">No harvest records yet.</div>'; return; }
 
-    const winMap = {};
-    allH.forEach(h => { if (h.tg_name && h.harvest_window_start) winMap[h.tg_name] = h.harvest_window_start; });
-
     const tgNames = [...new Set(allH.map(h => h.tg_name).filter(Boolean))];
-    if (status) status.textContent = 'Fetching ' + tgNames.length + ' vendos…';
+    if (status) status.textContent = 'Fetching ' + tgNames.length + ' harvested vendos…';
     const tgMap = {};
     await Promise.all(tgNames.map(async tgName => {
       const vh = allH.filter(h => h.tg_name === tgName);
-      const start2 = vh.map(h=>h.harvest_window_start).filter(Boolean).sort()[0] || DS;
-      const latest = vh.map(h => h.harvest_date).sort().pop();
+      const start2 = vh.map(h => h.harvest_window_start).filter(Boolean).sort()[0] || DS;
+      const latest = vh.map(h => h.harvest_date).filter(Boolean).sort().pop();
       if (!latest) return;
       let rows = [], page = 0;
       while (true) {
-        const r = await fetch(SB_URL + '/rest/v1/transactions?vendo=eq.' + encodeURIComponent(tgName) + '&date=gte.' + start2 + '&date=lte.' + latest + '&is_skipped=eq.false&select=amount,date',
-          { headers: { ...H2, Range: (page*1000) + '-' + ((page+1)*1000-1), Prefer: 'count=none' } });
-        const d = await r.json() || [];
-        rows = rows.concat(d);
-        if (d.length < 1000) break;
-        page++;
+        try {
+          const r = await fetch(SB_URL + '/rest/v1/transactions?vendo=eq.' + encodeURIComponent(tgName) + '&date=gte.' + start2 + '&date=lte.' + latest + '&is_skipped=eq.false&not.and=(total_time.like.*w*,extended.eq.1)&select=amount,date',
+            { headers: { ...H2, Range: (page*1000) + '-' + ((page+1)*1000-1), Prefer: 'count=none' } });
+          const d = await r.json() || [];
+          rows = rows.concat(d);
+          if (d.length < 1000) break;
+          page++;
+        } catch(e) { break; }
       }
       tgMap[tgName] = {};
       rows.forEach(tx => { tgMap[tgName][tx.date] = (tgMap[tgName][tx.date]||0) + (parseFloat(tx.amount)||0); });
@@ -5010,7 +5006,7 @@ async function hvoRenderReconOverlay(force) {
 
     const getTg = (h, date) => {
       if (!h.tg_name || !tgMap[h.tg_name]) return 0;
-      const win = h.harvest_window_start || winMap[h.tg_name] || DS;
+      const win = h.harvest_window_start || DS;
       return Object.entries(tgMap[h.tg_name]).reduce((s,[d,v])=> d>=win&&d<=date ? s+v : s, 0);
     };
 
@@ -5061,7 +5057,7 @@ async function hvoRenderReconOverlay(force) {
         const popId  = 'hrp_' + date.replace(/-/g,'') + '_' + col.replace(/[^a-z0-9]/gi,'');
         // Store data for popup in global dict
         _hvrReconData = _hvrReconData || {};
-        _hvrReconData[popId] = {col, date, cItems, cCoin, cTg, cDiff, routes, winMap, DS, getTgFn: getTg};
+        _hvrReconData[popId] = {col, date, cItems, cCoin, cTg, cDiff, routes, DS, getTgFn: getTg};
         html += '<div data-reconpop="' + popId + '" style="background:#fff;border:1.5px solid #dde3f5;border-radius:12px;padding:14px;cursor:pointer;transition:.15s;text-align:center;">' 
           + '<div style="margin-bottom:8px;">' + icon + '</div>'
           + '<div style="font-size:13px;font-weight:700;color:#1a1d2e;margin-bottom:2px;">' + col + '</div>'
@@ -5351,30 +5347,32 @@ async function hvoLoadDeficits() {
       return;
     }
 
-    // 2. If _rcTG not loaded, fetch TG income in bulk now
+    // 2. If _rcTG not loaded, fetch TG income per-vendo using exact windows
     if (!_rcTG || !Object.keys(_rcTG).length) {
-      if (listEl) listEl.innerHTML = '<div style="text-align:center;padding:30px;color:#9ca3af;">⏳ Fetching TG transactions…</div>';
-      const minWin = harvests.map(h=>h.harvest_window_start||_RC0).filter(Boolean).sort()[0] || _RC0;
-      const maxDate = harvests.map(h=>h.harvest_date).filter(Boolean).sort().pop() || new Date().toISOString().slice(0,10);
+      if (listEl) listEl.innerHTML = '<div style="text-align:center;padding:30px;color:#9ca3af;">⏳ Fetching TG income for harvested vendos…</div>';
       _rcTG = {};
-      let offset = 0; const pageSize = 1000;
-      while(true){
-        try{
-          const res = await fetch(`${_SB}/rest/v1/transactions?is_skipped=eq.false&date=gte.${minWin}&date=lte.${maxDate}&select=vendo,amount,date&limit=${pageSize}&offset=${offset}`,
-            {headers:{'apikey':_KEY,'Authorization':'Bearer '+_KEY,'Prefer':'count=none'}});
-          if(!res.ok) break;
-          const rows = await res.json();
-          if(!Array.isArray(rows)||rows.length===0) break;
-          rows.forEach(t=>{
-            if(!t.vendo) return;
-            if(!_rcTG[t.vendo]) _rcTG[t.vendo]={};
-            if(!_rcTG[t.vendo][t.date]) _rcTG[t.vendo][t.date]=0;
-            _rcTG[t.vendo][t.date]+=parseFloat(t.amount)||0;
-          });
-          if(rows.length<pageSize) break;
-          offset+=pageSize;
-        }catch(e){break;}
-      }
+      const tgNames2 = [...new Set(harvests.map(h=>h.tg_name).filter(Boolean))];
+      await Promise.all(tgNames2.map(async tgName => {
+        const vh = harvests.filter(h => h.tg_name === tgName);
+        const winStart = vh.map(h=>h.harvest_window_start).filter(Boolean).sort()[0] || _RC0;
+        const winEnd = vh.map(h=>h.harvest_date).filter(Boolean).sort().pop();
+        if (!winEnd) return;
+        let rows = [], page = 0;
+        while(true){
+          try{
+            const res = await fetch(`${_SB}/rest/v1/transactions?vendo=eq.${encodeURIComponent(tgName)}&date=gte.${winStart}&date=lte.${winEnd}&is_skipped=eq.false&not.and=(total_time.like.*w*,extended.eq.1)&select=amount,date`,
+              {headers:{'apikey':_KEY,'Authorization':'Bearer '+_KEY,'Range':`${page*1000}-${(page+1)*1000-1}`,'Prefer':'count=none'}});
+            if(!res.ok) break;
+            const rows2 = await res.json();
+            if(!Array.isArray(rows2)||rows2.length===0) break;
+            rows = rows.concat(rows2);
+            if(rows2.length<1000) break;
+            page++;
+          }catch(e){break;}
+        }
+        if(!_rcTG[tgName]) _rcTG[tgName]={};
+        rows.forEach(t=>{ if(!_rcTG[tgName][t.date]) _rcTG[tgName][t.date]=0; _rcTG[tgName][t.date]+=parseFloat(t.amount)||0; });
+      }));
     }
 
     // 3. Find deficits
@@ -6618,7 +6616,7 @@ async function hvExportCollector(collector, date) {
       const start = windowMap[tg] || DEFAULT_START;
       try {
         const rt = await fetch(
-          `${_SB}/rest/v1/transactions?vendo=eq.${encodeURIComponent(tg)}&date=gte.${start}&date=lte.${date}&is_skipped=eq.false&select=amount`,
+          `${_SB}/rest/v1/transactions?vendo=eq.${encodeURIComponent(tg)}&date=gte.${start}&date=lte.${date}&is_skipped=eq.false&not.and=(total_time.like.*w*,extended.eq.1)&select=amount`,
           { headers: { 'apikey': _KEY, 'Authorization': 'Bearer ' + _KEY, 'Range': '0-49999', 'Prefer': 'count=none' } }
         );
         const rows = await rt.json();
@@ -6762,7 +6760,7 @@ async function hvVerifyTG(btn) {
 
     // Step 2: Fetch amounts using confirmed tg_name
     const r1 = await fetch(
-      `${_SB}/rest/v1/transactions?vendo=eq.${encodeURIComponent(confirmedTg)}&date=gte.${winStart}&date=lte.${date}&is_skipped=eq.false&select=amount,id`,
+      `${_SB}/rest/v1/transactions?vendo=eq.${encodeURIComponent(confirmedTg)}&date=gte.${winStart}&date=lte.${date}&is_skipped=eq.false&not.and=(total_time.like.*w*,extended.eq.1)&select=amount,id`,
       { headers: { 'apikey': _KEY, 'Authorization': 'Bearer ' + _KEY, 'Range': '0-49999', 'Prefer': 'count=none' } }
     );
     const txns      = await r1.json();
@@ -9153,7 +9151,7 @@ async function loadReconciliation() {
       while (true) {
         try {
           const r = await fetch(
-            `${SB_URL}/rest/v1/transactions?vendo=eq.${encodeURIComponent(tgName)}&date=gte.${start}&date=lte.${latestDate}&is_skipped=eq.false&select=amount,date`,
+            `${SB_URL}/rest/v1/transactions?vendo=eq.${encodeURIComponent(tgName)}&date=gte.${start}&date=lte.${latestDate}&is_skipped=eq.false&not.and=(total_time.like.*w*,extended.eq.1)&select=amount,date`,
             { headers: { ...HDR, 'Range': `${page*pageSize}-${(page+1)*pageSize-1}`, 'Prefer': 'count=none' } }
           );
           const rows = await r.json() || [];
