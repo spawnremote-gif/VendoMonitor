@@ -4408,7 +4408,7 @@ function rcSel(date,btn){
   if(btn)btn.classList.add('on');else{const b=document.querySelector(`.rc-dtab[onclick*="${date}"]`);if(b)b.classList.add('on');}
   _rcRender(date);
 }
-function _rcTA(tg,win,upTo,winEnd){if(!tg||!_rcTG[tg])return 0;const w=win||_rcWin[tg]||_RC0;const endDate=winEnd?winEnd.split('T')[0]:upTo;return Object.entries(_rcTG[tg]).filter(([d])=>d&&d>=w&&d<=endDate).reduce((s,[,v])=>s+v,0);}
+function _rcTA(tg,win,upTo,winEnd){if(!tg||!_rcTG[tg])return 0;const w=win||_rcWin[tg]||_RC0;const endDate=upTo;return Object.entries(_rcTG[tg]).filter(([d])=>d&&d>=w&&d<=endDate).reduce((s,[,v])=>s+v,0);}
 function _rcRender(date){
   const ct=document.getElementById('rc-content');if(!ct||!_rcDone)return;
   const hs=_rcH.filter(h=>h.harvest_date===date);
@@ -4987,8 +4987,8 @@ async function hvoRenderReconOverlay(force) {
     if (status) status.textContent = 'Fetching ' + tgNames.length + ' vendos…';
     const tgMap = {};
     await Promise.all(tgNames.map(async tgName => {
-      const start2 = winMap[tgName] || DS;
       const vh = allH.filter(h => h.tg_name === tgName);
+      const start2 = vh.map(h=>h.harvest_window_start).filter(Boolean).sort()[0] || DS;
       const latest = vh.map(h => h.harvest_date).sort().pop();
       if (!latest) return;
       let rows = [], page = 0;
@@ -5010,7 +5010,7 @@ async function hvoRenderReconOverlay(force) {
 
     const getTg = (h, date) => {
       if (!h.tg_name || !tgMap[h.tg_name]) return 0;
-      const win = winMap[h.tg_name] || DS;
+      const win = h.harvest_window_start || winMap[h.tg_name] || DS;
       return Object.entries(tgMap[h.tg_name]).reduce((s,[d,v])=> d>=win&&d<=date ? s+v : s, 0);
     };
 
